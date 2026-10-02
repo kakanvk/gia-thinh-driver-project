@@ -1,0 +1,7 @@
+node_modules
+.next
+cpanel-deploy
+.git
+.env*
+npm-debug.log*
+*.tsbuildinfo
