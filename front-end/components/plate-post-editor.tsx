@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { Value } from "platejs"
+import type { TElement, Value } from "platejs"
 import { useRouter } from "next/navigation"
 import {
   AlignCenterIcon,
@@ -64,9 +64,9 @@ const initialValue: Value = [
 
 function valueToParagraphs(value: Value): string[] {
   return value
-    .map((node: any) =>
+    .map((node) =>
       (node.children ?? [])
-        .map((child: any) => (child.children ?? child.text ?? "").toString())
+        .map((child) => String(child.children ?? child.text ?? ""))
         .join("")
         .trim()
     )
@@ -112,12 +112,14 @@ function ImageInsertButton() {
       .forEach((file) => {
         const reader = new FileReader()
         reader.onload = () => {
-          editor.tf.insertNodes({
+          const image: TElement = {
             type: KEYS.img,
             url: String(reader.result),
             children: [{ text: "" }],
-          } as any)
-          editor.tf.insertNodes({ type: "p", children: [{ text: "" }] } as any)
+          }
+          const paragraph: TElement = { type: "p", children: [{ text: "" }] }
+          editor.tf.insertNodes(image)
+          editor.tf.insertNodes(paragraph)
         }
         reader.readAsDataURL(file)
       })
