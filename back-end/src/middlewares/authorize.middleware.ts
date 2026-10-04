@@ -25,3 +25,14 @@ export function assertBranchAccess(scope: Express.BranchScope | undefined, branc
   const ids = Array.isArray(branchIds) ? branchIds : [branchIds];
   if (ids.some((id) => !scope.branchIds.includes(String(id)))) throw ApiError.branchForbidden();
 }
+
+// Cho qua khi người dùng có ít nhất một trong các quyền
+export function authorizeAny(permissions: string[], opts: { branchScoped?: boolean } = {}): RequestHandler {
+  return (req, _res, next) => {
+    const user = req.user;
+    if (!user) return next(ApiError.unauthorized());
+    if (!permissions.some((permission) => hasPermission(user.role, permission))) return next(ApiError.forbidden());
+    if (opts.branchScoped) req.scope = { all: user.role === 'super_admin', branchIds: user.branchIds };
+    next();
+  };
+}

@@ -88,6 +88,11 @@ export const openApiDocument = {
         }),
       }),
     },
+    '/users/options': {
+      get: op('Người dùng', 'Nhân viên có thể phụ trách khách/lịch hẹn (lead.read hoặc appointment.read)', {
+        parameters: [{ name: 'branchId', in: 'query', schema: { type: 'string' } }],
+      }),
+    },
     '/users/{id}': {
       get: op('Người dùng', 'Chi tiết nhân viên', { parameters: [idParam] }),
       patch: op('Người dùng', 'Sửa nhân viên', { parameters: [idParam], requestBody: json({ name: 'Tên mới' }) }),

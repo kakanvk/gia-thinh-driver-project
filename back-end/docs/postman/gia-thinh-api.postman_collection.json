@@ -438,6 +438,32 @@
           "response": []
         },
         {
+          "name": "Nhân viên có thể phụ trách khách/lịch hẹn (lead.read hoặc appointment.read)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "options"
+              ],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/users/options"
+          },
+          "response": []
+        },
+        {
           "name": "Chi tiết nhân viên",
           "request": {
             "method": "GET",
