@@ -8,6 +8,11 @@ export const PIPELINE: LeadStatus[] = [
   "docs_completed",
 ]
 
+// Trạng thái còn theo dõi (giống OPEN_STATUSES ở backend)
+export function isOpenStatus(status: LeadStatus): boolean {
+  return PIPELINE.includes(status)
+}
+
 // Giống back-end/src/modules/leads/lead.status.ts
 export function canTransition(from: LeadStatus, to: LeadStatus): boolean {
   if (from === to || from === "enrolled" || to === "enrolled") return false

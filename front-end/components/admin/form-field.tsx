@@ -2,7 +2,7 @@ import { cloneElement } from "react"
 
 import { Label } from "@/components/ui/label"
 
-type FieldControlProps = {
+export type FieldControlProps = {
   id?: string
   "aria-invalid"?: boolean
   "aria-describedby"?: string
@@ -20,15 +20,22 @@ export function FormField({
   label: string
   error?: string
   required?: boolean
-  children: React.ReactElement<FieldControlProps>
+  // Hàm: tự gắn props vào phần tử cần (VD SelectTrigger, vì Select.Root bỏ aria-*)
+  children:
+    | React.ReactElement<FieldControlProps>
+    | ((props: FieldControlProps) => React.ReactElement)
 }) {
   const errorId = `${id}-error`
-  const control = cloneElement(children, {
+  const controlProps: FieldControlProps = {
     id,
     "aria-invalid": error ? true : undefined,
     "aria-describedby": error ? errorId : undefined,
     "aria-required": required || undefined,
-  })
+  }
+  const control =
+    typeof children === "function"
+      ? children(controlProps)
+      : cloneElement(children, controlProps)
 
   return (
     <div className="flex flex-col gap-1.5">

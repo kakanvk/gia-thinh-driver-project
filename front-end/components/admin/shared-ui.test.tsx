@@ -350,6 +350,25 @@ describe("FormField", () => {
     expect(screen.getByText("Bắt buộc")).toHaveAttribute("id", "name-error")
   })
 
+  it("children dạng hàm nhận props aria để tự gắn", () => {
+    render(
+      <FormField id="branch" label="Chi nhánh" required error="Chọn chi nhánh">
+        {(control) => (
+          <div>
+            <button type="button" {...control}>
+              Chọn
+            </button>
+          </div>
+        )}
+      </FormField>
+    )
+    const trigger = screen.getByRole("button", { name: /Chi nhánh/ })
+    expect(trigger).toHaveAttribute("id", "branch")
+    expect(trigger).toHaveAttribute("aria-invalid", "true")
+    expect(trigger).toHaveAttribute("aria-describedby", "branch-error")
+    expect(trigger).toHaveAttribute("aria-required", "true")
+  })
+
   it("không có lỗi thì không gắn aria-invalid", () => {
     render(
       <FormField id="phone" label="SĐT">

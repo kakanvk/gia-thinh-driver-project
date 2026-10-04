@@ -125,6 +125,10 @@ export function LeadFormSheet({
   const [values, setValues] = useState<FormValues>(() =>
     initialValues(lead, defaultBranchId)
   )
+  // Mốc so sánh khi sửa: chụp lúc mở sheet, không theo `lead` refetch giữa chừng
+  const [baseline, setBaseline] = useState<FormValues>(() =>
+    initialValues(lead, defaultBranchId)
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [wasOpen, setWasOpen] = useState(open)
 
@@ -132,7 +136,9 @@ export function LeadFormSheet({
   if (open !== wasOpen) {
     setWasOpen(open)
     if (open) {
-      setValues(initialValues(lead, defaultBranchId))
+      const initial = initialValues(lead, defaultBranchId)
+      setValues(initial)
+      setBaseline(initial)
       setErrors({})
     }
   }
@@ -143,9 +149,14 @@ export function LeadFormSheet({
         ? apiData<Lead>(`/leads/${lead.id}`, { method: "PATCH", body })
         : apiData<Lead>("/leads", { method: "POST", body }),
     meta: { silent: true },
-    onSuccess: (saved) => {
+    onSuccess: (saved, body) => {
       void queryClient.invalidateQueries({ queryKey: ["leads"] })
       if (lead) {
+        // Đổi chi nhánh: backend chuyển lịch hẹn sang chi nhánh mới
+        if ("branchId" in body) {
+          void queryClient.invalidateQueries({ queryKey: ["appointments"] })
+          void queryClient.invalidateQueries({ queryKey: ["calendar"] })
+        }
         queryClient.setQueryData(["lead", saved.id], saved)
         void queryClient.invalidateQueries({
           queryKey: ["lead-activities", saved.id],
@@ -174,11 +185,7 @@ export function LeadFormSheet({
     const nextErrors = validate(clean)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
-    const body = buildBody(
-      clean,
-      trimmed(initialValues(lead, defaultBranchId)),
-      isEdit
-    )
+    const body = buildBody(clean, trimmed(baseline), isEdit)
     if (isEdit && Object.keys(body).length === 0) {
       onOpenChange(false)
       return
@@ -248,46 +255,50 @@ export function LeadFormSheet({
           required
           error={errors.branchId}
         >
+          {(control) => (
+            <Select
+              items={branchItems}
+              value={values.branchId || null}
+              onValueChange={(value) => {
+                update("branchId", value ?? "")
+                update("assigneeId", "")
+              }}
+            >
+              <SelectTrigger {...control} className="w-full">
+                <SelectValue placeholder="Chọn chi nhánh" />
+              </SelectTrigger>
+              <SelectContent>
+                {branchItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </FormField>
+      ) : null}
+      <FormField id="lead-course" label="Gói học" error={errors.courseId}>
+        {(control) => (
           <Select
-            items={branchItems}
-            value={values.branchId || null}
-            onValueChange={(value) => {
-              update("branchId", value ?? "")
-              update("assigneeId", "")
-            }}
+            items={courseItems}
+            value={values.courseId || NONE}
+            onValueChange={(value) =>
+              update("courseId", !value || value === NONE ? "" : value)
+            }
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Chọn chi nhánh" />
+            <SelectTrigger {...control} className="w-full">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {branchItems.map((item) => (
+              {courseItems.map((item) => (
                 <SelectItem key={item.value} value={item.value}>
                   {item.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </FormField>
-      ) : null}
-      <FormField id="lead-course" label="Gói học" error={errors.courseId}>
-        <Select
-          items={courseItems}
-          value={values.courseId || NONE}
-          onValueChange={(value) =>
-            update("courseId", !value || value === NONE ? "" : value)
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {courseItems.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        )}
       </FormField>
       <FormField id="lead-email" label="Email" error={errors.email}>
         <Input
@@ -311,24 +322,26 @@ export function LeadFormSheet({
         />
       </FormField>
       <FormField id="lead-source" label="Nguồn" error={errors.source}>
-        <Select
-          items={sourceItems}
-          value={values.source}
-          onValueChange={(value) => {
-            if (value) update("source", value)
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {sourceItems.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {(control) => (
+          <Select
+            items={sourceItems}
+            value={values.source}
+            onValueChange={(value) => {
+              if (value) update("source", value)
+            }}
+          >
+            <SelectTrigger {...control} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sourceItems.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </FormField>
       {isEdit ? null : (
         <FormField
@@ -336,24 +349,26 @@ export function LeadFormSheet({
           label="Phụ trách"
           error={errors.assigneeId}
         >
-          <Select
-            items={assigneeItems}
-            value={values.assigneeId || NONE}
-            onValueChange={(value) =>
-              update("assigneeId", !value || value === NONE ? "" : value)
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {assigneeItems.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {(control) => (
+            <Select
+              items={assigneeItems}
+              value={values.assigneeId || NONE}
+              onValueChange={(value) =>
+                update("assigneeId", !value || value === NONE ? "" : value)
+              }
+            >
+              <SelectTrigger {...control} className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {assigneeItems.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </FormField>
       )}
       <FormField

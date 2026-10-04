@@ -33,11 +33,8 @@ import {
   LEAD_STATUS_LABELS,
   LEAD_STATUSES,
 } from "@/lib/admin/labels"
-import {
-  nameById,
-  useBranchChoice,
-  useStaffOptions,
-} from "@/lib/admin/lookups"
+import { isOpenStatus } from "@/lib/admin/lead-status"
+import { nameById, useBranchChoice, useStaffOptions } from "@/lib/admin/lookups"
 import type { Lead, Page } from "@/lib/admin/types"
 import { useCan } from "@/lib/admin/use-can"
 import { useListParams } from "@/lib/admin/use-list-params"
@@ -77,7 +74,10 @@ function FilterSelect({
       value={value || ALL}
       onValueChange={(next) => onChange(!next || next === ALL ? "" : next)}
     >
-      <SelectTrigger aria-label={label} className="h-9 bg-background text-[13px]">
+      <SelectTrigger
+        aria-label={label}
+        className="h-9 bg-background text-[13px]"
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -110,8 +110,7 @@ export function LeadList() {
   const query = { ...values, page, limit: LIMIT, sort: "-createdAt" }
   const leads = useQuery({
     queryKey: ["leads", query],
-    queryFn: ({ signal }) =>
-      apiFetch<Page<Lead>>("/leads", { query, signal }),
+    queryFn: ({ signal }) => apiFetch<Page<Lead>>("/leads", { query, signal }),
     placeholderData: keepPreviousData,
   })
 
@@ -201,7 +200,8 @@ export function LeadList() {
         lead.nextFollowUpAt ? (
           <span
             className={cn(
-              isOverdue(lead.nextFollowUpAt) &&
+              isOpenStatus(lead.status) &&
+                isOverdue(lead.nextFollowUpAt) &&
                 "font-semibold text-destructive"
             )}
           >
@@ -271,7 +271,17 @@ export function LeadList() {
                 label: branch.name,
               }))}
               value={values.branchId}
-              onChange={(branchId) => set({ branchId })}
+              onChange={(branchId) =>
+                set({
+                  branchId,
+                  // Người cụ thể của chi nhánh cũ không còn trong danh sách
+                  assigneeId:
+                    values.assigneeId === "none" ||
+                    values.assigneeId === user?.id
+                      ? values.assigneeId
+                      : "",
+                })
+              }
             />
           ) : null}
           <FilterSelect
