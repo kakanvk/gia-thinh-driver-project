@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { apiData, apiFetch, buildUrl } from "@/lib/api/client"
+import { apiData, apiDownload, apiFetch, buildUrl } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/errors"
 import {
   getAccessToken,
@@ -293,5 +293,74 @@ describe("apiFetch", () => {
     await apiData("/x")
     expect(request).toHaveBeenCalledWith("gt-refresh", expect.any(Function))
     Reflect.deleteProperty(navigator, "locks")
+  })
+})
+
+describe("apiDownload", () => {
+  it("gửi Bearer, lấy tên file từ Content-Disposition và tải về", async () => {
+    setAccessToken("t1")
+    const downloads: string[] = []
+    const createObjectURL = vi.fn(() => "blob:x")
+    const revokeObjectURL = vi.fn()
+    vi.stubGlobal(
+      "URL",
+      Object.assign(URL, { createObjectURL, revokeObjectURL })
+    )
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        downloads.push(this.download)
+      })
+    mockFetch({
+      "GET /leads/export": (init) => {
+        expect(new Headers(init.headers).get("Authorization")).toBe("Bearer t1")
+        return new Response("a,b\n", {
+          status: 200,
+          headers: {
+            "Content-Type": "text/csv",
+            "Content-Disposition":
+              'attachment; filename="khach-hang-20261004.csv"',
+          },
+        })
+      },
+    })
+    await apiDownload("/leads/export", { status: "new" }, "khach-hang.csv")
+    expect(click).toHaveBeenCalled()
+    expect(downloads).toEqual(["khach-hang-20261004.csv"])
+    expect(createObjectURL).toHaveBeenCalled()
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:x")
+  })
+
+  it("không có Content-Disposition thì dùng tên dự phòng; lỗi thì ném ApiError", async () => {
+    setAccessToken("t1")
+    const downloads: string[] = []
+    vi.stubGlobal(
+      "URL",
+      Object.assign(URL, {
+        createObjectURL: () => "blob:y",
+        revokeObjectURL: vi.fn(),
+      })
+    )
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
+      this: HTMLAnchorElement
+    ) {
+      downloads.push(this.download)
+    })
+    mockFetch({
+      "GET /leads/export": [
+        () => new Response("a\n", { status: 200 }),
+        () =>
+          jsonResponse(403, {
+            error: { code: "FORBIDDEN", message: "Không có quyền" },
+          }),
+      ],
+    })
+    await apiDownload("/leads/export", {}, "khach-hang.csv")
+    expect(downloads).toEqual(["khach-hang.csv"])
+    const error = await apiDownload("/leads/export", {}, "x.csv").catch(
+      (e: ApiError) => e
+    )
+    expect(error).toBeInstanceOf(ApiError)
+    expect((error as ApiError).status).toBe(403)
   })
 })

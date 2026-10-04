@@ -56,12 +56,10 @@ async function send(
   }
 }
 
-export async function apiFetch<T>(
-  path: string,
-  request: ApiRequest = {}
-): Promise<T> {
+// Gửi request kèm Bearer; gặp 401 thì refresh một lần rồi gửi lại
+async function request(path: string, req: ApiRequest): Promise<Response> {
   const token = getAccessToken()
-  let res = await send(path, request, token)
+  let res = await send(path, req, token)
 
   if (res.status === 401 && token && !NO_REFRESH.has(path)) {
     const current = getAccessToken()
@@ -74,7 +72,7 @@ export async function apiFetch<T>(
       expireSession()
       throw await toApiError(res)
     }
-    res = await send(path, request, nextToken)
+    res = await send(path, req, nextToken)
     if (res.status === 401) {
       expireSession()
       throw await toApiError(res)
@@ -82,8 +80,52 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) throw await toApiError(res)
+  return res
+}
+
+export async function apiFetch<T>(
+  path: string,
+  req: ApiRequest = {}
+): Promise<T> {
+  const res = await request(path, req)
   if (res.status === 204) return undefined as T
   return (await res.json()) as T
+}
+
+function filenameFrom(disposition: string | null): string | null {
+  if (!disposition) return null
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1]
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded)
+    } catch {
+      // bỏ qua, thử filename thường
+    }
+  }
+  return /filename="?([^";]+)"?/i.exec(disposition)?.[1] ?? null
+}
+
+// Tải file (CSV…) qua API có xác thực rồi lưu về máy bằng thẻ <a download>
+export async function apiDownload(
+  path: string,
+  query: ApiRequest["query"],
+  fallbackName: string
+): Promise<void> {
+  const res = await request(path, { query })
+  const filename =
+    filenameFrom(res.headers.get("Content-Disposition")) ?? fallbackName
+  const url = URL.createObjectURL(await res.blob())
+  const link = document.createElement("a")
+  link.href = url
+  link.download = filename
+  link.style.display = "none"
+  document.body.appendChild(link)
+  try {
+    link.click()
+  } finally {
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
 }
 
 export async function apiData<T>(
