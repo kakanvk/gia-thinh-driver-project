@@ -72,12 +72,14 @@ export class LocalStorageDriver implements StorageDriver {
   /** Kiểm token của route upload thẳng: sai chữ ký → 403, hết hạn → 401. */
   verifyUploadToken(token: string): DirectUploadClaims {
     const [payload, signature, ...rest] = token.split('.');
-    const expected = payload ? this.sign(payload) : '';
+    // So độ dài theo byte: chữ ký có ký tự nhiều byte sẽ làm timingSafeEqual ném RangeError.
+    const actual = Buffer.from(signature ?? '');
+    const expected = Buffer.from(payload ? this.sign(payload) : '');
     const valid =
       rest.length === 0 &&
-      !!signature &&
-      signature.length === expected.length &&
-      timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+      actual.length > 0 &&
+      actual.length === expected.length &&
+      timingSafeEqual(actual, expected);
     if (!valid) throw ApiError.forbidden('Liên kết tải lên không hợp lệ');
     let claims: DirectUploadClaims;
     try {

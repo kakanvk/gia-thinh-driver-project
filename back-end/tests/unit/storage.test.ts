@@ -173,6 +173,20 @@ describe('LocalStorageDriver — upload thẳng qua route nội bộ', () => {
     expect(await driver.stat('tmp/a.mp4')).toBeNull();
   });
 
+  it('chữ ký chứa ký tự nhiều byte (cùng số ký tự) → 403, không 500', async () => {
+    const { uploadUrl } = await driver.createUploadUrl('tmp/a.mp4', 'video/mp4', 100);
+    const p = pathOf(uploadUrl);
+    const token = p.split('/').pop()!;
+    const [payload, signature] = token.split('.');
+    const tampered = `${payload}.%C3%A9${signature!.slice(1)}`;
+    const res = await request(createApp())
+      .put(p.replace(token, tampered))
+      .set('Content-Type', 'video/mp4')
+      .send(Buffer.from('x'));
+    expect(res.status).toBe(403);
+    expect(await driver.stat('tmp/a.mp4')).toBeNull();
+  });
+
   it('token hết hạn → 401', async () => {
     const { uploadUrl } = await driver.createUploadUrl('tmp/a.mp4', 'video/mp4', 100);
     const now = Date.now();
