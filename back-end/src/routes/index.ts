@@ -8,6 +8,7 @@ import { createClassesRouter } from '../modules/classes/classes.routes';
 import { createCoursesRouter } from '../modules/courses/courses.routes';
 import { createDashboardRouter } from '../modules/dashboard/dashboard.routes';
 import { createExamsRouter } from '../modules/exams/exams.routes';
+import { createGalleryRouter } from '../modules/gallery/gallery.routes';
 import { createInstructorsRouter } from '../modules/instructors/instructors.routes';
 import { createLeadsRouter } from '../modules/leads/leads.routes';
 import { createMediaRouter } from '../modules/media/media.routes';
@@ -33,6 +34,7 @@ export function createApiRouter(): Router {
   router.use('/courses', createCoursesRouter());
   router.use('/dashboard', createDashboardRouter());
   router.use('/exams', createExamsRouter());
+  router.use('/gallery', createGalleryRouter());
   router.use('/instructors', createInstructorsRouter());
   router.use('/leads', createLeadsRouter());
   router.use('/media', createMediaRouter());

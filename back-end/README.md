@@ -148,10 +148,53 @@ Front-end (`front-end/`) gọi API theo `NEXT_PUBLIC_API_URL`:
 
 ## Lưu ảnh trên Google Cloud Storage
 
+Media (ảnh, video) **luôn** lưu trên GCS: thiếu `GCS_BUCKET` thì server không khởi động. `STORAGE_DRIVER=local` chỉ dùng khi chạy test, hoặc chạy thử offline có chủ đích với `ALLOW_LOCAL_STORAGE=true` (file ghi vào `UPLOAD_DIR`).
+
 1. Tạo bucket, bật *Uniform bucket-level access*, cấp `allUsers` quyền `Storage Object Viewer` để ảnh xem công khai.
 2. Tạo service account có quyền `Storage Object Admin` trên bucket, tải file JSON key, đặt vào `secret/` (đã được gitignore và dockerignore, không bao giờ commit).
 3. Trong `.env`: `STORAGE_DRIVER=gcs`, `GCS_BUCKET=<tên bucket>`, `GOOGLE_APPLICATION_CREDENTIALS=./secret/<tên-file>.json`.
    Nếu đặt CDN/domain riêng: `PUBLIC_MEDIA_BASE_URL=https://cdn.giathinh.vn`.
+4. Service account phải ký được URL upload (signed URL v4): dùng key JSON có `client_email` + `private_key` như bước 2, hoặc khi chạy bằng tài khoản không có key (Cloud Run, Workload Identity) cấp thêm quyền `roles/iam.serviceAccountTokenCreator`.
+
+### Video: upload thẳng lên bucket
+
+Video (`video/mp4`, `video/webm`, tối đa `MAX_VIDEO_BYTES`, mặc định 500 MB) không đi qua backend:
+
+1. `POST /media/video-uploads { filename, contentType, size, alt? }` → `uploadUrl` (hết hạn sau 15 phút) + `headers`.
+2. Trình duyệt `PUT` file tới `uploadUrl` kèm đúng `headers` (vào khoá tạm `tmp/<uuid>.<ext>`).
+3. `POST /media/video-uploads/complete { uploadId, width?, height?, duration? }` → backend kiểm loại/kích thước, chuyển object sang `<yyyy/MM>/<uuid>.<ext>` và tạo media `kind: video`. Gọi khi chưa PUT xong → 400 `UPLOAD_INCOMPLETE`.
+
+Bucket cần CORS cho trang admin (thiếu thì trình duyệt báo lỗi CORS khi upload video) và lifecycle dọn các lượt upload bỏ dở trong `tmp/` sau 1 ngày. Tạo hai file:
+
+`cors.json`
+
+```json
+[
+  {
+    "origin": ["http://localhost:3000", "https://giathinh.vn", "https://www.giathinh.vn"],
+    "method": ["PUT"],
+    "responseHeader": ["Content-Type", "x-goog-content-length-range"],
+    "maxAgeSeconds": 3600
+  }
+]
+```
+
+`lifecycle.json`
+
+```json
+{ "rule": [{ "action": { "type": "Delete" }, "condition": { "age": 1, "matchesPrefix": ["tmp/"] } }] }
+```
+
+rồi chạy:
+
+```bash
+gcloud storage buckets update gs://<bucket> --cors-file=cors.json --lifecycle-file=lifecycle.json
+```
+
+### Nơi dùng media và thư viện website
+
+- Media lưu danh sách nơi dùng (`refs`): ảnh bìa / ảnh trong nội dung bài viết, mục thư viện. `DELETE /media/:id` khi media đang được dùng → 409 `MEDIA_IN_USE`, `details` liệt kê `<entity>:<id>:<tiêu đề bài | chú thích>`. Xoá mềm bài viết vẫn giữ nơi dùng.
+- Thư viện website (`/gallery`, quyền `gallery.manage`): thêm mục từ kho media, chú thích, ảnh bìa (chỉ cho video), ẩn/hiện, sắp xếp (`PATCH /gallery/reorder` gửi đủ mọi id). Xoá mục không xoá media. Website đọc `GET /public/gallery?kind=` (chỉ mục đang hiện, theo thứ tự, tối đa 500).
 
 ## Cấu trúc
 

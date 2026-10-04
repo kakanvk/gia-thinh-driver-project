@@ -9,6 +9,7 @@ import { getStorage } from '../../shared/storage';
 import { vnYearMonthPath } from '../../shared/time';
 import { ApiError, type ErrorDetail } from '../../utils/ApiError';
 import { escapeRegex } from '../../utils/regex';
+import { GalleryItem } from '../gallery/gallery.model';
 import { Post } from '../posts/post.model';
 import { Media, MEDIA_KINDS, type IMedia } from './media.model';
 
@@ -143,9 +144,14 @@ export async function updateMedia(id: string, input: UpdateMediaInput) {
 async function refLabels(refs: IMedia['refs']): Promise<ErrorDetail[]> {
   const postIds = refs.filter((ref) => ref.entity === 'post').map((ref) => ref.entityId);
   const posts = postIds.length ? await Post.find({ _id: { $in: postIds }, ...WITH_DELETED }, { title: 1 }).lean() : [];
-  const titles = new Map(posts.map((post) => [String(post._id), post.title]));
+  const galleryIds = refs.filter((ref) => ref.entity === 'gallery').map((ref) => ref.entityId);
+  const items = galleryIds.length ? await GalleryItem.find({ _id: { $in: galleryIds } }, { caption: 1 }).lean() : [];
+  const labels = new Map<string, string>([
+    ...posts.map((post) => [`post:${String(post._id)}`, post.title] as [string, string]),
+    ...items.map((item) => [`gallery:${String(item._id)}`, item.caption ?? ''] as [string, string]),
+  ]);
   return refs.map((ref) => {
-    const label = ref.entity === 'post' ? (titles.get(ref.entityId) ?? '') : '';
+    const label = labels.get(`${ref.entity}:${ref.entityId}`) ?? '';
     return { path: 'refs', message: `${ref.entity}:${ref.entityId}:${label}` };
   });
 }

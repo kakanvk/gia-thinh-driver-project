@@ -127,7 +127,9 @@ export const openApiDocument = {
       patch: op('Cài đặt', 'Cập nhật cài đặt (super_admin)', { requestBody: json({ hotline: '0779 666 664' }) }),
     },
     '/media': {
-      get: op('Media', 'Danh sách ảnh', { parameters: listParams }),
+      get: op('Media', 'Danh sách media (lọc kind: image|video)', {
+        parameters: [...listParams, { name: 'kind', in: 'query', schema: { type: 'string' } }],
+      }),
       post: op('Media', 'Upload ảnh (multipart: file, alt)', {
         requestBody: {
           required: true,
@@ -141,6 +143,45 @@ export const openApiDocument = {
           },
         },
       }),
+    },
+    '/media/video-uploads': {
+      post: op('Media', 'Xin URL ký sẵn để upload video thẳng lên kho (mp4/webm, tối đa MAX_VIDEO_BYTES)', {
+        requestBody: json({ filename: 'buoi-hoc.mp4', contentType: 'video/mp4', size: 10485760, alt: 'Buổi học' }),
+      }),
+    },
+    '/media/video-uploads/complete': {
+      post: op('Media', 'Hoàn tất upload video (chưa PUT xong → 400 UPLOAD_INCOMPLETE)', {
+        requestBody: json({
+          uploadId: 'tmp/00000000-0000-4000-8000-000000000000.mp4',
+          width: 1280,
+          height: 720,
+          duration: 12.5,
+        }),
+      }),
+    },
+    '/media/{id}': {
+      patch: op('Media', 'Sửa mô tả (alt) media', { parameters: [idParam], requestBody: json({ alt: 'Sân tập' }) }),
+      delete: op('Media', 'Xoá media (đang dùng → 409 MEDIA_IN_USE)', { parameters: [idParam] }),
+    },
+    '/gallery': {
+      get: op('Thư viện', 'Danh sách mục thư viện website (theo thứ tự)', {
+        parameters: ['kind', 'visible'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+      post: op('Thư viện', 'Thêm mục vào thư viện (thêm cuối danh sách)', {
+        requestBody: json({ mediaId: '<mediaId>', caption: 'Sân tập', visible: true }),
+      }),
+    },
+    '/gallery/reorder': {
+      patch: op('Thư viện', 'Sắp xếp lại (gửi đủ mọi id theo thứ tự mới)', {
+        requestBody: json({ ids: ['<galleryItemId>'] }),
+      }),
+    },
+    '/gallery/{id}': {
+      patch: op('Thư viện', 'Sửa mục (chú thích, ảnh bìa video, ẩn/hiện)', {
+        parameters: [idParam],
+        requestBody: json({ caption: 'Buổi học thực hành', visible: true }),
+      }),
+      delete: op('Thư viện', 'Xoá mục (không xoá media)', { parameters: [idParam] }),
     },
     '/audit': {
       get: op('Audit', 'Lịch sử thao tác (super_admin)', {
@@ -532,6 +573,14 @@ export const openApiDocument = {
         'Công khai',
         'Bảng giá theo chi nhánh',
         { parameters: [{ name: 'branch', in: 'query', schema: { type: 'string' } }] },
+        false,
+      ),
+    },
+    '/public/gallery': {
+      get: op(
+        'Công khai',
+        'Thư viện ảnh/video đang hiện (theo thứ tự, tối đa 500)',
+        { parameters: [{ name: 'kind', in: 'query', schema: { type: 'string' } }] },
         false,
       ),
     },

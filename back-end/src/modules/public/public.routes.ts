@@ -13,6 +13,8 @@ import { publicClassesQuerySchema } from '../classes/classes.validation';
 import * as publicExams from '../exams/exams.public';
 import { publicExamsQuerySchema } from '../exams/exams.validation';
 import * as settings from '../settings/settings.controller';
+import * as gallery from '../gallery/gallery.controller';
+import { publicGalleryQuerySchema } from '../gallery/gallery.validation';
 
 export function createPublicRouter(): Router {
   const router = Router();
@@ -30,6 +32,7 @@ export function createPublicRouter(): Router {
   router.post('/posts/:slug/view', viewLimiter, validate({ params: publicSlugParamsSchema }), publicPosts.recordView);
   router.get('/classes/upcoming', validate({ query: publicClassesQuerySchema }), publicClasses.upcoming);
   router.get('/exams/upcoming', validate({ query: publicExamsQuerySchema }), publicExams.upcoming);
+  router.get('/gallery', validate({ query: publicGalleryQuerySchema }), gallery.listPublic);
   const leadLimiter = createRateLimiter({
     windowMs: 60 * 60 * 1000,
     limit: 10,

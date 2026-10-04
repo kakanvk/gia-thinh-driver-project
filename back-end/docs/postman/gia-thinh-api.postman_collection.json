@@ -44,6 +44,10 @@
       "value": ""
     },
     {
+      "key": "galleryItemId",
+      "value": ""
+    },
+    {
       "key": "courseId",
       "value": ""
     },
@@ -873,7 +877,7 @@
       "name": "Media",
       "item": [
         {
-          "name": "Danh sách ảnh",
+          "name": "Danh sách media (lọc kind: image|video)",
           "request": {
             "method": "GET",
             "header": [],
@@ -903,6 +907,11 @@
                 },
                 {
                   "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "kind",
                   "value": "",
                   "disabled": true
                 }
@@ -971,6 +980,329 @@
               }
             }
           ],
+          "response": []
+        },
+        {
+          "name": "Xin URL ký sẵn để upload video thẳng lên kho (mp4/webm, tối đa MAX_VIDEO_BYTES)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/media/video-uploads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media",
+                "video-uploads"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"buoi-hoc.mp4\",\n  \"contentType\": \"video/mp4\",\n  \"size\": 10485760,\n  \"alt\": \"Buổi học\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/media/video-uploads"
+          },
+          "response": []
+        },
+        {
+          "name": "Hoàn tất upload video (chưa PUT xong → 400 UPLOAD_INCOMPLETE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/media/video-uploads/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media",
+                "video-uploads",
+                "complete"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"uploadId\": \"tmp/00000000-0000-4000-8000-000000000000.mp4\",\n  \"width\": 1280,\n  \"height\": 720,\n  \"duration\": 12.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/media/video-uploads/complete"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa mô tả (alt) media",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/media/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{mediaId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alt\": \"Sân tập\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/media/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xoá media (đang dùng → 409 MEDIA_IN_USE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/media/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{mediaId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/media/{id}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Thư viện",
+      "item": [
+        {
+          "name": "Danh sách mục thư viện website (theo thứ tự)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gallery"
+              ],
+              "query": [
+                {
+                  "key": "kind",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "visible",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/gallery"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('galleryItemId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('galleryItemId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Thêm mục vào thư viện (thêm cuối danh sách)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gallery"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mediaId\": \"{{mediaId}}\",\n  \"caption\": \"Sân tập\",\n  \"visible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/gallery"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('galleryItemId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Sắp xếp lại (gửi đủ mọi id theo thứ tự mới)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gallery/reorder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gallery",
+                "reorder"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{galleryItemId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/gallery/reorder"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa mục (chú thích, ảnh bìa video, ẩn/hiện)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/gallery/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gallery",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{galleryItemId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caption\": \"Buổi học thực hành\",\n  \"visible\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/gallery/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xoá mục (không xoá media)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gallery/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "gallery",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{galleryItemId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/gallery/{id}"
+          },
           "response": []
         }
       ]
@@ -4410,6 +4742,35 @@
               ]
             },
             "description": "GET /api/v1/public/pricing"
+          },
+          "response": []
+        },
+        {
+          "name": "Thư viện ảnh/video đang hiện (theo thứ tự, tối đa 500)",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "gallery"
+              ],
+              "query": [
+                {
+                  "key": "kind",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/public/gallery"
           },
           "response": []
         },
