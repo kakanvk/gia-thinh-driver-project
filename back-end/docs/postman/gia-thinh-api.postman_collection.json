@@ -4454,7 +4454,7 @@
           "response": []
         },
         {
-          "name": "Chi tiết tin (+1 lượt xem)",
+          "name": "Chi tiết tin",
           "request": {
             "method": "GET",
             "auth": {
@@ -4479,6 +4479,36 @@
               ]
             },
             "description": "GET /api/v1/public/posts/{slug}"
+          },
+          "response": []
+        },
+        {
+          "name": "Ghi một lượt xem tin (giới hạn 30 lần/giờ/IP)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/posts/:slug/view",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":slug",
+                "view"
+              ],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "{{slug}}"
+                }
+              ]
+            },
+            "description": "POST /api/v1/public/posts/{slug}/view"
           },
           "response": []
         },

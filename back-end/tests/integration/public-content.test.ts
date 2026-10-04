@@ -53,7 +53,7 @@ describe('public content', () => {
     );
   });
 
-  it('chi tiết: trả content, tăng lượt xem; bài nháp/hẹn giờ/đã xóa → 404', async () => {
+  it('chi tiết: trả content, không tăng lượt xem; bài nháp/hẹn giờ/đã xóa → 404', async () => {
     const cat = await createCategory();
     await post(cat.id, { slug: 'xem' });
     await post(cat.id, { slug: 'nhap', status: 'draft' });
@@ -64,10 +64,28 @@ describe('public content', () => {
     expect(first.status).toBe(200);
     expect(first.body.data.content).toEqual(content);
     await request(app).get('/api/v1/public/posts/xem');
-    expect((await Post.findOne({ slug: 'xem' }))?.views).toBe(2);
+    expect((await Post.findOne({ slug: 'xem' }))?.views).toBe(0);
     for (const slug of ['nhap', 'tuong-lai', 'da-xoa', 'khong-co']) {
       expect((await request(app).get(`/api/v1/public/posts/${slug}`)).status).toBe(404);
     }
+  });
+
+  it('POST /view tăng lượt xem bài công khai, 404 với bài không công khai, giới hạn 30 lần/giờ', async () => {
+    const cat = await createCategory();
+    await post(cat.id, { slug: 'xem' });
+    await post(cat.id, { slug: 'nhap', status: 'draft' });
+    await post(cat.id, { slug: 'da-xoa', deletedAt: new Date() });
+    const app = createApp();
+    expect((await request(app).post('/api/v1/public/posts/xem/view')).status).toBe(204);
+    expect((await request(app).post('/api/v1/public/posts/xem/view')).status).toBe(204);
+    expect((await Post.findOne({ slug: 'xem' }))?.views).toBe(2);
+    expect((await request(app).post('/api/v1/public/posts/nhap/view')).status).toBe(404);
+    expect((await request(app).post('/api/v1/public/posts/da-xoa/view')).status).toBe(404);
+    expect((await request(app).post('/api/v1/public/posts/khong-co/view')).status).toBe(404);
+    for (let i = 0; i < 25; i += 1) await request(app).post('/api/v1/public/posts/xem/view');
+    const limited = await request(app).post('/api/v1/public/posts/xem/view');
+    expect(limited.status).toBe(429);
+    expect(limited.body.error.code).toBe('RATE_LIMITED');
   });
 
   it('/public/categories trả số bài đang công khai theo thứ tự', async () => {

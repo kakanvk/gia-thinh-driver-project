@@ -85,9 +85,14 @@ export async function listPublicPosts(query: PublicPostsQuery) {
 export async function getPublicPost(slug: string) {
   const post = await Post.findOne({ ...visibleFilter(), slug });
   if (!post) throw ApiError.notFound('Không tìm thấy bài viết');
-  await Post.updateOne({ _id: post._id }, { $inc: { views: 1 } });
   const categories = await categoryMap();
-  return { ...summarize(post, categories), views: post.views + 1, content: post.content };
+  return { ...summarize(post, categories), content: post.content };
+}
+
+// Lượt xem đếm riêng: GET chi tiết được website gọi khi render/ISR nên không dùng để đếm
+export async function recordPublicView(slug: string): Promise<void> {
+  const result = await Post.updateOne({ ...visibleFilter(), slug, deletedAt: null }, { $inc: { views: 1 } });
+  if (result.matchedCount === 0) throw ApiError.notFound('Không tìm thấy bài viết');
 }
 
 export async function listCategories(_req: Request, res: Response): Promise<void> {
@@ -100,4 +105,9 @@ export async function listPosts(req: Request, res: Response): Promise<void> {
 
 export async function getPost(req: Request, res: Response): Promise<void> {
   sendData(res, await getPublicPost(validated<{ slug: string }>(req, 'params').slug));
+}
+
+export async function recordView(req: Request, res: Response): Promise<void> {
+  await recordPublicView(validated<{ slug: string }>(req, 'params').slug);
+  res.status(204).end();
 }

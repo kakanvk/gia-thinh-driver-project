@@ -544,7 +544,17 @@ export const openApiDocument = {
     '/public/posts/{slug}': {
       get: op(
         'Công khai',
-        'Chi tiết tin (+1 lượt xem)',
+        'Chi tiết tin',
+        {
+          parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+        },
+        false,
+      ),
+    },
+    '/public/posts/{slug}/view': {
+      post: op(
+        'Công khai',
+        'Ghi một lượt xem tin (giới hạn 30 lần/giờ/IP)',
         {
           parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
         },

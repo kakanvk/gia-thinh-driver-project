@@ -22,6 +22,12 @@ export function createPublicRouter(): Router {
   router.get('/categories', publicPosts.listCategories);
   router.get('/posts', validate({ query: publicPostsQuerySchema }), publicPosts.listPosts);
   router.get('/posts/:slug', validate({ params: publicSlugParamsSchema }), publicPosts.getPost);
+  const viewLimiter = createRateLimiter({
+    windowMs: 60 * 60 * 1000,
+    limit: 30,
+    message: 'Quá nhiều lượt xem từ địa chỉ này, vui lòng thử lại sau',
+  });
+  router.post('/posts/:slug/view', viewLimiter, validate({ params: publicSlugParamsSchema }), publicPosts.recordView);
   router.get('/classes/upcoming', validate({ query: publicClassesQuerySchema }), publicClasses.upcoming);
   router.get('/exams/upcoming', validate({ query: publicExamsQuerySchema }), publicExams.upcoming);
   const leadLimiter = createRateLimiter({
