@@ -69,7 +69,7 @@ Chạy hoàn toàn ở client.
 
 - Menu ẩn mục không có quyền; nhóm menu không còn mục nào thì ẩn luôn tiêu đề nhóm.
 - Khung admin so đường dẫn hiện tại với bảng (khớp tiền tố dài nhất); thiếu quyền → màn "Không có quyền truy cập" (nút về trang đầu tiên được phép), không render trang.
-- `/admin` khi không có `dashboard.read` (biên tập viên, giáo viên) → `router.replace` tới mục đầu tiên được phép theo thứ tự menu.
+- `/admin` khi không có `dashboard.read` (biên tập viên, giáo viên) → `router.replace` tới mục đầu tiên được phép theo thứ tự menu, **ưu tiên mục cần quyền riêng** (biên tập viên → Bài viết, giáo viên → Lớp học); không có mục nào như vậy thì về mục chung đầu tiên (Chi nhánh).
 - Đây là lớp hiển thị; backend vẫn là nơi kiểm quyền thật.
 
 ## 6. Giao diện
