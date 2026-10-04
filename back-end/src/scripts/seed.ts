@@ -7,6 +7,7 @@ import { settingSchemas, type SettingKey } from '../modules/settings/settings.sc
 import { hashPassword, User } from '../modules/users/user.model';
 import { phoneSchema, usernameSchema } from '../modules/users/users.validation';
 import { WITH_DELETED } from '../shared/mongoose/softDelete';
+import { seedCatalog } from './seed-catalog';
 import { seedBranches, seedSettings } from './seed-data';
 
 export async function runSeed(
@@ -15,6 +16,8 @@ export async function runSeed(
   for (const branch of seedBranches) {
     await Branch.updateOne({ slug: branch.slug, ...WITH_DELETED }, { $setOnInsert: branch }, { upsert: true });
   }
+
+  await seedCatalog();
 
   for (const key of Object.keys(seedSettings) as SettingKey[]) {
     const value = settingSchemas[key].parse(seedSettings[key]);

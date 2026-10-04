@@ -23,6 +23,7 @@ cp .env.example .env
 # JWT_ACCESS_SECRET, SEED_ADMIN_USERNAME, SEED_ADMIN_PHONE, SEED_ADMIN_PASSWORD
 npm install
 npm run seed                  # chi nhánh, cài đặt, tài khoản super_admin
+# Seed gói học/bảng giá/bài viết chỉ nạp lần đầu; muốn nạp lại thì xoá document `__seed_catalog_v1` trong collection settings.
 npm run dev                   # http://localhost:4000/api/v1
 ```
 
@@ -55,6 +56,18 @@ docker compose up -d          # MongoDB ở localhost:27017
 - Không có đăng ký và không gửi email. Admin tạo tài khoản ở màn Người dùng (`POST /api/v1/users`) và gửi thông tin đăng nhập trực tiếp cho nhân viên.
 - Nhân viên đăng nhập bằng **số điện thoại hoặc username** + mật khẩu.
 - Quên mật khẩu: liên hệ admin để được cấp mật khẩu tạm (`POST /api/v1/users/:id/reset-password`).
+
+## Bảng giá theo chi nhánh
+
+- **Giá mặc định** nằm ở gói học (`/courses`, chỉ super_admin sửa). Mọi chi nhánh dùng giá này.
+- **Giá riêng** của một chi nhánh: `PUT /pricing/branches/:branchId/courses/:courseId` (quản lý chi nhánh đó hoặc super_admin). `DELETE` cùng đường dẫn để về giá mặc định.
+- **Phụ phí / ưu đãi** (`/pricing/items`, `kind: fee | discount`): mục `branchId: null` áp dụng mọi chi nhánh (chỉ super_admin). Chi nhánh tạo mục cùng `key` để thay mục chung, hoặc `hidden: true` để ẩn mục chung ở chi nhánh mình.
+- Website đọc giá cuối cùng ở `GET /public/pricing?branch=<slug>`; chi nhánh luôn hiện đủ mọi gói đang bán.
+
+## Bài viết
+
+- Trạng thái: `draft → (pending) → published → draft`; `archived` khôi phục về `draft` qua `POST /posts/:id/restore`. Người có quyền bài viết được xuất bản trực tiếp; `publishedAt` ở tương lai = hẹn giờ.
+- Nội dung là Plate JSON; link/ảnh chỉ nhận `http(s)://`, đường dẫn `/...`, `#`, `mailto:`, `tel:`.
 
 ## Lưu ảnh trên Google Cloud Storage
 

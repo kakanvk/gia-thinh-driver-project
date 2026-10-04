@@ -149,6 +149,140 @@ export const openApiDocument = {
         ],
       }),
     },
+    '/courses': {
+      get: op('Gói học', 'Danh sách gói học', {
+        parameters: [...listParams, { name: 'active', in: 'query', schema: { type: 'string' } }],
+      }),
+      post: op('Gói học', 'Tạo gói học (super_admin)', {
+        requestBody: json({ code: 'B', name: 'Hạng B', vehicleType: 'car', defaultPrice: 16_500_000 }),
+      }),
+    },
+    '/courses/reorder': { patch: op('Gói học', 'Sắp xếp gói học', { requestBody: json({ ids: ['<courseId>'] }) }) },
+    '/courses/{id}': {
+      get: op('Gói học', 'Chi tiết gói học', { parameters: [idParam] }),
+      patch: op('Gói học', 'Sửa gói học / giá mặc định (super_admin)', {
+        parameters: [idParam],
+        requestBody: json({ defaultPrice: 17_000_000 }),
+      }),
+      delete: op('Gói học', 'Xóa (mềm) gói học', { parameters: [idParam] }),
+    },
+    '/pricing/branches/{branchId}': {
+      get: op('Bảng giá', 'Bảng giá đầy đủ của chi nhánh (có nguồn giá)', {
+        parameters: [{ name: 'branchId', in: 'path', required: true, schema: { type: 'string' } }],
+      }),
+    },
+    '/pricing/branches/{branchId}/courses/{courseId}': {
+      put: op('Bảng giá', 'Đặt giá riêng cho chi nhánh', {
+        parameters: ['branchId', 'courseId'].map((name) => ({
+          name,
+          in: 'path',
+          required: true,
+          schema: { type: 'string' },
+        })),
+        requestBody: json({ price: 1_595_000 }),
+      }),
+      delete: op('Bảng giá', 'Bỏ giá riêng, về giá mặc định', {
+        parameters: ['branchId', 'courseId'].map((name) => ({
+          name,
+          in: 'path',
+          required: true,
+          schema: { type: 'string' },
+        })),
+      }),
+    },
+    '/pricing/items': {
+      get: op('Bảng giá', 'Danh sách phụ phí / ưu đãi', {
+        parameters: [
+          ...listParams,
+          ...['kind', 'branchId', 'courseId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        ],
+      }),
+      post: op('Bảng giá', 'Tạo phụ phí / ưu đãi', {
+        requestBody: json({
+          kind: 'fee',
+          key: 'cam-bien-a',
+          courseId: '<courseId>',
+          branchId: null,
+          label: 'Xe cảm biến A',
+          amount: 70_000,
+          unit: 'vòng',
+        }),
+      }),
+    },
+    '/pricing/items/{id}': {
+      patch: op('Bảng giá', 'Sửa phụ phí / ưu đãi', { parameters: [idParam], requestBody: json({ amount: 50_000 }) }),
+      delete: op('Bảng giá', 'Xóa phụ phí / ưu đãi', { parameters: [idParam] }),
+    },
+    '/categories': {
+      get: op('Bài viết', 'Danh sách chuyên mục'),
+      post: op('Bài viết', 'Tạo chuyên mục', { requestBody: json({ name: 'Kinh nghiệm thi' }) }),
+    },
+    '/categories/reorder': { patch: op('Bài viết', 'Sắp xếp chuyên mục', { requestBody: json({ ids: ['<categoryId>'] }) }) },
+    '/categories/{id}': {
+      get: op('Bài viết', 'Chi tiết chuyên mục', { parameters: [idParam] }),
+      patch: op('Bài viết', 'Sửa chuyên mục', { parameters: [idParam], requestBody: json({ name: 'Mẹo học' }) }),
+      delete: op('Bài viết', 'Xóa chuyên mục (409 nếu còn bài)', { parameters: [idParam] }),
+    },
+    '/posts': {
+      get: op('Bài viết', 'Danh sách bài viết (không kèm nội dung)', {
+        parameters: [
+          ...listParams,
+          ...['status', 'categoryId', 'tag'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        ],
+      }),
+      post: op('Bài viết', 'Tạo bản nháp', {
+        requestBody: json({
+          title: '5 lưu ý trước ngày thi A1',
+          categoryId: '<categoryId>',
+          content: [{ type: 'p', children: [{ text: '...' }] }],
+        }),
+      }),
+    },
+    '/posts/{id}': {
+      get: op('Bài viết', 'Chi tiết bài viết', { parameters: [idParam] }),
+      patch: op('Bài viết', 'Sửa bài viết', { parameters: [idParam], requestBody: json({ title: 'Tiêu đề mới' }) }),
+      delete: op('Bài viết', 'Xóa (mềm) bài viết', { parameters: [idParam] }),
+    },
+    '/posts/{id}/submit': { post: op('Bài viết', 'Gửi duyệt', { parameters: [idParam] }) },
+    '/posts/{id}/publish': {
+      post: op('Bài viết', 'Xuất bản (có thể hẹn giờ)', {
+        parameters: [idParam],
+        requestBody: json({ publishedAt: '2026-10-10T08:00' }),
+      }),
+    },
+    '/posts/{id}/unpublish': { post: op('Bài viết', 'Gỡ xuất bản', { parameters: [idParam] }) },
+    '/posts/{id}/archive': { post: op('Bài viết', 'Lưu trữ', { parameters: [idParam] }) },
+    '/posts/{id}/restore': { post: op('Bài viết', 'Khôi phục bài lưu trữ về bản nháp', { parameters: [idParam] }) },
+    '/posts/{id}/duplicate': { post: op('Bài viết', 'Nhân bản thành bản nháp', { parameters: [idParam] }) },
+    '/public/pricing': {
+      get: op(
+        'Công khai',
+        'Bảng giá theo chi nhánh',
+        { parameters: [{ name: 'branch', in: 'query', schema: { type: 'string' } }] },
+        false,
+      ),
+    },
+    '/public/categories': { get: op('Công khai', 'Chuyên mục kèm số bài', {}, false) },
+    '/public/posts': {
+      get: op(
+        'Công khai',
+        'Tin đã xuất bản',
+        {
+          parameters: ['page', 'limit', 'category', 'q'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        },
+        false,
+      ),
+    },
+    '/public/posts/{slug}': {
+      get: op(
+        'Công khai',
+        'Chi tiết tin (+1 lượt xem)',
+        {
+          parameters: [{ name: 'slug', in: 'path', required: true, schema: { type: 'string' } }],
+        },
+        false,
+      ),
+    },
     '/public/branches': { get: op('Công khai', 'Văn phòng/chi nhánh đang hoạt động', {}, false) },
     '/public/settings': { get: op('Công khai', 'Hotline, Zalo, mạng xã hội, lưu ý đăng ký', {}, false) },
   },

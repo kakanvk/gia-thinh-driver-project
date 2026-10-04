@@ -25,3 +25,18 @@ export const zDateTime = z.string().transform((value, ctx) => {
     return z.NEVER;
   }
 });
+export const slugSchema = z
+  .string()
+  .trim()
+  .max(150)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Slug chỉ gồm chữ thường không dấu, số và dấu gạch ngang');
+
+export const imageInputSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .max(500)
+    .regex(/^(https?:\/\/|\/(?![/\\]))/, 'URL ảnh phải là http(s) hoặc đường dẫn bắt đầu bằng /'),
+  alt: z.string().trim().max(200).default(''),
+  mediaId: objectIdSchema.optional(),
+});

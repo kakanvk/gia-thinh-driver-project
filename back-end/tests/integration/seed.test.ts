@@ -14,7 +14,7 @@ describe('runSeed', () => {
     await runSeed(admin);
     expect(await Branch.countDocuments()).toBe(5);
     expect(await User.countDocuments({ role: 'super_admin' })).toBe(1);
-    expect(await Setting.countDocuments()).toBe(8);
+    expect(await Setting.countDocuments({ key: { $ne: '__seed_catalog_v1' } })).toBe(8);
 
     const vungLiem = await Branch.findOne({ slug: 'vung-liem' });
     expect(vungLiem).toMatchObject({ officeName: 'VP Vũng Liêm', order: 5 });
