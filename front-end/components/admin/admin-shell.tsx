@@ -12,6 +12,7 @@ import {
   Car,
   ChevronDown,
   ClipboardCheck,
+  Contact,
   ExternalLink,
   FileText,
   GraduationCap,
@@ -56,11 +57,8 @@ const navGroups: NavGroup[] = [
     label: "Vận hành",
     items: [
       { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
-      {
-        label: "Lịch đăng ký",
-        href: "/admin/lich-dang-ky",
-        icon: CalendarDays,
-      },
+      { label: "Khách hàng", href: "/admin/khach-hang", icon: Contact },
+      { label: "Lịch hẹn", href: "/admin/lich-dang-ky", icon: CalendarDays },
       { label: "Lớp học", href: "/admin/lop-hoc", icon: GraduationCap },
       { label: "Lịch thi", href: "/admin/lich-thi", icon: ClipboardCheck },
       { label: "Người dùng", href: "/admin/nguoi-dung", icon: Users },

@@ -28,6 +28,16 @@ const instructor = [
   "student.read",
   "exam.read",
 ]
+const consultant = [
+  "branch.read",
+  "setting.read",
+  "course.read",
+  "lead.read",
+  "lead.create",
+  "lead.update",
+  "appointment.*",
+  "dashboard.read",
+]
 const manager = [
   "branch.read",
   "lead.*",
@@ -55,6 +65,12 @@ describe("routeFor", () => {
     expect(routeFor("/admin/hoc-phi-cu")).toBeUndefined()
     expect(routeFor("/admin/khong-co")).toBeUndefined()
   })
+
+  it("khách hàng theo lead.read, lịch hẹn theo appointment.read", () => {
+    expect(routeFor("/admin/khach-hang")?.permission).toBe("lead.read")
+    expect(routeFor("/admin/khach-hang/abc")?.permission).toBe("lead.read")
+    expect(routeFor("/admin/lich-dang-ky")?.permission).toBe("appointment.read")
+  })
 })
 
 describe("canAccess / firstAllowedPath", () => {
@@ -70,6 +86,13 @@ describe("canAccess / firstAllowedPath", () => {
   it("giáo viên về lớp học, quản lý về tổng quan", () => {
     expect(firstAllowedPath(instructor)).toBe("/admin/lop-hoc")
     expect(firstAllowedPath(manager)).toBe("/admin")
+    expect(firstAllowedPath(consultant)).toBe("/admin")
+    expect(
+      firstAllowedPath(consultant.filter((p) => p !== "dashboard.read"))
+    ).toBe("/admin/khach-hang")
+    expect(canAccess("/admin/khach-hang/abc", consultant)).toBe(true)
+    expect(canAccess("/admin/lich-dang-ky", consultant)).toBe(true)
+    expect(canAccess("/admin/lich-dang-ky", ["lead.read"])).toBe(false)
     expect(firstAllowedPath(["*"])).toBe("/admin")
     expect(firstAllowedPath([])).toBe("/admin/chi-nhanh")
   })

@@ -8,7 +8,8 @@ export const LOGIN_PATH = "/admin/dang-nhap"
 // permission null: mọi nhân viên đã đăng nhập.
 export const ADMIN_ROUTES: AdminRoute[] = [
   { href: "/admin", permission: "dashboard.read" },
-  { href: "/admin/lich-dang-ky", permission: "lead.read" },
+  { href: "/admin/khach-hang", permission: "lead.read" },
+  { href: "/admin/lich-dang-ky", permission: "appointment.read" },
   { href: "/admin/lop-hoc", permission: "class.read" },
   { href: "/admin/lich-thi", permission: "exam.read" },
   { href: "/admin/nguoi-dung", permission: "user.manage" },

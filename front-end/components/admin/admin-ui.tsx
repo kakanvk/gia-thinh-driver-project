@@ -63,7 +63,6 @@ const statusStyles: Record<string, string> = {
   "Đã kết thúc": "bg-muted text-muted-foreground",
   "Đã có kết quả": "bg-success/10 text-success",
   "Sắp diễn ra": "bg-primary/10 text-primary",
-  "Đã lên lịch": "bg-highlight/25 text-foreground",
   "Đã thu đủ": "bg-success/10 text-success",
   "Đang đóng theo đợt": "bg-primary/10 text-primary",
   "Quá hạn": "bg-destructive/10 text-destructive",
@@ -79,6 +78,19 @@ const statusStyles: Record<string, string> = {
   "Đã duyệt": "bg-primary/10 text-primary",
   "Chờ duyệt": "bg-highlight/25 text-foreground",
   "Bản nháp": "bg-muted text-muted-foreground",
+  // Trạng thái khách hàng
+  Mới: "bg-signal/20 text-navy",
+  "Đã liên hệ": "bg-primary/10 text-primary",
+  "Đã tư vấn": "bg-primary/10 text-primary",
+  "Đặt cọc": "bg-highlight/25 text-foreground",
+  "Hoàn tất hồ sơ": "bg-highlight/40 text-foreground",
+  "Nhập học": "bg-success/10 text-success",
+  "Không thành công": "bg-destructive/10 text-destructive",
+  // Trạng thái lịch hẹn (lịch thi mẫu cũng dùng "Đã lên lịch")
+  "Đã lên lịch": "bg-signal/20 text-navy",
+  "Hoàn thành": "bg-success/10 text-success",
+  "Đã hủy": "bg-muted text-muted-foreground",
+  "Khách không đến": "bg-destructive/10 text-destructive",
 }
 
 export function StatusPill({ status }: { status: string }) {
