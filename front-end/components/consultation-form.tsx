@@ -108,10 +108,10 @@ export function ConsultationForm({
         setFormError(error.message)
       } else if (error instanceof ApiError && error.status === 429) {
         setFormError(
-          `${error.message}. Vui lòng gọi hotline ${contact.hotline} để được hỗ trợ ngay.`
+          `Bạn đã gửi quá nhiều yêu cầu. Vui lòng gọi hotline ${contact.hotline} để được hỗ trợ ngay.`
         )
       } else {
-        setFormError(`${errorMessage(error)} Hoặc gọi hotline ${contact.hotline}.`)
+        setFormError(`${errorMessage(error)}. Hoặc gọi hotline ${contact.hotline}.`)
       }
     } finally {
       inFlight.current = false
@@ -219,6 +219,8 @@ export function ConsultationForm({
             autoComplete="name"
             placeholder="Nguyễn Văn An"
             required
+            minLength={2}
+            maxLength={100}
             aria-invalid={errors.name ? true : undefined}
             className="h-11 rounded-md"
           />
@@ -234,6 +236,8 @@ export function ConsultationForm({
             autoComplete="tel"
             placeholder="09xx xxx xxx"
             required
+            pattern="(?:\+84|0)(?:[ .-]?[0-9]){9}"
+            title="Nhập số điện thoại Việt Nam gồm 10 chữ số"
             aria-invalid={errors.phone ? true : undefined}
             className="h-11 rounded-md"
           />
@@ -330,6 +334,7 @@ export function ConsultationForm({
         <Textarea
           id="consultation-note"
           name="note"
+          maxLength={1000}
           placeholder="Ví dụ: học phí trọn khóa, lịch học cuối tuần, hồ sơ cần chuẩn bị…"
           aria-invalid={errors.note ? true : undefined}
           className="min-h-20 resize-y rounded-md"
