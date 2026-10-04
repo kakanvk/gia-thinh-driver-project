@@ -283,6 +283,7 @@ export function AppointmentCalendar() {
                           key={item.id}
                           type="button"
                           onClick={() => setDetailId(item.id)}
+                          aria-label={`${itemLabel(item)}, ${APPOINTMENT_STATUS_LABELS[item.status]}`}
                           className={cn(
                             "mt-1 block w-full truncate rounded-md px-1.5 py-1 text-left text-[10px] font-semibold transition-colors",
                             APPOINTMENT_STATUS_TONE[item.status]
@@ -316,7 +317,9 @@ export function AppointmentCalendar() {
             <SectionHeading
               title={`${selectedDay === today ? "Hôm nay, " : ""}${formatDate(selectedDay)}`}
               description={
-                calendar.isPending ? "Đang tải…" : `${dayItems.length} lịch hẹn`
+                calendar.isPending || calendar.data?.month !== month
+                  ? "Đang tải…"
+                  : `${dayItems.length} lịch hẹn`
               }
               icon={CalendarDays}
             />
