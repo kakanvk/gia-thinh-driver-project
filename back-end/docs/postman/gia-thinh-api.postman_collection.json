@@ -1,0 +1,5006 @@
+{
+  "info": {
+    "name": "Gia Thịnh API",
+    "description": "Sinh tự động từ src/docs/openapi.ts (npm run postman). Chạy \"Auth → Đăng nhập\" trước: access token tự lưu vào biến accessToken; cookie gt_refresh do Postman giữ cho \"Cấp lại access token\". Các request tạo mới tự lưu id (userId, branchId, …) để dùng ở request sau.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api/v1"
+    },
+    {
+      "key": "identifier",
+      "value": "admin"
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "branchId",
+      "value": ""
+    },
+    {
+      "key": "mediaId",
+      "value": ""
+    },
+    {
+      "key": "courseId",
+      "value": ""
+    },
+    {
+      "key": "pricingItemId",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "postId",
+      "value": ""
+    },
+    {
+      "key": "leadId",
+      "value": ""
+    },
+    {
+      "key": "appointmentId",
+      "value": ""
+    },
+    {
+      "key": "instructorId",
+      "value": ""
+    },
+    {
+      "key": "vehicleId",
+      "value": ""
+    },
+    {
+      "key": "classId",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": ""
+    },
+    {
+      "key": "examId",
+      "value": ""
+    },
+    {
+      "key": "candidateId",
+      "value": ""
+    },
+    {
+      "key": "tuitionId",
+      "value": ""
+    },
+    {
+      "key": "paymentId",
+      "value": ""
+    },
+    {
+      "key": "slug",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Hệ thống",
+      "item": [
+        {
+          "name": "Kiểm tra trạng thái",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "GET /api/v1/health"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Đăng nhập bằng SĐT hoặc username",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{identifier}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Cấp lại access token (cookie gt_refresh)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "POST /api/v1/auth/refresh"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', body.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Đăng xuất",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "POST /api/v1/auth/logout"
+          },
+          "response": []
+        },
+        {
+          "name": "Thông tin tài khoản và quyền",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "GET /api/v1/auth/me"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa hồ sơ",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mỹ Duyên\",\n  \"phone\": \"0779666664\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/auth/me"
+          },
+          "response": []
+        },
+        {
+          "name": "Đổi mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Matkhau123\",\n  \"newPassword\": \"Moimatkhau1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/auth/change-password"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Người dùng",
+      "item": [
+        {
+          "name": "Danh sách nhân viên",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('userId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('userId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Tạo nhân viên",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Trần Mỹ Duyên\",\n  \"username\": \"duyen.tran\",\n  \"phone\": \"0779666664\",\n  \"password\": \"Matkhau123\",\n  \"role\": \"consultant\",\n  \"branchIds\": [\n    \"{{branchId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('userId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Chi tiết nhân viên",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/users/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa nhân viên",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tên mới\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/users/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa (mềm) nhân viên",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/users/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Khóa/mở khóa",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"suspended\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/users/{id}/status"
+          },
+          "response": []
+        },
+        {
+          "name": "Cấp mật khẩu tạm",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id",
+                "reset-password"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "POST /api/v1/users/{id}/reset-password"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chi nhánh",
+      "item": [
+        {
+          "name": "Danh sách chi nhánh",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/branches"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('branchId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('branchId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Tạo chi nhánh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tân Ngãi\",\n  \"officeName\": \"VP1 — Tân Ngãi\",\n  \"address\": \"Số 331A, P. Tân Ngãi, T. Vĩnh Long\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/branches"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('branchId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Chi tiết chi nhánh",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{branchId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/branches/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa chi nhánh",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{branchId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"openingHours\": \"7:30–17:30 · T2–T7\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/branches/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa (mềm) chi nhánh",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{branchId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/branches/{id}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cài đặt",
+      "item": [
+        {
+          "name": "Đọc cài đặt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings"
+              ]
+            },
+            "description": "GET /api/v1/settings"
+          },
+          "response": []
+        },
+        {
+          "name": "Cập nhật cài đặt (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotline\": \"0779 666 664\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/settings"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Danh sách ảnh",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/media",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/media"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('mediaId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('mediaId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Upload ảnh (multipart: file, alt)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/media",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "media"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "alt",
+                  "type": "text",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "POST /api/v1/media"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('mediaId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "item": [
+        {
+          "name": "Lịch sử thao tác (super_admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/audit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audit"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "entity",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "entityId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "actor",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/audit"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gói học",
+      "item": [
+        {
+          "name": "Danh sách gói học",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "active",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/courses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('courseId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('courseId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Tạo gói học (super_admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"B\",\n  \"name\": \"Hạng B\",\n  \"vehicleType\": \"car\",\n  \"defaultPrice\": 16500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/courses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('courseId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Sắp xếp gói học",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/courses/reorder",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                "reorder"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{courseId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/courses/reorder"
+          },
+          "response": []
+        },
+        {
+          "name": "Chi tiết gói học",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/courses/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa gói học / giá mặc định (super_admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/courses/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"defaultPrice\": 17000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/courses/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa (mềm) gói học",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/courses/{id}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bảng giá",
+      "item": [
+        {
+          "name": "Bảng giá đầy đủ của chi nhánh (có nguồn giá)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/branches/:branchId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "branches",
+                ":branchId"
+              ],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/pricing/branches/{branchId}"
+          },
+          "response": []
+        },
+        {
+          "name": "Đặt giá riêng cho chi nhánh",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/branches/:branchId/courses/:courseId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "branches",
+                ":branchId",
+                "courses",
+                ":courseId"
+              ],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1595000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PUT /api/v1/pricing/branches/{branchId}/courses/{courseId}"
+          },
+          "response": []
+        },
+        {
+          "name": "Bỏ giá riêng, về giá mặc định",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/branches/:branchId/courses/:courseId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "branches",
+                ":branchId",
+                "courses",
+                ":courseId"
+              ],
+              "variable": [
+                {
+                  "key": "branchId",
+                  "value": "{{branchId}}"
+                },
+                {
+                  "key": "courseId",
+                  "value": "{{courseId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/pricing/branches/{branchId}/courses/{courseId}"
+          },
+          "response": []
+        },
+        {
+          "name": "Danh sách phụ phí / ưu đãi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "kind",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "courseId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/pricing/items"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('pricingItemId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('pricingItemId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Tạo phụ phí / ưu đãi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "items"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"fee\",\n  \"key\": \"cam-bien-a\",\n  \"courseId\": \"{{courseId}}\",\n  \"branchId\": null,\n  \"label\": \"Xe cảm biến A\",\n  \"amount\": 70000,\n  \"unit\": \"vòng\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/pricing/items"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('pricingItemId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Sửa phụ phí / ưu đãi",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/items/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "items",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{pricingItemId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/pricing/items/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa phụ phí / ưu đãi",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing/items/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pricing",
+                "items",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{pricingItemId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/pricing/items/{id}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bài viết",
+      "item": [
+        {
+          "name": "categories",
+          "item": [
+            {
+              "name": "Danh sách chuyên mục",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories"
+                  ]
+                },
+                "description": "GET /api/v1/categories"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('categoryId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('categoryId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Tạo chuyên mục",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Kinh nghiệm thi\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/categories"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('categoryId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Sắp xếp chuyên mục",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/reorder",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    "reorder"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ids\": [\n    \"{{categoryId}}\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/categories/reorder"
+              },
+              "response": []
+            },
+            {
+              "name": "Chi tiết chuyên mục",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{categoryId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/categories/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa chuyên mục",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{categoryId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Mẹo học\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/categories/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa chuyên mục (409 nếu còn bài)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{categoryId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/categories/{id}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "posts",
+          "item": [
+            {
+              "name": "Danh sách bài viết (không kèm nội dung)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "categoryId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "tag",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/posts"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('postId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('postId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Tạo bản nháp",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"5 lưu ý trước ngày thi A1\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"content\": [\n    {\n      \"type\": \"p\",\n      \"children\": [\n        {\n          \"text\": \"...\"\n        }\n      ]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/posts"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('postId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Chi tiết bài viết",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/posts/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa bài viết",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Tiêu đề mới\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/posts/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa (mềm) bài viết",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/posts/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Gửi duyệt",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "POST /api/v1/posts/{id}/submit"
+              },
+              "response": []
+            },
+            {
+              "name": "Xuất bản (có thể hẹn giờ)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id/publish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id",
+                    "publish"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"publishedAt\": \"2026-10-10T08:00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/posts/{id}/publish"
+              },
+              "response": []
+            },
+            {
+              "name": "Gỡ xuất bản",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id/unpublish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id",
+                    "unpublish"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "POST /api/v1/posts/{id}/unpublish"
+              },
+              "response": []
+            },
+            {
+              "name": "Lưu trữ",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id/archive",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id",
+                    "archive"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "POST /api/v1/posts/{id}/archive"
+              },
+              "response": []
+            },
+            {
+              "name": "Khôi phục bài lưu trữ về bản nháp",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id/restore",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id",
+                    "restore"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "POST /api/v1/posts/{id}/restore"
+              },
+              "response": []
+            },
+            {
+              "name": "Nhân bản thành bản nháp",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posts/:id/duplicate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posts",
+                    ":id",
+                    "duplicate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{postId}}"
+                    }
+                  ]
+                },
+                "description": "POST /api/v1/posts/{id}/duplicate"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CRM",
+      "item": [
+        {
+          "name": "Danh sách khách (theo chi nhánh của nhân viên)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "source",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "courseId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "followUpDue",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/leads"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('leadId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('leadId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Tạo khách (tại quầy/điện thoại)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn An\",\n  \"phone\": \"0903412869\",\n  \"branchId\": \"{{branchId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"source\": \"walk_in\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/leads"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('leadId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Xuất CSV (quản lý)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/leads/export"
+          },
+          "response": []
+        },
+        {
+          "name": "Chi tiết khách",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/leads/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa thông tin khách",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Hỏi lịch cuối tuần\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/leads/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa (mềm) khách (quản lý)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/leads/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Chuyển trạng thái",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"lost\",\n  \"lostReason\": \"Chọn trung tâm khác\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/leads/{id}/status"
+          },
+          "response": []
+        },
+        {
+          "name": "Phân công người phụ trách",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id",
+                "assign"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/leads/{id}/assign"
+          },
+          "response": []
+        },
+        {
+          "name": "Lịch sử chăm sóc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id/activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id",
+                "activities"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/leads/{id}/activities"
+          },
+          "response": []
+        },
+        {
+          "name": "Ghi cuộc gọi / ghi chú",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id/activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id",
+                "activities"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"call\",\n  \"content\": \"Khách hẹn gọi lại\",\n  \"nextFollowUpAt\": \"2026-10-10T09:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/leads/{id}/activities"
+          },
+          "response": []
+        },
+        {
+          "name": "Chuyển khách thành học viên",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id/convert",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id",
+                "convert"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{leadId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"classId\": \"{{classId}}\",\n  \"idNumber\": \"086204001234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/leads/{id}/convert"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return (body.data && body.data.student) || body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('studentId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Lịch hẹn",
+      "item": [
+        {
+          "name": "Danh sách lịch hẹn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "leadId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/appointments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('appointmentId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('appointmentId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Đặt lịch hẹn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leadId\": \"{{leadId}}\",\n  \"startAt\": \"2026-10-24T08:00\",\n  \"type\": \"consult\",\n  \"assigneeId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/appointments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('appointmentId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Lịch theo tháng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/calendar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                "calendar"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-10",
+                  "disabled": false
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assigneeId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/appointments/calendar"
+          },
+          "response": []
+        },
+        {
+          "name": "Chi tiết lịch hẹn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{appointmentId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/appointments/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Dời lịch / đổi người phụ trách",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{appointmentId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startAt\": \"2026-10-25T14:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/appointments/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Xóa (mềm) lịch hẹn",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{appointmentId}}"
+                }
+              ]
+            },
+            "description": "DELETE /api/v1/appointments/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Đổi trạng thái lịch hẹn",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "appointments",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{appointmentId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"done\",\n  \"note\": \"Khách đã đặt cọc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/appointments/{id}/status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Đào tạo",
+      "item": [
+        {
+          "name": "instructors",
+          "item": [
+            {
+              "name": "Danh sách giáo viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/instructors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "instructors"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "branchId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/instructors"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('instructorId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('instructorId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Tạo giáo viên",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/instructors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "instructors"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Nguyễn Hoàng Đức\",\n  \"phone\": \"0907226880\",\n  \"specialties\": [\n    \"B\",\n    \"C1\"\n  ],\n  \"branchId\": \"{{branchId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/instructors"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('instructorId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Chi tiết giáo viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/instructors/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "instructors",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{instructorId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/instructors/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa giáo viên",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/instructors/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "instructors",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{instructorId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"on_leave\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/instructors/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa (mềm) giáo viên",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/instructors/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "instructors",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{instructorId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/instructors/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Thống kê lớp, học viên, tỷ lệ đậu",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/instructors/:id/stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "instructors",
+                    ":id",
+                    "stats"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{instructorId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/instructors/{id}/stats"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "vehicles",
+          "item": [
+            {
+              "name": "Danh sách xe tập lái",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/vehicles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vehicles"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "branchId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "courseCode",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/vehicles"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('vehicleId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('vehicleId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Thêm xe",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vehicles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vehicles"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"plate\": \"64A-123.45\",\n  \"model\": \"Toyota Vios\",\n  \"courseCode\": \"B\",\n  \"transmission\": \"automatic\",\n  \"branchId\": \"{{branchId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/vehicles"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('vehicleId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Xe sắp đến hạn bảo dưỡng/đăng kiểm",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/vehicles/alerts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vehicles",
+                    "alerts"
+                  ],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/vehicles/alerts"
+              },
+              "response": []
+            },
+            {
+              "name": "Chi tiết xe",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/vehicles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vehicles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{vehicleId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/vehicles/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa xe",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vehicles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vehicles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{vehicleId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"maintenance\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/vehicles/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa (mềm) xe",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/vehicles/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vehicles",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{vehicleId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/vehicles/{id}"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "classes",
+          "item": [
+            {
+              "name": "Danh sách lớp (kèm sĩ số)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/classes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "classes"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "branchId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "courseId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "instructorId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/classes"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('classId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('classId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Mở lớp",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/classes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "classes"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"B-TD-2610\",\n  \"courseId\": \"{{courseId}}\",\n  \"branchId\": \"{{branchId}}\",\n  \"startDate\": \"2026-10-21\",\n  \"endDate\": \"2026-11-18\",\n  \"scheduleText\": \"T2–T7 · 13:30\",\n  \"capacity\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/classes"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('classId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Chi tiết lớp",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/classes/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "classes",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{classId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/classes/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa lớp",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/classes/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "classes",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{classId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ongoing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/classes/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa (mềm) lớp (409 nếu còn học viên)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/classes/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "classes",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{classId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/classes/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Học viên của lớp",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/classes/:id/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "classes",
+                    ":id",
+                    "students"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{classId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/classes/{id}/students"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "students",
+          "item": [
+            {
+              "name": "Danh sách học viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "branchId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "classId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "courseId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/students"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('studentId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('studentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Tạo học viên",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Nguyễn Minh Anh\",\n  \"phone\": \"0903412869\",\n  \"courseId\": \"{{courseId}}\",\n  \"branchId\": \"{{branchId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/students"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('studentId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Chi tiết học viên",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/students/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{studentId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/students/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa học viên",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/students/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{studentId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"paused\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/students/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa (mềm) học viên",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/students/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{studentId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/students/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xếp / bỏ lớp",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/students/:id/class",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ":id",
+                    "class"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{studentId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"classId\": \"{{classId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/students/{id}/class"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "exams",
+          "item": [
+            {
+              "name": "Danh sách ca thi (kèm thống kê)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/exams",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "type",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "branchId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "courseId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "from",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/exams"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && !pm.collectionVariables.get('examId')) {",
+                      "  const first = (pm.response.json().data || [])[0];",
+                      "  if (first && first.id) pm.collectionVariables.set('examId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Tạo ca thi",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/exams",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"SH-2610-01\",\n  \"type\": \"official\",\n  \"courseId\": \"{{courseId}}\",\n  \"branchId\": \"{{branchId}}\",\n  \"date\": \"2026-10-28\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/exams"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 300) {",
+                      "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                      "  if (record && record.id) pm.collectionVariables.set('examId', record.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "response": []
+            },
+            {
+              "name": "Chi tiết ca thi",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/exams/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Sửa ca thi",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"done\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/exams/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Xóa ca thi (409 nếu đã có kết quả)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/exams/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Danh sách thí sinh",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id/candidates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id",
+                    "candidates"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/exams/{id}/candidates"
+              },
+              "response": []
+            },
+            {
+              "name": "Thêm thí sinh",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id/candidates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id",
+                    "candidates"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"studentIds\": [\n    \"{{studentId}}\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "POST /api/v1/exams/{id}/candidates"
+              },
+              "response": []
+            },
+            {
+              "name": "Nhập kết quả",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id/candidates/:candidateId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id",
+                    "candidates",
+                    ":candidateId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    },
+                    {
+                      "key": "candidateId",
+                      "value": "{{candidateId}}"
+                    }
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"result\": \"passed\",\n  \"score\": 24\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "description": "PATCH /api/v1/exams/{id}/candidates/{candidateId}"
+              },
+              "response": []
+            },
+            {
+              "name": "Bỏ thí sinh (chưa có kết quả)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/exams/:id/candidates/:candidateId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "exams",
+                    ":id",
+                    "candidates",
+                    ":candidateId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{examId}}"
+                    },
+                    {
+                      "key": "candidateId",
+                      "value": "{{candidateId}}"
+                    }
+                  ]
+                },
+                "description": "DELETE /api/v1/exams/{id}/candidates/{candidateId}"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Công khai",
+      "item": [
+        {
+          "name": "Lịch khai giảng",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/classes/upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "classes",
+                "upcoming"
+              ],
+              "query": [
+                {
+                  "key": "branch",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "course",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/public/classes/upcoming"
+          },
+          "response": []
+        },
+        {
+          "name": "Lịch thi sắp tới",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/exams/upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "exams",
+                "upcoming"
+              ],
+              "query": [
+                {
+                  "key": "branch",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "course",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/public/exams/upcoming"
+          },
+          "response": []
+        },
+        {
+          "name": "Gửi form tư vấn",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/leads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "leads"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nguyễn Văn An\",\n  \"phone\": \"0779666664\",\n  \"branch\": \"tan-ngai\",\n  \"courseCode\": \"B\",\n  \"preferredContactTime\": \"Buổi chiều (13:00–17:30)\",\n  \"consent\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/public/leads"
+          },
+          "response": []
+        },
+        {
+          "name": "Bảng giá theo chi nhánh",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/pricing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "pricing"
+              ],
+              "query": [
+                {
+                  "key": "branch",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/public/pricing"
+          },
+          "response": []
+        },
+        {
+          "name": "Chuyên mục kèm số bài",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "categories"
+              ]
+            },
+            "description": "GET /api/v1/public/categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Tin đã xuất bản",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/public/posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Chi tiết tin (+1 lượt xem)",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/posts/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "posts",
+                ":slug"
+              ],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "{{slug}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/public/posts/{slug}"
+          },
+          "response": []
+        },
+        {
+          "name": "Văn phòng/chi nhánh đang hoạt động",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "branches"
+              ]
+            },
+            "description": "GET /api/v1/public/branches"
+          },
+          "response": []
+        },
+        {
+          "name": "Hotline, Zalo, mạng xã hội, lưu ý đăng ký",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "settings"
+              ]
+            },
+            "description": "GET /api/v1/public/settings"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tài chính",
+      "item": [
+        {
+          "name": "Danh sách sổ học phí",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tuition",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "courseId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "includeArchived",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/tuition"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && !pm.collectionVariables.get('tuitionId')) {",
+                  "  const first = (pm.response.json().data || [])[0];",
+                  "  if (first && first.id) pm.collectionVariables.set('tuitionId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Tạo bù sổ học phí cho học viên cũ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tuition",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/tuition"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('tuitionId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Chi tiết sổ (kèm phiếu thu)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tuition/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{tuitionId}}"
+                }
+              ]
+            },
+            "description": "GET /api/v1/tuition/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Sửa giảm trừ / kế hoạch đóng",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tuition/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{tuitionId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"discounts\": [\n    {\n      \"label\": \"HSSV\",\n      \"amount\": 1000000\n    }\n  ],\n  \"plan\": \"installments\",\n  \"installments\": [\n    {\n      \"dueDate\": \"2026-10-10\",\n      \"amount\": 7750000\n    },\n    {\n      \"dueDate\": \"2026-11-10\",\n      \"amount\": 7750000\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "PATCH /api/v1/tuition/{id}"
+          },
+          "response": []
+        },
+        {
+          "name": "Thu tiền",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tuition/:id/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition",
+                ":id",
+                "payments"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{tuitionId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5000000,\n  \"method\": \"transfer\",\n  \"note\": \"Đợt 1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "POST /api/v1/tuition/{id}/payments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) {",
+                  "  const record = (() => { const body = pm.response.json(); return (body.data && body.data.payment) || body.data; })();",
+                  "  if (record && record.id) pm.collectionVariables.set('paymentId', record.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Hủy phiếu thu (super_admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tuition/:id/payments/:paymentId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tuition",
+                ":id",
+                "payments",
+                ":paymentId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{tuitionId}}"
+                },
+                {
+                  "key": "paymentId",
+                  "value": "{{paymentId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Nhập nhầm số tiền\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "DELETE /api/v1/tuition/{id}/payments/{paymentId}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tổng quan",
+      "item": [
+        {
+          "name": "Số liệu tổng quan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/dashboard/summary"
+          },
+          "response": []
+        },
+        {
+          "name": "Khách mới theo ngày",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/registrations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "registrations"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/dashboard/registrations"
+          },
+          "response": []
+        },
+        {
+          "name": "Nguồn khách theo tháng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/sources",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "sources"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/dashboard/sources"
+          },
+          "response": []
+        },
+        {
+          "name": "Phễu tuyển sinh theo tháng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/funnel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "funnel"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/dashboard/funnel"
+          },
+          "response": []
+        },
+        {
+          "name": "Thực thu theo tháng và theo hạng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/revenue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "months",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/dashboard/revenue"
+          },
+          "response": []
+        },
+        {
+          "name": "Tỷ lệ đậu sát hạch lần đầu",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/pass-rate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "pass-rate"
+              ],
+              "query": [
+                {
+                  "key": "months",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "GET /api/v1/dashboard/pass-rate"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

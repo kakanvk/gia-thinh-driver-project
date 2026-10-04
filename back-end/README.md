@@ -50,6 +50,22 @@ docker compose up -d          # MongoDB ở localhost:27017
 | `npm run build` && `npm start` | Build và chạy bản production |
 | `npm run seed` / `npm run seed:prod` | Seed dữ liệu (dev / sau khi build) |
 | `npm run seed:reset` | **Xoá sạch database dev** rồi seed lại (xem bên dưới) |
+| `npm run postman` | Sinh lại Postman collection từ tài liệu API (xem bên dưới) |
+
+## Postman
+
+File trong `docs/postman/`, sinh từ `src/docs/openapi.ts` (sửa API thì sửa `openapi.ts` rồi chạy `npm run postman`):
+
+- `gia-thinh-api.postman_collection.json` — 126 request, chia thư mục theo nghiệp vụ.
+- `gia-thinh-local.postman_environment.json` — biến `baseUrl` (mặc định `http://localhost:4000/api/v1`), `identifier`, `password`.
+
+Cách dùng:
+
+1. Postman/Bruno → **Import** file collection. Mở tab biến của collection (*Variables* ở Postman, *Vars* ở Bruno), điền `password` (= `SEED_ADMIN_PASSWORD`); `baseUrl` mặc định `http://localhost:4000/api/v1`, `identifier` mặc định `admin`. File environment là tuỳ chọn: import khi cần đổi `baseUrl` theo môi trường (biến environment ghi đè biến collection).
+2. Chạy **Auth → Đăng nhập** trước: access token tự lưu vào biến `accessToken`, các request khác tự gắn `Authorization: Bearer`. Token hết hạn sau 15 phút → chạy **Cấp lại access token** (Postman tự gửi cookie `gt_refresh`) hoặc đăng nhập lại.
+3. Request có `:id` lấy id từ biến collection (`branchId`, `courseId`, `leadId`, …). Biến được điền tự động khi gọi request **danh sách** (lấy bản ghi đầu tiên nếu biến còn trống) hoặc **tạo mới** (lấy bản ghi vừa tạo). Muốn đổi bản ghi: sửa biến ở tab *Variables* của collection.
+
+Lưu ý: nên gọi từng request. Không bấm *Run collection* trên database đang dùng, vì collection có cả **Đổi mật khẩu**, **Xóa** và **Khóa tài khoản**, chạy hết sẽ đổi mật khẩu admin và xóa dữ liệu mẫu.
 
 ## Seed lại dữ liệu
 

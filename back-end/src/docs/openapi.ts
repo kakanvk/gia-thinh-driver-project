@@ -323,7 +323,10 @@ export const openApiDocument = {
     },
     '/appointments/calendar': {
       get: op('Lịch hẹn', 'Lịch theo tháng', {
-        parameters: ['month', 'branchId', 'assigneeId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        parameters: [
+          { name: 'month', in: 'query', required: true, schema: { type: 'string' }, example: '2026-10' },
+          ...['branchId', 'assigneeId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        ],
       }),
     },
     '/appointments/{id}': {
