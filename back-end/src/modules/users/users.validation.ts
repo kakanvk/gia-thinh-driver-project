@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ROLES } from '../../config/roles';
-import { listQuerySchema } from '../../shared/mongoose/paginate';
+import { listQuerySchema, sortSchema } from '../../shared/mongoose/paginate';
 import { objectIdSchema } from '../../shared/zod';
 import { normalizePhone } from '../../utils/phone';
 import { USER_STATUSES } from './user.model';
@@ -55,6 +55,7 @@ export const updateUserSchema = z
 export const userStatusSchema = z.object({ status: z.enum(USER_STATUSES) });
 
 export const listUsersQuerySchema = listQuerySchema.extend({
+  sort: sortSchema(['createdAt', 'name', 'username', 'role', 'status', 'lastLoginAt']),
   role: z.enum(ROLES).optional(),
   status: z.enum(USER_STATUSES).optional(),
   branchId: objectIdSchema.optional(),

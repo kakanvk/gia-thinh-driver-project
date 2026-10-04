@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app';
 
 describe('tài liệu API', () => {
-  it('/api/docs.json liệt kê endpoint đợt 1–3', async () => {
+  it('/api/docs.json liệt kê endpoint đợt 1–4', async () => {
     const res = await request(createApp()).get('/api/docs.json');
     expect(res.status).toBe(200);
     expect(Object.keys(res.body.paths)).toEqual(
@@ -37,6 +37,15 @@ describe('tài liệu API', () => {
         '/appointments',
         '/appointments/calendar',
         '/public/leads',
+        '/instructors',
+        '/vehicles/alerts',
+        '/classes',
+        '/students',
+        '/students/{id}/class',
+        '/leads/{id}/convert',
+        '/exams/{id}/candidates',
+        '/public/classes/upcoming',
+        '/public/exams/upcoming',
       ]),
     );
   });

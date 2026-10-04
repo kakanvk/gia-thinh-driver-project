@@ -4,6 +4,10 @@ import { WITH_DELETED } from '../../shared/mongoose/softDelete';
 import { ApiError } from '../../utils/ApiError';
 import { escapeRegex } from '../../utils/regex';
 import { recordAudit, snapshot } from '../audit/audit.service';
+import { TrainingClass } from '../classes/class.model';
+import { ExamSession } from '../exams/exam-session.model';
+import { Student } from '../students/student.model';
+import { Vehicle } from '../vehicles/vehicle.model';
 import { Course, type CourseDoc, type ICourse } from './course.model';
 import type { CreateCourseInput, ListCoursesQuery, UpdateCourseInput } from './courses.validation';
 
@@ -46,7 +50,18 @@ export async function createCourse(actor: Actor, input: CreateCourseInput): Prom
 
 export async function updateCourse(actor: Actor, id: string, input: UpdateCourseInput): Promise<CourseDoc> {
   const course = await getCourse(id);
-  if (input.code && input.code !== course.code) await assertCodeFree(input.code, id);
+  if (input.code && input.code !== course.code) {
+    await assertCodeFree(input.code, id);
+    const inUse = await Promise.all([
+      TrainingClass.exists({ courseId: course._id }),
+      Student.exists({ courseId: course._id }),
+      ExamSession.exists({ courseId: course._id }),
+      Vehicle.exists({ courseCode: course.code }),
+    ]);
+    if (inUse.some(Boolean)) {
+      throw ApiError.conflict('Mã gói đang được dùng ở lớp/học viên/ca thi/xe, không thể đổi mã');
+    }
+  }
   const before = snapshot(course);
   course.set(input);
   await course.save();

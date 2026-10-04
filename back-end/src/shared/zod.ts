@@ -40,3 +40,9 @@ export const imageInputSchema = z.object({
   alt: z.string().trim().max(200).default(''),
   mediaId: objectIdSchema.optional(),
 });
+
+export function atLeastOneField<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
+  return schema.refine((value) => Object.keys(value).length > 0, { message: 'Không có thay đổi nào' });
+}
+
+export const transmissionSchema = z.enum(['manual', 'automatic']).nullable();

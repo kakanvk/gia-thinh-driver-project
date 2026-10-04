@@ -8,6 +8,10 @@ import { publicPostsQuerySchema, publicSlugParamsSchema } from '../posts/posts.p
 import { createRateLimiter } from '../../middlewares/rateLimit.middleware';
 import * as publicLeads from '../leads/leads.public';
 import { publicLeadSchema } from '../leads/leads.public';
+import * as publicClasses from '../classes/classes.public';
+import { publicClassesQuerySchema } from '../classes/classes.validation';
+import * as publicExams from '../exams/exams.public';
+import { publicExamsQuerySchema } from '../exams/exams.validation';
 import * as settings from '../settings/settings.controller';
 
 export function createPublicRouter(): Router {
@@ -18,6 +22,8 @@ export function createPublicRouter(): Router {
   router.get('/categories', publicPosts.listCategories);
   router.get('/posts', validate({ query: publicPostsQuerySchema }), publicPosts.listPosts);
   router.get('/posts/:slug', validate({ params: publicSlugParamsSchema }), publicPosts.getPost);
+  router.get('/classes/upcoming', validate({ query: publicClassesQuerySchema }), publicClasses.upcoming);
+  router.get('/exams/upcoming', validate({ query: publicExamsQuerySchema }), publicExams.upcoming);
   const leadLimiter = createRateLimiter({
     windowMs: 60 * 60 * 1000,
     limit: 10,

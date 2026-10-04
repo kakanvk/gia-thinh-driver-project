@@ -30,6 +30,7 @@ export const PERMISSIONS: Record<Role, readonly string[]> = {
     'appointment.*',
     'student.read',
     'student.create',
+    'student.update',
     'tuition.read',
     'dashboard.read',
   ],

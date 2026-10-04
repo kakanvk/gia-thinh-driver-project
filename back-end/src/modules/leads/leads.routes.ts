@@ -3,6 +3,7 @@ import { authenticate } from '../../middlewares/auth.middleware';
 import { authorize } from '../../middlewares/authorize.middleware';
 import { validate } from '../../middlewares/validate.middleware';
 import { idParamsSchema } from '../../shared/zod';
+import { convert, convertLeadSchema } from './leads.convert';
 import { exportCsv } from './leads.export';
 import * as controller from './leads.controller';
 import {
@@ -50,6 +51,12 @@ export function createLeadsRouter(): Router {
     can('lead.update'),
     validate({ params: idParamsSchema, body: createActivitySchema }),
     controller.addActivity,
+  );
+  router.post(
+    '/:id/convert',
+    authorize('student.create', { branchScoped: true }),
+    validate({ params: idParamsSchema, body: convertLeadSchema }),
+    convert,
   );
   return router;
 }

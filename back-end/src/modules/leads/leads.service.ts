@@ -131,6 +131,7 @@ export async function updateLead(actor: Actor, scope: Scope, id: string, input: 
   let newBranchId: string | undefined;
 
   if (input.branchId && input.branchId !== lead.branchId.toString()) {
+    if (lead.status === 'enrolled') throw ApiError.conflict('Khách đã nhập học, không thể chuyển chi nhánh');
     assertBranchAccess(scope, input.branchId);
     await getBranch(input.branchId);
     newBranchId = input.branchId;

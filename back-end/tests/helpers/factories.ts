@@ -4,7 +4,10 @@ import { hashPassword, User, type UserDoc, type UserStatus } from '../../src/mod
 
 import { signAccessToken } from '../../src/utils/jwt';
 import { Course, type CourseDoc } from '../../src/modules/courses/course.model';
+import { TrainingClass, type TrainingClassDoc } from '../../src/modules/classes/class.model';
+import { Instructor, type InstructorDoc } from '../../src/modules/instructors/instructor.model';
 import { Lead, type LeadDoc, type LeadSource, type LeadStatus } from '../../src/modules/leads/lead.model';
+import { Student, type StudentDoc } from '../../src/modules/students/student.model';
 
 let seq = 0;
 
@@ -126,4 +129,85 @@ export async function createLead(
   // Ghi thẳng qua driver để Mongoose timestamps không ghi đè createdAt.
   await Lead.collection.updateOne({ _id: lead._id }, { $set: { createdAt: overrides.createdAt } });
   return (await Lead.findById(lead._id))!;
+}
+
+let instructorSeq = 0;
+
+export async function createInstructor(
+  overrides: { branchId: string } & Partial<{
+    name: string;
+    phone: string;
+    userId: string;
+    specialties: string[];
+    status: 'active' | 'on_leave' | 'inactive';
+  }>,
+): Promise<InstructorDoc> {
+  instructorSeq += 1;
+  return Instructor.create({
+    name: overrides.name ?? `Giáo viên ${instructorSeq}`,
+    phone: overrides.phone ?? `08${String(instructorSeq).padStart(8, '0')}`,
+    userId: overrides.userId ?? null,
+    specialties: overrides.specialties ?? ['B'],
+    branchId: overrides.branchId,
+    status: overrides.status ?? 'active',
+  });
+}
+
+let classSeq = 0;
+
+export async function createClass(
+  overrides: { branchId: string; courseId: string } & Partial<{
+    code: string;
+    instructorId: string;
+    capacity: number;
+    status: 'enrolling' | 'upcoming' | 'ongoing' | 'finished';
+    startDate: Date;
+    endDate: Date;
+    transmission: 'manual' | 'automatic' | null;
+  }>,
+): Promise<TrainingClassDoc> {
+  classSeq += 1;
+  const startDate = overrides.startDate ?? new Date(Date.now() + 7 * 86_400_000);
+  const course = await Course.findById(overrides.courseId);
+  return TrainingClass.create({
+    code: overrides.code ?? `LOP-${classSeq}`,
+    courseId: overrides.courseId,
+    courseCode: course?.code ?? 'X',
+    transmission: overrides.transmission ?? null,
+    branchId: overrides.branchId,
+    instructorId: overrides.instructorId ?? null,
+    startDate,
+    endDate: overrides.endDate ?? new Date(startDate.getTime() + 28 * 86_400_000),
+    scheduleText: 'T2–T6 · 08:00',
+    capacity: overrides.capacity ?? 50,
+    status: overrides.status ?? 'enrolling',
+  });
+}
+
+let studentSeq = 0;
+
+export async function createStudent(
+  overrides: { branchId: string; courseId: string } & Partial<{
+    name: string;
+    phone: string;
+    classId: string;
+    status: 'studying' | 'paused' | 'completed' | 'dropped';
+    idNumber: string;
+  }>,
+): Promise<StudentDoc> {
+  studentSeq += 1;
+  const seq = studentSeq;
+  const course = await Course.findById(overrides.courseId);
+  return Student.create({
+    code: `HV-TEST-${seq}`,
+    name: overrides.name ?? `Học viên ${seq}`,
+    phone: overrides.phone ?? `03${String(seq).padStart(8, '0')}`,
+    courseId: overrides.courseId,
+    courseCode: course?.code ?? 'X',
+    branchId: overrides.branchId,
+    classId: overrides.classId ?? null,
+    status: overrides.status ?? 'studying',
+    idNumber: overrides.idNumber ?? null,
+    enrolledAt: new Date(),
+  });
 }

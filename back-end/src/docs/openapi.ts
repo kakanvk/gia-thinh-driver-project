@@ -340,6 +340,168 @@ export const openApiDocument = {
         requestBody: json({ status: 'done', note: 'Khách đã đặt cọc' }),
       }),
     },
+    '/instructors': {
+      get: op('Đào tạo', 'Danh sách giáo viên', {
+        parameters: [
+          ...listParams,
+          ...['status', 'branchId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        ],
+      }),
+      post: op('Đào tạo', 'Tạo giáo viên', {
+        requestBody: json({
+          name: 'Nguyễn Hoàng Đức',
+          phone: '0907226880',
+          specialties: ['B', 'C1'],
+          branchId: '<branchId>',
+        }),
+      }),
+    },
+    '/instructors/{id}': {
+      get: op('Đào tạo', 'Chi tiết giáo viên', { parameters: [idParam] }),
+      patch: op('Đào tạo', 'Sửa giáo viên', { parameters: [idParam], requestBody: json({ status: 'on_leave' }) }),
+      delete: op('Đào tạo', 'Xóa (mềm) giáo viên', { parameters: [idParam] }),
+    },
+    '/instructors/{id}/stats': { get: op('Đào tạo', 'Thống kê lớp, học viên, tỷ lệ đậu', { parameters: [idParam] }) },
+    '/vehicles': {
+      get: op('Đào tạo', 'Danh sách xe tập lái', {
+        parameters: [
+          ...listParams,
+          ...['status', 'branchId', 'courseCode'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+        ],
+      }),
+      post: op('Đào tạo', 'Thêm xe', {
+        requestBody: json({
+          plate: '64A-123.45',
+          model: 'Toyota Vios',
+          courseCode: 'B',
+          transmission: 'automatic',
+          branchId: '<branchId>',
+        }),
+      }),
+    },
+    '/vehicles/alerts': {
+      get: op('Đào tạo', 'Xe sắp đến hạn bảo dưỡng/đăng kiểm', {
+        parameters: [{ name: 'days', in: 'query', schema: { type: 'string' } }],
+      }),
+    },
+    '/vehicles/{id}': {
+      get: op('Đào tạo', 'Chi tiết xe', { parameters: [idParam] }),
+      patch: op('Đào tạo', 'Sửa xe', { parameters: [idParam], requestBody: json({ status: 'maintenance' }) }),
+      delete: op('Đào tạo', 'Xóa (mềm) xe', { parameters: [idParam] }),
+    },
+    '/classes': {
+      get: op('Đào tạo', 'Danh sách lớp (kèm sĩ số)', {
+        parameters: [
+          ...listParams,
+          ...['status', 'branchId', 'courseId', 'instructorId'].map((name) => ({
+            name,
+            in: 'query',
+            schema: { type: 'string' },
+          })),
+        ],
+      }),
+      post: op('Đào tạo', 'Mở lớp', {
+        requestBody: json({
+          code: 'B-TD-2610',
+          courseId: '<courseId>',
+          branchId: '<branchId>',
+          startDate: '2026-10-21',
+          endDate: '2026-11-18',
+          scheduleText: 'T2–T7 · 13:30',
+          capacity: 50,
+        }),
+      }),
+    },
+    '/classes/{id}': {
+      get: op('Đào tạo', 'Chi tiết lớp', { parameters: [idParam] }),
+      patch: op('Đào tạo', 'Sửa lớp', { parameters: [idParam], requestBody: json({ status: 'ongoing' }) }),
+      delete: op('Đào tạo', 'Xóa (mềm) lớp (409 nếu còn học viên)', { parameters: [idParam] }),
+    },
+    '/classes/{id}/students': { get: op('Đào tạo', 'Học viên của lớp', { parameters: [idParam] }) },
+    '/students': {
+      get: op('Đào tạo', 'Danh sách học viên', {
+        parameters: [
+          ...listParams,
+          ...['status', 'branchId', 'classId', 'courseId'].map((name) => ({
+            name,
+            in: 'query',
+            schema: { type: 'string' },
+          })),
+        ],
+      }),
+      post: op('Đào tạo', 'Tạo học viên', {
+        requestBody: json({ name: 'Nguyễn Minh Anh', phone: '0903412869', courseId: '<courseId>', branchId: '<branchId>' }),
+      }),
+    },
+    '/students/{id}': {
+      get: op('Đào tạo', 'Chi tiết học viên', { parameters: [idParam] }),
+      patch: op('Đào tạo', 'Sửa học viên', { parameters: [idParam], requestBody: json({ status: 'paused' }) }),
+      delete: op('Đào tạo', 'Xóa (mềm) học viên', { parameters: [idParam] }),
+    },
+    '/students/{id}/class': {
+      patch: op('Đào tạo', 'Xếp / bỏ lớp', { parameters: [idParam], requestBody: json({ classId: '<classId>' }) }),
+    },
+    '/leads/{id}/convert': {
+      post: op('CRM', 'Chuyển khách thành học viên', {
+        parameters: [idParam],
+        requestBody: json({ courseId: '<courseId>', classId: '<classId>', idNumber: '086204001234' }),
+      }),
+    },
+    '/exams': {
+      get: op('Đào tạo', 'Danh sách ca thi (kèm thống kê)', {
+        parameters: [
+          ...listParams,
+          ...['type', 'status', 'branchId', 'courseId', 'from', 'to'].map((name) => ({
+            name,
+            in: 'query',
+            schema: { type: 'string' },
+          })),
+        ],
+      }),
+      post: op('Đào tạo', 'Tạo ca thi', {
+        requestBody: json({
+          code: 'SH-2610-01',
+          type: 'official',
+          courseId: '<courseId>',
+          branchId: '<branchId>',
+          date: '2026-10-28',
+        }),
+      }),
+    },
+    '/exams/{id}': {
+      get: op('Đào tạo', 'Chi tiết ca thi', { parameters: [idParam] }),
+      patch: op('Đào tạo', 'Sửa ca thi', { parameters: [idParam], requestBody: json({ status: 'done' }) }),
+      delete: op('Đào tạo', 'Xóa ca thi (409 nếu đã có kết quả)', { parameters: [idParam] }),
+    },
+    '/exams/{id}/candidates': {
+      get: op('Đào tạo', 'Danh sách thí sinh', { parameters: [idParam] }),
+      post: op('Đào tạo', 'Thêm thí sinh', { parameters: [idParam], requestBody: json({ studentIds: ['<studentId>'] }) }),
+    },
+    '/exams/{id}/candidates/{candidateId}': {
+      patch: op('Đào tạo', 'Nhập kết quả', {
+        parameters: [idParam, { name: 'candidateId', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: json({ result: 'passed', score: 24 }),
+      }),
+      delete: op('Đào tạo', 'Bỏ thí sinh (chưa có kết quả)', {
+        parameters: [idParam, { name: 'candidateId', in: 'path', required: true, schema: { type: 'string' } }],
+      }),
+    },
+    '/public/classes/upcoming': {
+      get: op(
+        'Công khai',
+        'Lịch khai giảng',
+        { parameters: ['branch', 'course'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })) },
+        false,
+      ),
+    },
+    '/public/exams/upcoming': {
+      get: op(
+        'Công khai',
+        'Lịch thi sắp tới',
+        { parameters: ['branch', 'course'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })) },
+        false,
+      ),
+    },
     '/public/leads': {
       post: op(
         'Công khai',

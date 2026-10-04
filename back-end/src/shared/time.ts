@@ -53,3 +53,7 @@ export function vnMonthRange(month: string): { start: Date; end: Date } {
     end: parseDateOnly(`${nextYear}-${String(nextMonth).padStart(2, '0')}-01`),
   };
 }
+
+export function startOfVnDay(date: Date = new Date()): Date {
+  return parseDateOnly(formatInTimeZone(date, VN_OFFSET, 'yyyy-MM-dd'));
+}

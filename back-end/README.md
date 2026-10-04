@@ -76,6 +76,15 @@ docker compose up -d          # MongoDB ở localhost:27017
 - Trạng thái: `new → contacted → consulted → deposited → docs_completed` (đi tiến, có thể nhảy bước); `lost` cần lý do, mở lại bằng `contacted`. "Nhập học" sẽ có ở đợt học viên.
 - Nhân viên chỉ thấy khách và lịch hẹn của chi nhánh mình. Xuất CSV (`/leads/export`) và xóa khách chỉ dành cho quản lý chi nhánh / quản trị viên.
 
+## Đào tạo
+
+- **Giáo viên** (`/instructors`): có thể gắn với tài khoản vai trò `instructor` cùng chi nhánh (`userId`). Tài khoản giáo viên chỉ thấy lớp mình phụ trách và học viên các lớp đó (không thấy CCCD, địa chỉ, ngày sinh).
+- **Lớp học** (`/classes`): trạng thái `enrolling → upcoming → ongoing → finished` do người dùng đặt; sĩ số tính từ học viên, vượt `capacity` bị từ chối. Website lấy lịch khai giảng ở `GET /public/classes/upcoming?branch=&course=`.
+- **Học viên** (`/students`): mã `HV-yyMMdd-NN`; xếp lớp qua `PATCH /students/:id/class` (cùng chi nhánh, cùng gói, lớp chưa kết thúc).
+- **Chuyển khách thành học viên:** `POST /leads/:id/convert` khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ. Sổ học phí sẽ có ở đợt tài chính.
+- **Lịch thi** (`/exams`): ca thi tốt nghiệp/sát hạch, thêm thí sinh (học viên đang học, cùng chi nhánh và gói), nhập kết quả; đậu sát hạch → học viên "hoàn thành". Website lấy lịch thi ở `GET /public/exams/upcoming`.
+- **Xe tập lái** (`/vehicles`): `GET /vehicles/alerts?days=30` liệt kê xe sắp đến hạn hoặc quá hạn bảo dưỡng/đăng kiểm.
+
 ## Lưu ảnh trên Google Cloud Storage
 
 1. Tạo bucket, bật *Uniform bucket-level access*, cấp `allUsers` quyền `Storage Object Viewer` để ảnh xem công khai.

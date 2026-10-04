@@ -12,6 +12,12 @@ export const listQuerySchema = z.object({
   q: z.string().trim().min(1).max(100).optional(),
 });
 
+/** Sort param limited to an allowlist of fields (optionally prefixed with `-`). */
+export function sortSchema(allowed: string[]) {
+  const pattern = new RegExp(`^-?(${allowed.map((field) => field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})$`);
+  return z.string().regex(pattern, 'Tham số sort không hợp lệ').optional();
+}
+
 export type ListQuery = z.infer<typeof listQuerySchema>;
 
 export async function paginate<T>(
