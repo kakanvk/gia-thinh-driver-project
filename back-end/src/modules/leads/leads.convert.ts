@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import type { Types } from 'mongoose';
 import { z } from 'zod';
 import { logger } from '../../config/logger';
 import { branchFilter } from '../../middlewares/authorize.middleware';
@@ -7,6 +8,7 @@ import { objectIdSchema, zDateOnly } from '../../shared/zod';
 import { ApiError } from '../../utils/ApiError';
 import { sendData } from '../../utils/response';
 import { Student } from '../students/student.model';
+import { TuitionAccount } from '../tuition/tuition-account.model';
 import { createStudent, presentStudent } from '../students/students.service';
 import { studentProfileFields } from '../students/students.validation';
 import { Lead } from './lead.model';
@@ -28,6 +30,19 @@ export const convertLeadSchema = z.object({
 });
 
 export type ConvertLeadInput = z.infer<typeof convertLeadSchema>;
+
+async function compensate(studentId: Types.ObjectId, id: string): Promise<void> {
+  try {
+    await Student.deleteOne({ _id: studentId });
+  } catch (err) {
+    logger.error({ err, studentId: id }, 'Không xóa được học viên khi chuyển khách thất bại');
+  }
+  try {
+    await TuitionAccount.deleteOne({ studentId });
+  } catch (err) {
+    logger.error({ err, studentId: id }, 'Không xóa được sổ học phí khi chuyển khách thất bại');
+  }
+}
 
 export async function convertLead(
   actor: Express.AuthUser,
@@ -68,15 +83,11 @@ export async function convertLead(
       { returnDocument: 'after' },
     );
   } catch (error) {
-    try {
-      await Student.deleteOne({ _id: student._id });
-    } catch (cleanupError) {
-      logger.error({ err: cleanupError, studentId: student.id }, 'Không xóa được học viên khi chuyển khách thất bại');
-    }
+    await compensate(student._id, student.id);
     throw error;
   }
   if (!updated) {
-    await Student.deleteOne({ _id: student._id });
+    await compensate(student._id, student.id);
     throw ApiError.conflict('Khách vừa được người khác cập nhật, vui lòng tải lại');
   }
   try {

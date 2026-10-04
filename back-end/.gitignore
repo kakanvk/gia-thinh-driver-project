@@ -28,3 +28,11 @@ dist
 uploads
 .test-uploads
 .env.template-old
+
+# Service account / khóa bí mật (GCS...) — không bao giờ commit
+secret/
+*.pem
+*service-account*.json
+
+# Cấu hình Claude Code cục bộ
+.claude/

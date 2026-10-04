@@ -548,6 +548,77 @@ export const openApiDocument = {
         false,
       ),
     },
+    '/tuition': {
+      get: op('Tài chính', 'Danh sách sổ học phí', {
+        parameters: [
+          ...listParams,
+          ...['status', 'branchId', 'courseId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+          {
+            name: 'includeArchived',
+            in: 'query',
+            description: 'true: gồm cả sổ đã lưu trữ (học viên đã xóa nhưng còn lịch sử thu)',
+            schema: { type: 'string', enum: ['true', 'false'] },
+          },
+        ],
+      }),
+      post: op('Tài chính', 'Tạo bù sổ học phí cho học viên cũ', { requestBody: json({ studentId: '<studentId>' }) }),
+    },
+    '/tuition/{id}': {
+      get: op('Tài chính', 'Chi tiết sổ (kèm phiếu thu)', { parameters: [idParam] }),
+      patch: op('Tài chính', 'Sửa giảm trừ / kế hoạch đóng', {
+        parameters: [idParam],
+        requestBody: json({
+          discounts: [{ label: 'HSSV', amount: 1_000_000 }],
+          plan: 'installments',
+          installments: [
+            { dueDate: '2026-10-10', amount: 7_750_000 },
+            { dueDate: '2026-11-10', amount: 7_750_000 },
+          ],
+        }),
+      }),
+    },
+    '/tuition/{id}/payments': {
+      post: op('Tài chính', 'Thu tiền', {
+        parameters: [idParam],
+        requestBody: json({ amount: 5_000_000, method: 'transfer', note: 'Đợt 1' }),
+      }),
+    },
+    '/tuition/{id}/payments/{paymentId}': {
+      delete: op('Tài chính', 'Hủy phiếu thu (super_admin)', {
+        parameters: [idParam, { name: 'paymentId', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: json({ reason: 'Nhập nhầm số tiền' }),
+      }),
+    },
+    '/dashboard/summary': {
+      get: op('Tổng quan', 'Số liệu tổng quan', {
+        parameters: [{ name: 'branchId', in: 'query', schema: { type: 'string' } }],
+      }),
+    },
+    '/dashboard/registrations': {
+      get: op('Tổng quan', 'Khách mới theo ngày', {
+        parameters: ['days', 'branchId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
+    '/dashboard/sources': {
+      get: op('Tổng quan', 'Nguồn khách theo tháng', {
+        parameters: ['month', 'branchId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
+    '/dashboard/funnel': {
+      get: op('Tổng quan', 'Phễu tuyển sinh theo tháng', {
+        parameters: ['month', 'branchId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
+    '/dashboard/revenue': {
+      get: op('Tổng quan', 'Thực thu theo tháng và theo hạng', {
+        parameters: ['months', 'branchId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
+    '/dashboard/pass-rate': {
+      get: op('Tổng quan', 'Tỷ lệ đậu sát hạch lần đầu', {
+        parameters: ['months', 'branchId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
     '/public/branches': { get: op('Công khai', 'Văn phòng/chi nhánh đang hoạt động', {}, false) },
     '/public/settings': { get: op('Công khai', 'Hotline, Zalo, mạng xã hội, lưu ý đăng ký', {}, false) },
   },

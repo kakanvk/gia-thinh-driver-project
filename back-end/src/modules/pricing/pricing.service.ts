@@ -1,6 +1,7 @@
 import type { FilterQuery, Types } from 'mongoose';
 import { assertBranchAccess } from '../../middlewares/authorize.middleware';
 import { paginate } from '../../shared/mongoose/paginate';
+import { WITH_DELETED } from '../../shared/mongoose/softDelete';
 import { ApiError } from '../../utils/ApiError';
 import { recordAudit, snapshot } from '../audit/audit.service';
 import { Branch, type BranchDoc } from '../branches/branch.model';
@@ -79,6 +80,16 @@ async function resolveFor(branchIds: string[]): Promise<Map<string, ResolvedCour
       return [branchId, resolveBranchPricing(branchId, courses, branchOverrides, resolverItems)];
     }),
   );
+}
+
+export async function resolveCoursePrice(
+  branchId: string,
+  courseId: string,
+): Promise<{ price: number; priceNote: string | null }> {
+  const resolved = (await resolveFor([branchId])).get(branchId)?.find((course) => course.id === courseId);
+  if (resolved) return { price: resolved.price, priceNote: resolved.priceNote };
+  const course = await Course.findOne({ _id: courseId, ...WITH_DELETED });
+  return { price: course?.defaultPrice ?? 0, priceNote: course?.priceNote ?? null };
 }
 
 export async function getBranchPricing(branchId: string): Promise<{ branch: BranchDoc; courses: ResolvedCourse[] }> {

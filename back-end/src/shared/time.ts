@@ -57,3 +57,20 @@ export function vnMonthRange(month: string): { start: Date; end: Date } {
 export function startOfVnDay(date: Date = new Date()): Date {
   return parseDateOnly(formatInTimeZone(date, VN_OFFSET, 'yyyy-MM-dd'));
 }
+
+export function vnMonthKey(date: Date): string {
+  return formatInTimeZone(date, VN_OFFSET, 'yyyy-MM');
+}
+
+export function shiftMonth(month: string, delta: number): string {
+  const index = Number(month.slice(0, 4)) * 12 + (Number(month.slice(5, 7)) - 1) + delta;
+  const year = Math.floor(index / 12);
+  return `${year}-${String((index % 12) + 1).padStart(2, '0')}`;
+}
+
+export function vnWeekRange(date: Date = new Date()): { start: Date; end: Date } {
+  const dayStart = startOfVnDay(date);
+  const isoWeekday = Number(formatInTimeZone(date, VN_OFFSET, 'i')); // 1 = Thứ 2 … 7 = Chủ nhật
+  const start = addFixedDays(dayStart, -(isoWeekday - 1));
+  return { start, end: addFixedDays(start, 7) };
+}

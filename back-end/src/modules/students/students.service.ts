@@ -16,6 +16,8 @@ import { ExamCandidate } from '../exams/exam-candidate.model';
 import { instructorIdsOfUser } from '../instructors/instructors.scope';
 import { addActivity } from '../leads/leads.activity';
 import { Lead } from '../leads/lead.model';
+import { TuitionAccount } from '../tuition/tuition-account.model';
+import { createAccountForStudent, rescheduleOneTimeDue } from '../tuition/tuition.service';
 import { Student, type IStudent, type StudentDoc } from './student.model';
 import type { CreateStudentInput, ListStudentsQuery, UpdateStudentInput } from './students.validation';
 
@@ -119,6 +121,11 @@ export async function createStudent(
     enrolledAt,
     status: 'studying',
   });
+  try {
+    await createAccountForStudent(student, actor.id);
+  } catch (error) {
+    logger.error({ err: error, studentId: student.id }, 'Không tạo được sổ học phí cho học viên');
+  }
   await recordAudit({
     actorId: actor.id,
     action: 'student.create',
@@ -136,8 +143,10 @@ export async function updateStudent(actor: Actor, scope: Scope, id: string, inpu
     await assertClassHasSeat(await getClassDoc(actor, scope, student.classId.toString()));
   }
   const before = snapshot(student);
+  const enrolledChanged = input.enrolledAt !== undefined && input.enrolledAt.getTime() !== student.enrolledAt.getTime();
   student.set(input);
   await student.save();
+  if (enrolledChanged) await rescheduleOneTimeDue(student._id, student.enrolledAt);
   await recordAudit({
     actorId: actor.id,
     action: 'student.update',
@@ -197,6 +206,8 @@ export async function removeStudent(actor: Actor, scope: Scope, id: string): Pro
     }
   }
   await ExamCandidate.deleteMany({ studentId: student._id, result: 'pending' });
+  const removed = await TuitionAccount.deleteOne({ studentId: student._id, paidAmount: 0, lastPaymentAt: null });
+  if (removed.deletedCount === 0) await TuitionAccount.updateOne({ studentId: student._id }, { archived: true });
   student.deletedAt = now;
   await student.save();
   await recordAudit({ actorId: actor.id, action: 'student.delete', entity: 'student', entityId: id, before });

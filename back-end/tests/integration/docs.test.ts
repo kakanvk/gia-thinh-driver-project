@@ -3,12 +3,19 @@ import { describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app';
 
 describe('tài liệu API', () => {
-  it('/api/docs.json liệt kê endpoint đợt 1–4', async () => {
+  it('/api/docs.json liệt kê endpoint đợt 1–5', async () => {
     const res = await request(createApp()).get('/api/docs.json');
     expect(res.status).toBe(200);
     expect(Object.keys(res.body.paths)).toEqual(
       expect.arrayContaining([
         '/health',
+        '/tuition',
+        '/tuition/{id}/payments',
+        '/tuition/{id}/payments/{paymentId}',
+        '/dashboard/summary',
+        '/dashboard/funnel',
+        '/dashboard/revenue',
+        '/dashboard/pass-rate',
         '/auth/login',
         '/auth/refresh',
         '/users',

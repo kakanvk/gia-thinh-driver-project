@@ -2,7 +2,7 @@
 
 API cho website và trang quản trị Trường lái Gia Thịnh. Express 5 + MongoDB + TypeScript.
 
-Thiết kế: `../docs/superpowers/specs/2026-10-03-backend-api-design.md`
+Thiết kế: `docs/superpowers/specs/2026-10-03-backend-api-design.md`
 
 ## Chạy ở máy dev
 
@@ -81,15 +81,22 @@ docker compose up -d          # MongoDB ở localhost:27017
 - **Giáo viên** (`/instructors`): có thể gắn với tài khoản vai trò `instructor` cùng chi nhánh (`userId`). Tài khoản giáo viên chỉ thấy lớp mình phụ trách và học viên các lớp đó (không thấy CCCD, địa chỉ, ngày sinh).
 - **Lớp học** (`/classes`): trạng thái `enrolling → upcoming → ongoing → finished` do người dùng đặt; sĩ số tính từ học viên, vượt `capacity` bị từ chối. Website lấy lịch khai giảng ở `GET /public/classes/upcoming?branch=&course=`.
 - **Học viên** (`/students`): mã `HV-yyMMdd-NN`; xếp lớp qua `PATCH /students/:id/class` (cùng chi nhánh, cùng gói, lớp chưa kết thúc).
-- **Chuyển khách thành học viên:** `POST /leads/:id/convert` khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ. Sổ học phí sẽ có ở đợt tài chính.
+- **Chuyển khách thành học viên:** `POST /leads/:id/convert` khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ. Chuyển khách cũng tạo luôn sổ học phí (xem "Học phí và báo cáo").
 - **Lịch thi** (`/exams`): ca thi tốt nghiệp/sát hạch, thêm thí sinh (học viên đang học, cùng chi nhánh và gói), nhập kết quả; đậu sát hạch → học viên "hoàn thành". Website lấy lịch thi ở `GET /public/exams/upcoming`.
 - **Xe tập lái** (`/vehicles`): `GET /vehicles/alerts?days=30` liệt kê xe sắp đến hạn hoặc quá hạn bảo dưỡng/đăng kiểm.
+
+## Học phí và báo cáo
+
+- **Sổ học phí** tự tạo khi tạo học viên (giá theo chi nhánh, 1 đợt hạn sau 14 ngày). Học viên tạo trước đó: `POST /api/v1/tuition { studentId }`. Sửa giảm trừ / chia đợt: `PATCH /tuition/:id` (tổng các đợt phải bằng tổng học phí).
+- **Thu tiền:** `POST /tuition/:id/payments` (quản lý chi nhánh), số phiếu `PT-yyMMdd-NN`, không thu vượt số còn lại. **Hủy phiếu** chỉ super_admin: `DELETE /tuition/:id/payments/:paymentId { reason }` (hủy mềm, giữ để đối soát).
+- **Quá hạn:** server tự chạy job mỗi 60 phút (và lúc khởi động); đợt có hạn hôm nay chỉ thành quá hạn từ 00:00 hôm sau (giờ VN).
+- **Tổng quan** (`/dashboard/*`): số liệu theo chi nhánh của người xem; doanh thu là **thực thu** theo ngày thu tiền; tỷ lệ đậu là sát hạch lần đầu. Chưa có chỉ tiêu doanh thu.
 
 ## Lưu ảnh trên Google Cloud Storage
 
 1. Tạo bucket, bật *Uniform bucket-level access*, cấp `allUsers` quyền `Storage Object Viewer` để ảnh xem công khai.
-2. Tạo service account có quyền `Storage Object Admin` trên bucket, tải file JSON key.
-3. Trong `.env`: `STORAGE_DRIVER=gcs`, `GCS_BUCKET=<tên bucket>`, `GOOGLE_APPLICATION_CREDENTIALS=<đường dẫn file JSON>`.
+2. Tạo service account có quyền `Storage Object Admin` trên bucket, tải file JSON key, đặt vào `secret/` (đã được gitignore và dockerignore, không bao giờ commit).
+3. Trong `.env`: `STORAGE_DRIVER=gcs`, `GCS_BUCKET=<tên bucket>`, `GOOGLE_APPLICATION_CREDENTIALS=./secret/<tên-file>.json`.
    Nếu đặt CDN/domain riêng: `PUBLIC_MEDIA_BASE_URL=https://cdn.giathinh.vn`.
 
 ## Cấu trúc
