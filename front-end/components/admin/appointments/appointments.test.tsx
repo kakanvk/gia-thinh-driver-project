@@ -493,5 +493,8 @@ describe("LeadAppointments", () => {
     await waitFor(() =>
       expect(invalidatedKeys(invalidate)).toContain("lead-activities")
     )
+    expect(
+      invalidate.mock.calls.map(([filters]) => filters?.queryKey)
+    ).toContainEqual(["lead", "l1"])
   })
 })

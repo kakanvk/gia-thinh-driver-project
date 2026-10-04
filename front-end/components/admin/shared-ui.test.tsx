@@ -111,6 +111,16 @@ describe("Pagination", () => {
     )
     expect(container).toBeEmptyDOMElement()
   })
+
+  it("vẫn hiện khi page vượt số trang để quay lại trang trước", async () => {
+    const onPageChange = vi.fn()
+    render(
+      <Pagination page={2} limit={20} total={10} onPageChange={onPageChange} />
+    )
+    expect(screen.getByRole("button", { name: /Sau/ })).toBeDisabled()
+    await userEvent.click(screen.getByRole("button", { name: /Trước/ }))
+    expect(onPageChange).toHaveBeenLastCalledWith(1)
+  })
 })
 
 describe("FilterBar", () => {

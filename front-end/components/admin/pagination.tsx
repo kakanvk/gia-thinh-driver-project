@@ -15,7 +15,8 @@ export function Pagination({
   total: number
   onPageChange: (page: number) => void
 }) {
-  if (total <= limit) return null
+  // Vẫn hiện khi page > 1 (URL cũ/bookmark) để người dùng quay lại trang trước
+  if (total <= limit && page <= 1) return null
   const pages = Math.max(1, Math.ceil(total / limit))
 
   return (

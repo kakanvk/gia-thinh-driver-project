@@ -373,6 +373,43 @@ describe("LeadDetail", () => {
     })
   })
 
+  it("tư vấn viên chuyển thành học viên: không có ô Lớp, không gọi /classes", async () => {
+    const { fn, calls } = setup(lead({ status: "deposited" }), {
+      "POST /leads/l1/convert": () =>
+        jsonResponse(201, {
+          data: {
+            lead: lead({ status: "enrolled", studentId: "s1" }),
+            student: { id: "s1", code: "HV0008" },
+          },
+        }),
+    })
+    renderDetail()
+    await userEvent.click(
+      await screen.findByRole("button", { name: /Chuyển thành học viên/ })
+    )
+    const dialog = await screen.findByRole("dialog")
+    expect(
+      within(dialog).getByRole("combobox", { name: /Gói học/ })
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).queryByRole("combobox", { name: "Lớp" })
+    ).not.toBeInTheDocument()
+
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Chuyển thành học viên" })
+    )
+    await waitFor(() =>
+      expect(toastSuccess).toHaveBeenCalledWith("Đã tạo học viên HV0008")
+    )
+    expect(bodyOf(calls, "POST /leads/l1/convert")).toEqual({
+      courseId: "c1",
+      email: "an@example.com",
+      enrolledAt: todayVn(),
+    })
+    expect(urlsOf(fn, "/classes")).toHaveLength(0)
+    expect(toastError).not.toHaveBeenCalled()
+  })
+
   it("ghi hoạt động rồi tải lại lịch sử", async () => {
     const { fn, calls } = setup(lead(), {
       "POST /leads/l1/activities": () =>

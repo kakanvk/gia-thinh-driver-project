@@ -46,6 +46,10 @@ export function invalidateAppointments(
   void queryClient.invalidateQueries({ queryKey: ["calendar"] })
   void queryClient.invalidateQueries({ queryKey: ["appointments"] })
   if (appointment.leadId) {
+    // Backend cập nhật lastActivityAt của khách khi ghi hoạt động
+    void queryClient.invalidateQueries({
+      queryKey: ["lead", appointment.leadId],
+    })
     void queryClient.invalidateQueries({
       queryKey: ["lead-activities", appointment.leadId],
     })
