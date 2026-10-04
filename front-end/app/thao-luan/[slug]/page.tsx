@@ -11,7 +11,8 @@ import {
 
 import { getThread, threads } from "@/lib/forum"
 import { ForumThreadClient } from "@/components/forum-thread-client"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
+import { getSiteContact } from "@/lib/api/public"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -43,11 +44,12 @@ export default async function ThreadDetailPage({
   const thread = getThread(slug)
   if (!thread) notFound()
 
+  const contact = await getSiteContact()
   const related = threads.filter((item) => item.slug !== slug).slice(0, 4)
 
   return (
     <main className="min-h-svh bg-background">
-      <StickyHeader />
+      <SiteHeader />
 
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -157,11 +159,11 @@ export default async function ThreadDetailPage({
                   Vào nhóm Zalo lớp để hỏi đáp trực tiếp cùng thầy cô và học viên các khóa.
                 </p>
                 <a
-                  href="tel:0779666664"
+                  href={contact.telHref}
                   className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "mt-4 h-11 w-full rounded-full px-6")}
                 >
                   <Phone data-icon="inline-start" aria-hidden="true" />
-                  0779 666 664
+                  {contact.hotline}
                 </a>
               </div>
             </div>

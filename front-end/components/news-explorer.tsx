@@ -54,6 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { toSiteContact, type SiteContact } from "@/lib/public/contact"
 import { cn } from "@/lib/utils"
 
 const ALL_CATEGORIES = "all"
@@ -160,7 +161,16 @@ function AnnouncementList({ posts, query }: { posts: NewsPost[]; query?: string 
   )
 }
 
-export function NewsExplorer({ posts }: { posts: NewsPost[] }) {
+// Hotline lấy ở server (trang /dien-dan); thiếu thì dùng giá trị mặc định
+const DEFAULT_CONTACT = toSiteContact(null)
+
+export function NewsExplorer({
+  posts,
+  contact = DEFAULT_CONTACT,
+}: {
+  posts: NewsPost[]
+  contact?: Pick<SiteContact, "hotline" | "telHref" | "zaloHref">
+}) {
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<string>(ALL_CATEGORIES)
   const [sort, setSort] = useState<NewsSortKey>("newest")
@@ -391,17 +401,17 @@ export function NewsExplorer({ posts }: { posts: NewsPost[] }) {
                   </p>
                   <div className="mt-4 flex flex-col gap-2">
                     <a
-                      href="tel:0779666664"
+                      href={contact.telHref}
                       className={cn(
                         buttonVariants({ variant: "secondary", size: "lg" }),
                         "h-11 rounded-full px-6",
                       )}
                     >
                       <Phone data-icon="inline-start" aria-hidden="true" />
-                      0779 666 664
+                      {contact.hotline}
                     </a>
                     <a
-                      href="https://zalo.me/0779666664"
+                      href={contact.zaloHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={cn(

@@ -5,7 +5,8 @@ import { Phone, PlusCircle, ThumbsUp } from "lucide-react"
 import { threads } from "@/lib/forum"
 import { ForumTabs } from "@/components/forum-tabs"
 import { VerifiedBadge } from "@/components/verified-badge"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
+import { getSiteContact } from "@/lib/api/public"
 
 export const metadata: Metadata = {
   title: "Diễn đàn học viên | Trường lái Gia Thịnh",
@@ -30,10 +31,11 @@ const TOPIC_COUNTS = [
   { name: "# lich-thi", count: 10 },
 ]
 
-export default function ForumPage() {
+export default async function ForumPage() {
+  const contact = await getSiteContact()
   return (
     <main className="min-h-svh bg-[#eef0f2]">
-      <StickyHeader />
+      <SiteHeader />
 
       <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -99,11 +101,11 @@ export default function ForumPage() {
                 Vào nhóm Zalo lớp để được thầy cô hỗ trợ trực tiếp.
               </p>
               <a
-                href="tel:0779666664"
+                href={contact.telHref}
                 className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-navy hover:bg-white/90"
               >
                 <Phone aria-hidden="true" className="size-4" />
-                0779 666 664
+                {contact.hotline}
               </a>
             </div>
           </aside>

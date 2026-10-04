@@ -20,13 +20,14 @@ import {
 import { AboutTimeline } from "@/components/about-timeline"
 import { JourneyTimeline } from "@/components/journey-timeline"
 import { NewsCard } from "@/components/news-card"
+import { OfficeList } from "@/components/office-list"
 import { ScrollReveal } from "@/components/scroll-reveal"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
 import { TikTokSection } from "@/components/tiktok-section"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { offices } from "@/lib/contact"
+import { getBranches, getSiteContact } from "@/lib/api/public"
 import { newsPosts } from "@/lib/news"
 import { cn } from "@/lib/utils"
 import mainBanner from "@/public/main-banner.png"
@@ -140,7 +141,11 @@ const process = [
   },
 ]
 
-export default function Page() {
+export const revalidate = 300
+
+export default async function Page() {
+  const [contact, branches] = await Promise.all([getSiteContact(), getBranches()])
+
   return (
     <main className="min-h-svh overflow-x-clip bg-background">
       <div className="bg-navy text-white">
@@ -156,7 +161,7 @@ export default function Page() {
         </div>
       </div>
 
-      <StickyHeader />
+      <SiteHeader />
 
       <section className="relative overflow-hidden border-b border-border/60 bg-background lg:h-[40vw] lg:min-h-[480px]">
         <div
@@ -416,27 +421,7 @@ export default function Page() {
                   </a>
                 </div>
               </div>
-              <div className="flex flex-col gap-4">
-                {offices.slice(0, 4).map((office) => (
-                  <a
-                    key={office.name}
-                    href={office.map}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Xem bản đồ ${office.name}`}
-                    className="group flex flex-1 items-center gap-4 rounded-md border border-primary/15 bg-background px-5 py-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.04]"
-                  >
-                    <span className="grid size-11 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
-                      <Building2 aria-hidden="true" className="size-5" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-extrabold text-navy">{office.name}</span>
-                      <span className="mt-1.5 block text-sm leading-6 text-muted-foreground">{office.address}</span>
-                    </span>
-                    <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
-                  </a>
-                ))}
-              </div>
+              <OfficeList branches={branches} />
             </div>
           </ScrollReveal>
         </div>
@@ -548,16 +533,16 @@ export default function Page() {
             </div>
             <div className="rounded-md border border-white/15 bg-white/[0.07] p-6 text-center sm:p-8">
               <p className="text-xs font-bold tracking-[0.14em] text-white/60 uppercase">Hotline hỗ trợ (Zalo)</p>
-              <a href="tel:0779666664" className="mt-2 flex min-h-11 items-center justify-center text-3xl font-extrabold tracking-tight text-white hover:text-signal sm:text-4xl">
-                0779 666 664
+              <a href={contact.telHref} className="mt-2 flex min-h-11 items-center justify-center text-3xl font-extrabold tracking-tight text-white hover:text-signal sm:text-4xl">
+                {contact.hotline}
               </a>
               <p className="mt-2 text-xs text-white/55">Tư vấn 07:00–21:00 mỗi ngày</p>
               <div className="mt-6 flex flex-col gap-3">
-                <a href="tel:0779666664" className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "h-11 rounded-full px-5")}>
+                <a href={contact.telHref} className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "h-11 rounded-full px-5")}>
                   <Phone data-icon="inline-start" aria-hidden="true" />
                   Gọi ngay
                 </a>
-                <a href="https://zalo.me/0779666664" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 rounded-full border-white/30 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white")}>
+                <a href={contact.zaloHref} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 rounded-full border-white/30 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white")}>
                   <MessageCircle data-icon="inline-start" aria-hidden="true" />
                   Nhắn Zalo
                 </a>

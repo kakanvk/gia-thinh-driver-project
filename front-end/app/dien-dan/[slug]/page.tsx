@@ -4,10 +4,11 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, CalendarDays, Clock3, Phone } from "lucide-react"
 
+import { getSiteContact } from "@/lib/api/public"
 import { getPost, newsPosts } from "@/lib/news"
 
 import { ScrollReveal } from "@/components/scroll-reveal"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -39,11 +40,12 @@ export default async function NewsDetailPage({
   const post = getPost(slug)
   if (!post) notFound()
 
+  const contact = await getSiteContact()
   const related = newsPosts.filter((item) => item.slug !== slug).slice(0, 4)
 
   return (
     <main className="min-h-svh bg-background">
-      <StickyHeader />
+      <SiteHeader />
 
       <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -127,11 +129,11 @@ export default async function NewsDetailPage({
                 <p className="font-extrabold">Cần tư vấn khóa học?</p>
                 <p className="mt-2 text-sm leading-6 text-white/70">Phản hồi trong ít phút qua Zalo / điện thoại.</p>
                 <a
-                  href="tel:0779666664"
+                  href={contact.telHref}
                   className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "mt-4 h-11 w-full rounded-full px-6")}
                 >
                   <Phone data-icon="inline-start" aria-hidden="true" />
-                  0779 666 664
+                  {contact.hotline}
                 </a>
               </div>
             </div>

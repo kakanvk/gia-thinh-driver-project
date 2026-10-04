@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 import { MediaGallery, type MediaItem } from "@/components/media-gallery"
 import { ScrollReveal } from "@/components/scroll-reveal"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
 import { Badge } from "@/components/ui/badge"
 
 export const metadata: Metadata = {
@@ -44,7 +44,7 @@ export default function MediaPage() {
 
   return (
     <main className="min-h-svh bg-background">
-      <StickyHeader />
+      <SiteHeader />
 
       <section className="border-b border-border/60 bg-mist">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">

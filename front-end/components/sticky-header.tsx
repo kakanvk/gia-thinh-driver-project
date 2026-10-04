@@ -28,7 +28,7 @@ function subscribeHash(onChange: () => void) {
 const getHash = () => window.location.hash.slice(1)
 const getServerHash = () => ""
 
-export function StickyHeader() {
+export function StickyHeader({ contact }: { contact: { hotline: string; telHref: string } }) {
   const [compact, setCompact] = useState(false)
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -151,11 +151,11 @@ export function StickyHeader() {
           </nav>
 
           <a
-            href="tel:0779666664"
+            href={contact.telHref}
             className={cn(buttonVariants({ size: "lg" }), "hidden rounded-full sm:inline-flex")}
           >
             <Phone data-icon="inline-start" aria-hidden="true" />
-            <span className="hidden sm:inline">0779 666 664</span>
+            <span className="hidden sm:inline">{contact.hotline}</span>
             <span className="sm:hidden">Gọi ngay</span>
           </a>
 
@@ -218,11 +218,11 @@ export function StickyHeader() {
             </nav>
             <div className="border-t border-border p-4">
               <a
-                href="tel:0779666664"
+                href={contact.telHref}
                 className={cn(buttonVariants({ size: "lg" }), "h-11 w-full rounded-md")}
               >
                 <Phone data-icon="inline-start" aria-hidden="true" />
-                0779 666 664
+                {contact.hotline}
               </a>
             </div>
           </div>
@@ -230,8 +230,8 @@ export function StickyHeader() {
       ) : null}
 
       <a
-        href="tel:0779666664"
-        aria-label="Gọi ngay 0779 666 664"
+        href={contact.telHref}
+        aria-label={`Gọi ngay ${contact.hotline}`}
         className="group fixed right-5 bottom-5 z-40 grid size-14 place-items-center rounded-full bg-logo-red text-white shadow-[0_10px_30px_-8px_color-mix(in_oklch,var(--logo-red)_70%,transparent)] transition-transform hover:scale-105 active:scale-95 sm:right-6 sm:bottom-6"
       >
         <span
