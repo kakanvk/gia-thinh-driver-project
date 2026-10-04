@@ -41,3 +41,5 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 | `npm test` | Test (Vitest + Testing Library) |
 | `npm run typecheck` / `npm run lint` | Kiểm tra kiểu / lint |
 | `npm run build` && `npm start` | Build và chạy bản production |
+
+> Lưu ý: `next.config.ts` đặt `output: "standalone"`, nên `npm start` (`next start`) sẽ in cảnh báo. Khi chạy production thật, sau `npm run build` hãy chép `public/` vào `.next/standalone/public` và `.next/static` vào `.next/standalone/.next/static`, rồi chạy `node .next/standalone/server.js`.
