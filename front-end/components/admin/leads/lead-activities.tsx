@@ -28,8 +28,12 @@ import { apiData, apiFetch } from "@/lib/api/client"
 import { ApiError, errorMessage, fieldErrors } from "@/lib/api/errors"
 
 const LIMIT = 20
-const MANUAL_TYPES = ["call", "note", "sms", "meeting"] as const satisfies
-  readonly ActivityType[]
+const MANUAL_TYPES = [
+  "call",
+  "note",
+  "sms",
+  "meeting",
+] as const satisfies readonly ActivityType[]
 type ManualType = (typeof MANUAL_TYPES)[number]
 
 function activityTitle(activity: LeadActivity): string {
@@ -66,7 +70,14 @@ export function LeadActivities({
         : undefined
     },
   })
-  const items = activities.data?.pages.flatMap((page) => page.data) ?? []
+  // Trang offset có thể lệch khi có hoạt động mới chen vào giữa các lần tải —
+  // bỏ bản ghi trùng id để không hiển thị lặp.
+  const seen = new Set<string>()
+  const items = (
+    activities.data?.pages.flatMap((page) => page.data) ?? []
+  ).filter(
+    (activity) => !seen.has(activity.id) && Boolean(seen.add(activity.id))
+  )
 
   return (
     <section className="rounded-xl border border-border/80 bg-card p-4">

@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -46,12 +52,7 @@ const CONSULTANT_PERMISSIONS = [
   "student.read",
   "student.create",
 ]
-const MANAGER_PERMISSIONS = [
-  "lead.*",
-  "appointment.*",
-  "student.*",
-  "class.*",
-]
+const MANAGER_PERMISSIONS = ["lead.*", "appointment.*", "student.*", "class.*"]
 
 function lead(overrides: Partial<Lead> = {}): Lead {
   return {
@@ -109,8 +110,18 @@ const lookups = {
   "GET /users/options": () =>
     jsonResponse(200, {
       data: [
-        { id: "u1", name: "Trần Mỹ Duyên", role: "consultant", branchIds: ["b1"] },
-        { id: "u2", name: "Phạm Hoàng Long", role: "consultant", branchIds: ["b1"] },
+        {
+          id: "u1",
+          name: "Trần Mỹ Duyên",
+          role: "consultant",
+          branchIds: ["b1"],
+        },
+        {
+          id: "u2",
+          name: "Phạm Hoàng Long",
+          role: "consultant",
+          branchIds: ["b1"],
+        },
       ],
     }),
   "GET /courses": () =>
@@ -238,7 +249,9 @@ describe("LeadDetail", () => {
       screen.getByRole("menuitem", { name: "Không thành công" })
     )
     const dialog = await screen.findByRole("alertdialog")
-    await userEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" }))
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Xác nhận" })
+    )
     expect(
       within(dialog).getByText("Nhập lý do từ 3 đến 300 ký tự")
     ).toBeInTheDocument()
@@ -247,7 +260,9 @@ describe("LeadDetail", () => {
     )
 
     await userEvent.type(within(dialog).getByLabelText(/Lý do/), "Khách đổi ý")
-    await userEvent.click(within(dialog).getByRole("button", { name: "Xác nhận" }))
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Xác nhận" })
+    )
     await waitFor(() =>
       expect(bodyOf(calls, "PATCH /leads/l1/status")).toEqual({
         status: "lost",
@@ -327,8 +342,12 @@ describe("LeadDetail", () => {
       limit: "100",
     })
     await userEvent.click(classTrigger)
-    expect(await screen.findByRole("option", { name: "B-K12" })).toBeInTheDocument()
-    expect(screen.queryByRole("option", { name: "B-K01" })).not.toBeInTheDocument()
+    expect(
+      await screen.findByRole("option", { name: "B-K12" })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("option", { name: "B-K01" })
+    ).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole("option", { name: "B-K12" }))
 
     await userEvent.type(within(dialog).getByLabelText(/CCCD/), "012345678901")
@@ -368,15 +387,22 @@ describe("LeadDetail", () => {
     })
     renderDetail()
     await screen.findByRole("heading", { name: "Nguyễn Văn An" })
-    await waitFor(() => expect(urlsOf(fn, "/leads/l1/activities")).toHaveLength(1))
+    await waitFor(() =>
+      expect(urlsOf(fn, "/leads/l1/activities")).toHaveLength(1)
+    )
 
     const form = screen.getByRole("form", { name: "Ghi hoạt động" })
-    await choose(within(form).getByRole("combobox", { name: "Loại" }), "Cuộc gọi")
+    await choose(
+      within(form).getByRole("combobox", { name: "Loại" }),
+      "Cuộc gọi"
+    )
     await userEvent.type(within(form).getByLabelText(/Nội dung/), "Gọi lần 1")
     fireEvent.change(within(form).getByLabelText("Hẹn gọi lại"), {
       target: { value: "2026-10-22T09:00" },
     })
-    await userEvent.click(within(form).getByRole("button", { name: "Lưu hoạt động" }))
+    await userEvent.click(
+      within(form).getByRole("button", { name: "Lưu hoạt động" })
+    )
 
     await waitFor(() =>
       expect(bodyOf(calls, "POST /leads/l1/activities")).toEqual({
@@ -394,7 +420,9 @@ describe("LeadDetail", () => {
     const { calls } = setup()
     renderDetail()
     const form = await screen.findByRole("form", { name: "Ghi hoạt động" })
-    await userEvent.click(within(form).getByRole("button", { name: "Lưu hoạt động" }))
+    await userEvent.click(
+      within(form).getByRole("button", { name: "Lưu hoạt động" })
+    )
     expect(within(form).getByText("Nhập nội dung")).toBeInTheDocument()
     expect(calls.some((call) => call.key === "POST /leads/l1/activities")).toBe(
       false
@@ -430,7 +458,9 @@ describe("LeadDetail", () => {
       await screen.findByText("Đổi trạng thái: Mới → Đã liên hệ")
     ).toBeInTheDocument()
     const history = screen.getByRole("list", { name: "Lịch sử chăm sóc" })
-    expect(await within(history).findByText(/Phạm Hoàng Long/)).toBeInTheDocument()
+    expect(
+      await within(history).findByText(/Phạm Hoàng Long/)
+    ).toBeInTheDocument()
     expect(within(history).getByText(/02\/10\/2026 10:15/)).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole("button", { name: "Xem thêm" }))
@@ -440,7 +470,46 @@ describe("LeadDetail", () => {
       url.searchParams.get("page")
     )
     expect(pages).toEqual(["1", "2"])
-    expect(screen.queryByRole("button", { name: "Xem thêm" })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Xem thêm" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("lịch sử: trang sau lệch offset không hiển thị trùng hoạt động", async () => {
+    setup(lead(), {
+      "GET /leads/l1/activities": [
+        () =>
+          jsonResponse(200, {
+            data: [activity()],
+            meta: { page: 1, limit: 1, total: 2 },
+          }),
+        () =>
+          jsonResponse(200, {
+            data: [
+              activity(),
+              activity({
+                id: "a0",
+                type: "created",
+                fromStatus: null,
+                toStatus: "new",
+              }),
+            ],
+            meta: { page: 2, limit: 1, total: 3 },
+          }),
+      ],
+    })
+    renderDetail()
+    const history = await screen.findByRole("list", {
+      name: "Lịch sử chăm sóc",
+    })
+    expect(
+      await within(history).findByText("Đổi trạng thái: Mới → Đã liên hệ")
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Xem thêm" }))
+    expect(await within(history).findByText("Tạo mới")).toBeInTheDocument()
+    expect(
+      within(history).getAllByText("Đổi trạng thái: Mới → Đã liên hệ")
+    ).toHaveLength(1)
   })
 
   it("phân công và bỏ phân công", async () => {
@@ -460,7 +529,9 @@ describe("LeadDetail", () => {
         calls.filter((call) => call.key === "PATCH /leads/l1/assign")
       ).toHaveLength(1)
     )
-    expect(bodyOf(calls, "PATCH /leads/l1/assign")).toEqual({ assigneeId: "u2" })
+    expect(bodyOf(calls, "PATCH /leads/l1/assign")).toEqual({
+      assigneeId: "u2",
+    })
 
     await userEvent.click(
       await screen.findByRole("button", { name: "Bỏ phân công" })
@@ -470,7 +541,9 @@ describe("LeadDetail", () => {
         calls.filter((call) => call.key === "PATCH /leads/l1/assign")
       ).toHaveLength(2)
     )
-    const second = calls.filter((call) => call.key === "PATCH /leads/l1/assign")[1]
+    const second = calls.filter(
+      (call) => call.key === "PATCH /leads/l1/assign"
+    )[1]
     expect(JSON.parse(String(second.init.body))).toEqual({ assigneeId: null })
   })
 
@@ -478,7 +551,9 @@ describe("LeadDetail", () => {
     setup()
     const first = renderDetail()
     await screen.findByRole("heading", { name: "Nguyễn Văn An" })
-    expect(screen.queryByRole("button", { name: /Xoá/ })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /Xoá/ })
+    ).not.toBeInTheDocument()
     first.unmount()
 
     auth = {
@@ -490,9 +565,18 @@ describe("LeadDetail", () => {
     })
     renderDetail()
     await userEvent.click(await screen.findByRole("button", { name: /Xoá/ }))
+    const getsBefore = calls.filter(
+      (call) => call.key === "GET /leads/l1"
+    ).length
     const dialog = await screen.findByRole("alertdialog")
-    await userEvent.click(within(dialog).getByRole("button", { name: "Xoá khách" }))
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Xoá khách" })
+    )
     await waitFor(() => expect(push).toHaveBeenCalledWith("/admin/khach-hang"))
     expect(calls.some((call) => call.key === "DELETE /leads/l1")).toBe(true)
+    // Không gọi lại GET khách vừa xoá (sẽ 404).
+    expect(calls.filter((call) => call.key === "GET /leads/l1")).toHaveLength(
+      getsBefore
+    )
   })
 })

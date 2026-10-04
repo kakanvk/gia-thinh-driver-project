@@ -66,7 +66,12 @@ export function LeadDetail({ id }: { id: string }) {
     mutationFn: () => apiFetch<void>(`/leads/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["leads"] })
-      queryClient.removeQueries({ queryKey: ["lead", id] })
+      // Backend huỷ các lịch hẹn đang chờ của khách khi xoá.
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] })
+      void queryClient.invalidateQueries({ queryKey: ["calendar"] })
+      // Không removeQueries khi trang còn đang quan sát query: sẽ kéo lại
+      // GET /leads/:id (404). Chỉ huỷ request đang chạy; cache tự dọn sau khi rời trang.
+      void queryClient.cancelQueries({ queryKey: ["lead", id] })
       toast.success("Đã xoá khách")
       setDeleteOpen(false)
       router.push("/admin/khach-hang")
@@ -191,7 +196,8 @@ export function LeadDetail({ id }: { id: string }) {
                 <span>{LEAD_SOURCE_LABELS[lead.source]}</span>
                 {utm.length > 0 ? (
                   <span className="mt-0.5 block text-xs text-muted-foreground">
-                    UTM: {utm.map(([key, value]) => `${key}: ${value}`).join(" · ")}
+                    UTM:{" "}
+                    {utm.map(([key, value]) => `${key}: ${value}`).join(" · ")}
                   </span>
                 ) : null}
               </InfoRow>
@@ -228,7 +234,9 @@ export function LeadDetail({ id }: { id: string }) {
                   {lead.lostReason ?? empty}
                 </InfoRow>
               ) : null}
-              <InfoRow label="Ngày tạo">{formatDateTime(lead.createdAt)}</InfoRow>
+              <InfoRow label="Ngày tạo">
+                {formatDateTime(lead.createdAt)}
+              </InfoRow>
               <InfoRow label="Hoạt động gần nhất">
                 {formatDateTime(lead.lastActivityAt)}
               </InfoRow>
