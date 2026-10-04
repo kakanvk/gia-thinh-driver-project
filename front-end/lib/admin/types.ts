@@ -123,3 +123,21 @@ export type BranchOption = {
 }
 
 export type CourseOption = { id: string; code: string; name: string }
+
+// back-end/src/modules/media/media.model.ts (toJSON thêm refsCount)
+export type MediaKind = "image" | "video"
+
+export type MediaItem = {
+  id: string
+  kind: MediaKind
+  url: string
+  mimeType: string
+  size: number
+  width?: number
+  height?: number
+  // Thời lượng video (giây)
+  duration?: number
+  alt?: string
+  refsCount: number
+  createdAt: string
+}
