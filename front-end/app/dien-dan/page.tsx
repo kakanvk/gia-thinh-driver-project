@@ -16,7 +16,14 @@ export default async function NewsPage() {
   return (
     <main className="min-h-svh bg-background">
       <SiteHeader />
-      <NewsExplorer posts={newsPosts} contact={contact} />
+      <NewsExplorer
+        posts={newsPosts}
+        contact={{
+          hotline: contact.hotline,
+          telHref: contact.telHref,
+          zaloHref: contact.zaloHref,
+        }}
+      />
     </main>
   )
 }
