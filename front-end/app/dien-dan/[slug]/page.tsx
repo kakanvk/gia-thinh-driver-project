@@ -15,8 +15,13 @@ import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-// Không generateStaticParams: render khi có người mở rồi cache ISR 5 phút
+// generateStaticParams trả mảng rỗng: build không cần gọi API, mỗi slug render lần đầu có người mở
+// rồi cache ISR 5 phút (thiếu hàm này Next coi route là dynamic, không cache HTML)
 export const revalidate = 300
+
+export async function generateStaticParams() {
+  return []
+}
 
 export async function generateMetadata({
   params,
@@ -105,36 +110,38 @@ export default async function NewsDetailPage({
           {/* Cột phải: sticky */}
           <aside className="min-w-0">
             <div className="flex flex-col gap-5 lg:sticky lg:top-24">
-              <div>
-                <p className="font-extrabold text-navy">Bài viết liên quan</p>
-                <div className="mt-4 flex flex-col gap-4">
-                  {relatedPosts.map((item) => (
-                    <Link key={item.slug} href={`/dien-dan/${item.slug}`} className="group flex gap-3">
-                      <span className="relative block h-16 w-24 shrink-0 overflow-hidden rounded-md border border-border bg-mist">
-                        {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.imageAlt}
-                            fill
-                            unoptimized
-                            sizes="96px"
-                            loading="lazy"
-                            className="object-cover"
-                          />
-                        ) : (
-                          <Image src="/giathinh-logo.png" alt="" fill sizes="96px" className="object-contain p-2 opacity-60" />
-                        )}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-bold leading-snug text-navy group-hover:text-primary line-clamp-2">
-                          {item.title}
+              {relatedPosts.length > 0 ? (
+                <div>
+                  <p className="font-extrabold text-navy">Bài viết liên quan</p>
+                  <div className="mt-4 flex flex-col gap-4">
+                    {relatedPosts.map((item) => (
+                      <Link key={item.slug} href={`/dien-dan/${item.slug}`} className="group flex gap-3">
+                        <span className="relative block h-16 w-24 shrink-0 overflow-hidden rounded-md border border-border bg-mist">
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              alt={item.imageAlt}
+                              fill
+                              unoptimized
+                              sizes="96px"
+                              loading="lazy"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <Image src="/giathinh-logo.png" alt="" fill sizes="96px" className="object-contain p-2 opacity-60" />
+                          )}
                         </span>
-                        <span className="mt-1 block text-xs text-muted-foreground">{item.date}</span>
-                      </span>
-                    </Link>
-                  ))}
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold leading-snug text-navy group-hover:text-primary line-clamp-2">
+                            {item.title}
+                          </span>
+                          <span className="mt-1 block text-xs text-muted-foreground">{item.date}</span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               <div className="rounded-md bg-navy p-6 text-center text-white">
                 <p className="font-extrabold">Cần tư vấn khóa học?</p>

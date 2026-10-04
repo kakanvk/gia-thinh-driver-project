@@ -68,8 +68,8 @@ describe("NewsExplorer", () => {
 })
 
 describe("PostContent", () => {
-  it("render đoạn văn, tiêu đề, đậm, danh sách, liên kết, ảnh có chú thích và bỏ qua node lạ", () => {
-    render(
+  it("render đoạn văn, tiêu đề, đậm, danh sách, liên kết, ảnh có/không chú thích và bỏ qua node lạ", () => {
+    const { container } = render(
       <PostContent
         value={[
           { type: "h2", children: [{ text: "Chuẩn bị giấy tờ" }] },
@@ -78,6 +78,8 @@ describe("PostContent", () => {
           { type: "p", children: [{ type: "a", url: "https://giathinh.vn/tu-van", children: [{ text: "Trang chủ" }] }] },
           { type: "img", url: "https://cdn/x.webp", caption: [{ text: "Sân thi" }], children: [{ text: "" }] },
           { type: "khong-ton-tai", children: [{ text: "Vẫn hiện" }] },
+          { type: "img", url: "https://cdn/y.webp", children: [{ text: "" }] },
+          { type: "p", children: [{ text: "Sau ảnh không chú thích" }] },
         ]}
       />
     )
@@ -85,9 +87,15 @@ describe("PostContent", () => {
     expect(screen.getByText("CCCD").closest("strong")).not.toBeNull()
     expect(screen.getByText("Ý một").closest("ul")).not.toBeNull()
     expect(screen.getByRole("link", { name: "Trang chủ" })).toHaveAttribute("href", "https://giathinh.vn/tu-van")
-    expect(screen.getByRole("img")).toHaveAttribute("src", "https://cdn/x.webp")
+    const imgs = container.querySelectorAll("img")
+    expect(imgs).toHaveLength(2)
+    expect(imgs[0]).toHaveAttribute("src", "https://cdn/x.webp")
+    expect(imgs[1]).toHaveAttribute("src", "https://cdn/y.webp")
+    expect(imgs[1]).toHaveAttribute("alt", "")
+    expect(container.querySelectorAll("figcaption")).toHaveLength(1)
     expect(screen.getByText("Sân thi")).toBeInTheDocument()
     expect(screen.getByText("Vẫn hiện")).toBeInTheDocument()
+    expect(screen.getByText("Sau ảnh không chú thích")).toBeInTheDocument()
   })
 })
 
