@@ -197,6 +197,29 @@ describe("apiFetch", () => {
     expect(calls.map((c) => c.key)).toEqual(["POST /auth/login", "GET /x"])
   })
 
+  it("không refresh khi /auth/logout hoặc /auth/refresh trả 401 dù đang có token", async () => {
+    setAccessToken("old")
+    const unauthorized = () =>
+      jsonResponse(401, {
+        error: { code: "UNAUTHORIZED", message: "Hết hạn" },
+      })
+    const { calls } = mockFetch({
+      "POST /auth/logout": unauthorized,
+      "POST /auth/refresh": unauthorized,
+    })
+    await expect(
+      apiFetch("/auth/logout", { method: "POST" })
+    ).rejects.toMatchObject({ status: 401 })
+    await expect(
+      apiFetch("/auth/refresh", { method: "POST" })
+    ).rejects.toMatchObject({ status: 401 })
+    // Mỗi đường dẫn chỉ được gọi đúng một lần: không có lượt refresh/gửi lại nào
+    expect(calls.map((c) => c.key)).toEqual([
+      "POST /auth/logout",
+      "POST /auth/refresh",
+    ])
+  })
+
   it("request khác đã refresh xong → gửi lại bằng token hiện tại, không refresh nữa", async () => {
     setAccessToken("old")
     const { calls } = mockFetch({

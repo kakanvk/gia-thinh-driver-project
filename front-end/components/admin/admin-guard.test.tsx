@@ -78,6 +78,8 @@ describe("AdminGuard", () => {
       </AdminGuard>
     )
     expect(screen.getByText("Đang tải…")).toBeInTheDocument()
+    expect(screen.getByRole("status")).toHaveAttribute("aria-busy", "true")
+    expect(screen.queryByText("nội dung")).not.toBeInTheDocument()
     expect(replace).not.toHaveBeenCalled()
   })
 

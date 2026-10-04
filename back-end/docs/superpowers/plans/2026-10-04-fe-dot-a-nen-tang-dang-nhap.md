@@ -58,7 +58,7 @@
 | `front-end/components/ui/sonner.tsx` | `Toaster` |
 | `front-end/components/providers/query-provider.tsx` | `QueryClient` + toast lỗi mutation |
 | `front-end/components/admin/auth-provider.tsx` | Trạng thái phiên, `useAuth` |
-| `front-end/components/admin/admin-status.tsx` | Màn chờ/mất kết nối/không có quyền |
+| `front-end/components/admin/admin-status.tsx` | Màn chờ (skeleton khung admin)/mất kết nối/không có quyền |
 | `front-end/components/admin/admin-guard.tsx` | Chặn đăng nhập + quyền, bọc `AdminShell` |
 | `front-end/components/admin/admin-shell.tsx` (sửa) | Menu theo quyền, header người dùng thật, đăng xuất |
 | `front-end/app/admin/layout.tsx` (sửa) | Metadata + providers |

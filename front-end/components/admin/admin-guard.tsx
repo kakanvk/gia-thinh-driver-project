@@ -4,7 +4,11 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
 
 import { AdminShell } from "@/components/admin/admin-shell"
-import { AdminStatus, Forbidden } from "@/components/admin/admin-status"
+import {
+  AdminShellSkeleton,
+  AdminStatus,
+  Forbidden,
+} from "@/components/admin/admin-status"
 import { useAuth } from "@/components/admin/auth-provider"
 import { Button } from "@/components/ui/button"
 import { hasPermission } from "@/lib/auth/permissions"
@@ -45,8 +49,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       />
     )
   }
-  if (status !== "authenticated" || needsHome)
-    return <AdminStatus title="Đang tải…" />
+  if (status !== "authenticated" || needsHome) return <AdminShellSkeleton />
 
   return (
     <AdminShell>
