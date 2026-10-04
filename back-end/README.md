@@ -23,7 +23,6 @@ cp .env.example .env
 # JWT_ACCESS_SECRET, SEED_ADMIN_USERNAME, SEED_ADMIN_PHONE, SEED_ADMIN_PASSWORD
 npm install
 npm run seed                  # chi nhánh, cài đặt, tài khoản super_admin
-# Seed gói học/bảng giá/bài viết chỉ nạp lần đầu; muốn nạp lại thì xoá document `__seed_catalog_v1` trong collection settings.
 npm run dev                   # http://localhost:4000/api/v1
 ```
 
@@ -50,6 +49,32 @@ docker compose up -d          # MongoDB ở localhost:27017
 | `npm run typecheck` / `npm run lint` | Kiểm tra kiểu / lint |
 | `npm run build` && `npm start` | Build và chạy bản production |
 | `npm run seed` / `npm run seed:prod` | Seed dữ liệu (dev / sau khi build) |
+| `npm run seed:reset` | **Xoá sạch database dev** rồi seed lại (xem bên dưới) |
+
+## Seed lại dữ liệu
+
+`npm run seed` chỉ **thêm phần còn thiếu**, không ghi đè: chi nhánh, cài đặt, admin đã có thì bỏ qua; gói học, bảng giá, bài viết mẫu chỉ nạp ở lần đầu (đánh dấu bằng document `__seed_catalog_v1` trong collection `settings`). Chạy lại nhiều lần đều an toàn.
+
+**Nạp lại gói học / bảng giá / bài viết mẫu** (giữ nguyên khách hàng, học viên, học phí, tài khoản):
+
+```bash
+# mongosh hoặc Atlas → Browse Collections → settings
+db.settings.deleteOne({ key: '__seed_catalog_v1' })
+npm run seed
+```
+
+Chỉ tạo lại mục đã bị xoá; mục đang có (kể cả đã sửa) giữ nguyên. Muốn về đúng dữ liệu mẫu thì xoá mục đó trên admin trước.
+
+**Xoá sạch và seed từ đầu** (chỉ database dev):
+
+```bash
+npm run seed:reset            # hỏi gõ lại tên database để xác nhận
+npm run seed:reset -- --yes   # bỏ qua bước xác nhận (script tự động)
+```
+
+- Xoá **toàn bộ** database trong `MONGODB_URL`: khách hàng, học viên, phiếu thu, tài khoản nhân viên… rồi tạo lại index và chạy seed (admin lấy từ `SEED_ADMIN_*` trong `.env`).
+- Tự từ chối khi `NODE_ENV=production` hoặc tên database không chứa `dev` / `test` / `local` (vd. `gia-thinh` production).
+- Ảnh đã upload (thư mục `uploads/` hoặc bucket GCS) **không** bị xoá; dọn tay nếu cần.
 
 ## Tài khoản nhân viên
 
