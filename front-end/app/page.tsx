@@ -25,8 +25,15 @@ import { SiteHeader } from "@/components/site-header"
 import { TikTokSection } from "@/components/tiktok-section"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
-import { getBranches, getPricing, getSiteContact, getUpcomingClasses, getUpcomingExams } from "@/lib/api/public"
-import { newsPosts } from "@/lib/news"
+import {
+  getBranches,
+  getLatestPosts,
+  getPricing,
+  getSiteContact,
+  getUpcomingClasses,
+  getUpcomingExams,
+} from "@/lib/api/public"
+import { toNewsPost } from "@/lib/news"
 import { cn } from "@/lib/utils"
 import mainBanner from "@/public/main-banner.png"
 import mainMobileBanner from "@/public/main-mobile-banner.png"
@@ -59,13 +66,15 @@ const process = [
 export const revalidate = 300
 
 export default async function Page() {
-  const [contact, branches, pricing, classes, exams] = await Promise.all([
+  const [contact, branches, pricing, classes, exams, latest] = await Promise.all([
     getSiteContact(),
     getBranches(),
     getPricing(),
     getUpcomingClasses(),
     getUpcomingExams(),
+    getLatestPosts(4),
   ])
+  const latestPosts = (latest ?? []).map(toNewsPost)
 
   return (
     <main className="min-h-svh overflow-x-clip bg-background">
@@ -303,13 +312,17 @@ export default async function Page() {
             </Link>
           </ScrollReveal>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {newsPosts.slice(0, 4).map((post, index) => (
-              <ScrollReveal key={post.slug} delay={0.05 * index}>
-                <NewsCard post={post} />
-              </ScrollReveal>
-            ))}
-          </div>
+          {latestPosts.length > 0 ? (
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {latestPosts.map((post, index) => (
+                <ScrollReveal key={post.slug} delay={0.05 * index}>
+                  <NewsCard post={post} />
+                </ScrollReveal>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-12 text-muted-foreground">Chưa có bài viết mới.</p>
+          )}
         </div>
       </section>
 

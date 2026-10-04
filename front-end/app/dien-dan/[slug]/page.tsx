@@ -4,18 +4,19 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeft, CalendarDays, Clock3, Phone } from "lucide-react"
 
-import { getSiteContact } from "@/lib/api/public"
-import { getPost, newsPosts } from "@/lib/news"
+import { getPost, getRelatedPosts, getSiteContact } from "@/lib/api/public"
+import { toNewsPost } from "@/lib/news"
 
+import { PostContent } from "@/components/post-content"
+import { PostViewTracker } from "@/components/post-view-tracker"
 import { ScrollReveal } from "@/components/scroll-reveal"
 import { SiteHeader } from "@/components/site-header"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export function generateStaticParams() {
-  return newsPosts.map((post) => ({ slug: post.slug }))
-}
+// Không generateStaticParams: render khi có người mở rồi cache ISR 5 phút
+export const revalidate = 300
 
 export async function generateMetadata({
   params,
@@ -23,11 +24,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const post = getPost(slug)
+  const post = await getPost(slug)
   if (!post) return {}
   return {
     title: `${post.title} | Tin tức Gia Thịnh`,
     description: post.excerpt,
+    openGraph: post.cover ? { images: [post.cover.url] } : undefined,
   }
 }
 
@@ -37,11 +39,15 @@ export default async function NewsDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const post = getPost(slug)
+  const post = await getPost(slug)
   if (!post) notFound()
 
-  const contact = await getSiteContact()
-  const related = newsPosts.filter((item) => item.slug !== slug).slice(0, 4)
+  const view = toNewsPost(post)
+  const [related, contact] = await Promise.all([
+    getRelatedPosts(view.categorySlug, slug),
+    getSiteContact(),
+  ])
+  const relatedPosts = related.map(toNewsPost)
 
   return (
     <main className="min-h-svh bg-background">
@@ -60,15 +66,16 @@ export default async function NewsDetailPage({
                 Tất cả tin tức
               </Link>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge>{post.category}</Badge>
+                {view.category ? <Badge>{view.category}</Badge> : null}
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <CalendarDays aria-hidden="true" className="size-3.5" />
-                  {post.date}
+                  {view.date}
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock3 aria-hidden="true" className="size-3.5" />
-                  {post.readTime}
+                  {view.readTime}
                 </span>
+                <span className="text-xs text-muted-foreground">Tác giả: {post.authorName}</span>
               </div>
               <h1 className="mt-4 text-3xl font-extrabold leading-tight tracking-tight text-navy sm:text-4xl">
                 {post.title}
@@ -76,23 +83,22 @@ export default async function NewsDetailPage({
               <p className="mt-4 text-lg leading-7 text-muted-foreground sm:leading-8">{post.excerpt}</p>
             </ScrollReveal>
 
-            <ScrollReveal className="relative mt-8 aspect-[16/9] overflow-hidden rounded-md border border-border" delay={0.08}>
-              <Image
-                src={post.image}
-                alt={post.imageAlt}
-                fill
-                sizes="(max-width: 1024px) 100vw, 800px"
-                priority
-                className="object-cover"
-              />
-            </ScrollReveal>
+            {view.image ? (
+              <ScrollReveal className="relative mt-8 aspect-[16/9] overflow-hidden rounded-md border border-border" delay={0.08}>
+                <Image
+                  src={view.image}
+                  alt={view.imageAlt}
+                  fill
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 800px"
+                  priority
+                  className="object-cover"
+                />
+              </ScrollReveal>
+            ) : null}
 
-            <ScrollReveal className="mt-8 flex flex-col gap-5" delay={0.1}>
-              {post.content.map((paragraph, index) => (
-                <p key={index} className="leading-7 text-foreground/85 sm:leading-8">
-                  {paragraph}
-                </p>
-              ))}
+            <ScrollReveal className="mt-8" delay={0.1}>
+              <PostContent value={post.content} />
             </ScrollReveal>
           </article>
 
@@ -102,17 +108,22 @@ export default async function NewsDetailPage({
               <div>
                 <p className="font-extrabold text-navy">Bài viết liên quan</p>
                 <div className="mt-4 flex flex-col gap-4">
-                  {related.map((item) => (
+                  {relatedPosts.map((item) => (
                     <Link key={item.slug} href={`/dien-dan/${item.slug}`} className="group flex gap-3">
-                      <span className="relative block h-16 w-24 shrink-0 overflow-hidden rounded-md border border-border">
-                        <Image
-                          src={item.image}
-                          alt={item.imageAlt}
-                          fill
-                          sizes="96px"
-                          loading="lazy"
-                          className="object-cover"
-                        />
+                      <span className="relative block h-16 w-24 shrink-0 overflow-hidden rounded-md border border-border bg-mist">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.imageAlt}
+                            fill
+                            unoptimized
+                            sizes="96px"
+                            loading="lazy"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <Image src="/giathinh-logo.png" alt="" fill sizes="96px" className="object-contain p-2 opacity-60" />
+                        )}
                       </span>
                       <span className="min-w-0">
                         <span className="block text-sm font-bold leading-snug text-navy group-hover:text-primary line-clamp-2">
@@ -141,6 +152,7 @@ export default async function NewsDetailPage({
         </div>
       </div>
 
+      <PostViewTracker slug={post.slug} />
     </main>
   )
 }

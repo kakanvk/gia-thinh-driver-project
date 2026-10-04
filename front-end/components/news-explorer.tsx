@@ -16,12 +16,10 @@ import {
 } from "lucide-react"
 
 import {
-  announcementCategorySlug,
   countPostsByCategory,
-  newsCategories,
   newsMatchesQuery,
   sortNewsPosts,
-  type NewsCategorySlug,
+  type NewsCategory,
   type NewsPost,
   type NewsSortKey,
 } from "@/lib/news"
@@ -75,12 +73,14 @@ const PRESSED_ITEM =
   "aria-pressed:border-primary/50 aria-pressed:bg-primary/10 aria-pressed:text-primary aria-pressed:hover:text-primary"
 
 function CategoryItems({
+  categories,
   total,
   counts,
   itemClassName,
 }: {
+  categories: NewsCategory[]
   total: number
-  counts: Partial<Record<NewsCategorySlug, number>>
+  counts: Record<string, number>
   itemClassName?: string
 }) {
   return (
@@ -91,7 +91,7 @@ function CategoryItems({
           {total}
         </Badge>
       </ToggleGroupItem>
-      {newsCategories.map((category) => (
+      {categories.map((category) => (
         <ToggleGroupItem
           key={category.slug}
           value={category.slug}
@@ -128,14 +128,19 @@ function AnnouncementList({ posts, query }: { posts: NewsPost[]; query?: string 
               className="flex gap-3 px-4 py-4 sm:gap-4"
             >
               <span className="relative block h-14 w-20 shrink-0 overflow-hidden rounded-md border border-border bg-background sm:h-16 sm:w-24">
-                <Image
-                  src={post.image}
-                  alt={post.imageAlt}
-                  fill
-                  sizes="(max-width: 640px) 80px, 96px"
-                  loading="lazy"
-                  className="object-cover"
-                />
+                {post.image ? (
+                  <Image
+                    src={post.image}
+                    alt={post.imageAlt}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 640px) 80px, 96px"
+                    loading="lazy"
+                    className="object-cover"
+                  />
+                ) : (
+                  <Image src="/giathinh-logo.png" alt="" fill sizes="96px" className="object-contain p-2 opacity-60" />
+                )}
               </span>
               <span className="flex min-w-0 flex-1 flex-col justify-center">
                 <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary tabular-nums">
@@ -166,9 +171,11 @@ const DEFAULT_CONTACT = toSiteContact(null)
 
 export function NewsExplorer({
   posts,
+  categories,
   contact = DEFAULT_CONTACT,
 }: {
   posts: NewsPost[]
+  categories: NewsCategory[]
   contact?: Pick<SiteContact, "hotline" | "telHref" | "zaloHref">
 }) {
   const [query, setQuery] = useState("")
@@ -177,7 +184,12 @@ export function NewsExplorer({
 
   const trimmedQuery = query.trim()
   const searching = trimmedQuery.length > 0
-  const activeCategory = newsCategories.find((item) => item.slug === category)
+  // Chuyên mục thông báo hiện thành khối riêng, không nằm trong bộ lọc
+  const filterCategories = useMemo(
+    () => categories.filter((item) => !item.isAnnouncement),
+    [categories],
+  )
+  const activeCategory = categories.find((item) => item.slug === category)
 
   const matched = useMemo(
     () => (trimmedQuery ? posts.filter((post) => newsMatchesQuery(post, trimmedQuery)) : posts),
@@ -193,11 +205,11 @@ export function NewsExplorer({
   }, [matched, category, sort])
 
   const announcements = useMemo(
-    () => filtered.filter((post) => post.categorySlug === announcementCategorySlug),
+    () => filtered.filter((post) => post.isAnnouncement),
     [filtered],
   )
   const articles = useMemo(
-    () => filtered.filter((post) => post.categorySlug !== announcementCategorySlug),
+    () => filtered.filter((post) => !post.isAnnouncement),
     [filtered],
   )
 
@@ -277,6 +289,7 @@ export function NewsExplorer({
                   className="mt-3 flex w-full flex-nowrap overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:py-0"
                 >
                   <CategoryItems
+                    categories={filterCategories}
                     total={matched.length}
                     counts={counts}
                     itemClassName="h-11 px-3.5"
@@ -293,7 +306,7 @@ export function NewsExplorer({
                         ? "Kết quả tìm kiếm"
                         : "Tất cả bài viết"}
                   </h2>
-                  {activeCategory ? (
+                  {activeCategory?.description ? (
                     <p className="mt-1.5 max-w-xl text-sm leading-6 text-muted-foreground">
                       {activeCategory.description}
                     </p>
@@ -342,7 +355,9 @@ export function NewsExplorer({
                 </div>
               ) : null}
 
-              {filtered.length === 0 ? (
+              {posts.length === 0 ? (
+                <p className="mt-6 text-muted-foreground">Chưa có bài viết.</p>
+              ) : filtered.length === 0 ? (
                 <Empty className="mt-6 rounded-md border border-dashed border-border bg-card py-14">
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -387,6 +402,7 @@ export function NewsExplorer({
                     className="mt-3 w-full"
                   >
                     <CategoryItems
+                      categories={filterCategories}
                       total={matched.length}
                       counts={counts}
                       itemClassName="h-10 justify-between px-3 text-sm font-semibold"
