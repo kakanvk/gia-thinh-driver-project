@@ -21,7 +21,15 @@ export function createApp(): Express {
   app.set('json replacer', jsonDateReplacer);
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-  app.use(cors({ origin: env.CORS_ORIGINS, credentials: true, maxAge: 600 }));
+  app.use(
+    cors({
+      origin: env.CORS_ORIGINS,
+      credentials: true,
+      maxAge: 600,
+      // FE gọi khác origin ở production — cần lộ header này để lấy tên file CSV khi tải xuống
+      exposedHeaders: ['Content-Disposition'],
+    }),
+  );
   app.use(
     pinoHttp({
       logger,

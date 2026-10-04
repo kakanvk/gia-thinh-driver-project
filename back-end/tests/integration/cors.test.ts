@@ -15,6 +15,11 @@ describe('CORS', () => {
     expect(res.headers['access-control-max-age']).toBe('600');
   });
 
+  it('lộ Content-Disposition cho request khác origin để FE đọc được tên file tải xuống', async () => {
+    const res = await request(createApp()).get('/api/v1/auth/me').set('Origin', 'http://localhost:3000');
+    expect(res.headers['access-control-expose-headers']).toBe('Content-Disposition');
+  });
+
   it('không trả allow-origin cho origin lạ', async () => {
     const res = await request(createApp())
       .options('/api/v1/auth/me')
