@@ -116,6 +116,7 @@ npm run seed:reset -- --yes   # bỏ qua bước xác nhận (script tự độn
 - Cùng SĐT gửi lại khi khách còn đang chăm sóc → không tạo khách mới, ghi "gửi lại form" vào lịch sử.
 - Trạng thái: `new → contacted → consulted → deposited → docs_completed` (đi tiến, có thể nhảy bước); `lost` cần lý do, mở lại bằng `contacted`. "Nhập học" sẽ có ở đợt học viên.
 - Nhân viên chỉ thấy khách và lịch hẹn của chi nhánh mình. Xuất CSV (`/leads/export`) và xóa khách chỉ dành cho quản lý chi nhánh / quản trị viên.
+- Ô chọn người phụ trách dùng `GET /users/options` (cần `lead.read` hoặc `appointment.read`, không trả SĐT).
 
 ## Đào tạo
 

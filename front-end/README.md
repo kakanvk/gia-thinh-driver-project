@@ -41,6 +41,13 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 - Menu và trang hiện theo quyền của vai trò (`lib/auth/routes.ts`). Backend vẫn kiểm quyền cho mọi API.
 - Quên mật khẩu: quản trị viên cấp mật khẩu tạm ở màn Người dùng; nhân viên đổi lại ở `/admin/tai-khoan`.
 
+## Khách hàng & lịch hẹn
+
+- `/admin/khach-hang`: danh sách khách từ CRM; bộ lọc, ô tìm và số trang lưu trên URL (tải lại hoặc gửi link vẫn giữ). Xuất CSV và xoá khách chỉ hiện với quản lý chi nhánh / quản trị viên.
+- `/admin/khach-hang/[id]`: đổi trạng thái (chuyển sang "Không thành công" phải nhập lý do; mở lại bằng "Đã liên hệ"), phân công người phụ trách, ghi lịch sử chăm sóc, đặt lịch hẹn và chuyển thành học viên khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ.
+- `/admin/lich-dang-ky`: lịch hẹn theo tháng (lọc chi nhánh, người phụ trách); tạo/sửa/đổi trạng thái/xoá lịch hẹn. Trùng giờ với lịch khác của cùng người phụ trách thì báo lỗi ngay trên form.
+- Giờ nhập và hiển thị theo giờ Việt Nam (`+07:00`), không phụ thuộc múi giờ máy.
+
 ## Lệnh
 
 | Lệnh | Mô tả |
