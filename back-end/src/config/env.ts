@@ -23,7 +23,12 @@ const schema = z
     JWT_REFRESH_EXPIRES_DAYS: z.coerce.number().int().positive().default(30),
     CORS_ORIGINS: csv,
     COOKIE_DOMAIN: z.string().optional(),
-    STORAGE_DRIVER: z.enum(['local', 'gcs']).default('local'),
+    STORAGE_DRIVER: z.enum(['local', 'gcs']).default('gcs'),
+    ALLOW_LOCAL_STORAGE: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
+    MAX_VIDEO_BYTES: z.coerce.number().int().positive().default(524_288_000),
     UPLOAD_DIR: z.string().default('uploads'),
     GCS_BUCKET: z.string().optional(),
     PUBLIC_MEDIA_BASE_URL: z.url().optional(),
@@ -34,6 +39,13 @@ const schema = z
   .superRefine((value, ctx) => {
     if (value.STORAGE_DRIVER === 'gcs' && !value.GCS_BUCKET) {
       ctx.addIssue({ code: 'custom', path: ['GCS_BUCKET'], message: 'Bắt buộc khi STORAGE_DRIVER=gcs' });
+    }
+    if (value.STORAGE_DRIVER === 'local' && value.NODE_ENV !== 'test' && !value.ALLOW_LOCAL_STORAGE) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['STORAGE_DRIVER'],
+        message: 'Media phải lưu trên GCS (đặt STORAGE_DRIVER=gcs, hoặc ALLOW_LOCAL_STORAGE=true khi chạy thử offline)',
+      });
     }
   });
 

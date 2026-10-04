@@ -11,6 +11,7 @@ export default defineConfig({
       JWT_ACCESS_SECRET: 'test-access-secret-at-least-32-characters',
       CORS_ORIGINS: 'http://localhost:3000',
       LOG_LEVEL: 'silent',
+      STORAGE_DRIVER: 'local',
       UPLOAD_DIR: '.test-uploads',
     },
     hookTimeout: 120_000,

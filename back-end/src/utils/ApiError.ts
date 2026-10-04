@@ -5,6 +5,7 @@ export type ErrorCode =
   | 'BRANCH_FORBIDDEN'
   | 'NOT_FOUND'
   | 'CONFLICT'
+  | 'PAYLOAD_TOO_LARGE'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
@@ -39,6 +40,10 @@ export class ApiError extends Error {
 
   static notFound(message = 'Không tìm thấy dữ liệu') {
     return new ApiError(404, 'NOT_FOUND', message);
+  }
+
+  static payloadTooLarge(message = 'Dữ liệu gửi lên quá lớn') {
+    return new ApiError(413, 'PAYLOAD_TOO_LARGE', message);
   }
 
   static conflict(message: string, details?: ErrorDetail[]) {
