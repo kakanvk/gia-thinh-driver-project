@@ -33,7 +33,14 @@ export function ConfirmDialog({
   children?: React.ReactNode
 }) {
   return (
-    <AlertDialog open={open} onOpenChange={(next) => onOpenChange(next)}>
+    // Khoá khi đang xử lý: Escape không đóng được hộp xác nhận
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && pending) return
+        onOpenChange(next)
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

@@ -44,8 +44,18 @@ export function EntitySheet({
   )
 
   return (
-    <Sheet open={open} onOpenChange={(next) => onOpenChange(next)}>
-      <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md">
+    // Khoá khi đang gửi: X, Escape và bấm nền không đóng được sheet
+    <Sheet
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && submitting) return
+        onOpenChange(next)
+      }}
+    >
+      <SheetContent
+        showCloseButton={!submitting}
+        className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-md"
+      >
         {onSubmit ? (
           <form
             noValidate

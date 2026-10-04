@@ -151,6 +151,61 @@ describe("FilterBar", () => {
     expect(screen.getByPlaceholderText("Tìm")).toHaveValue("")
   })
 
+  it("đồng bộ lại khi quay về giá trị ô vừa gửi", () => {
+    vi.useFakeTimers()
+    const onChange = vi.fn()
+    const props = { placeholder: "Tìm", onChange }
+    const { rerender } = render(<FilterBar search={{ value: "", ...props }} />)
+    const input = screen.getByPlaceholderText("Tìm")
+    fireEvent.change(input, { target: { value: "an" } })
+    act(() => {
+      vi.advanceTimersByTime(300)
+    })
+    expect(onChange).toHaveBeenCalledWith("an")
+    rerender(<FilterBar search={{ value: "an", ...props }} />)
+    rerender(<FilterBar search={{ value: "", ...props }} />)
+    expect(input).toHaveValue("")
+    rerender(<FilterBar search={{ value: "an", ...props }} />)
+    expect(input).toHaveValue("an")
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it("không gửi lại lần gõ đang chờ khi bộ lọc bị xoá từ ngoài", () => {
+    vi.useFakeTimers()
+    const onChange = vi.fn()
+    const props = { placeholder: "Tìm", onChange }
+    const { rerender } = render(
+      <FilterBar search={{ value: "an", ...props }} />
+    )
+    const input = screen.getByPlaceholderText("Tìm")
+    fireEvent.change(input, { target: { value: "anh" } })
+    rerender(<FilterBar search={{ value: "", ...props }} />)
+    expect(input).toHaveValue("")
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("giữ chữ đang gõ khi URL bắt kịp giá trị đã gửi", () => {
+    vi.useFakeTimers()
+    const onChange = vi.fn()
+    const props = { placeholder: "Tìm", onChange }
+    const { rerender } = render(<FilterBar search={{ value: "", ...props }} />)
+    const input = screen.getByPlaceholderText("Tìm")
+    fireEvent.change(input, { target: { value: "an" } })
+    act(() => {
+      vi.advanceTimersByTime(300)
+    })
+    fireEvent.change(input, { target: { value: "anh" } })
+    rerender(<FilterBar search={{ value: "an", ...props }} />)
+    expect(input).toHaveValue("anh")
+    act(() => {
+      vi.advanceTimersByTime(300)
+    })
+    expect(onChange).toHaveBeenLastCalledWith("anh")
+  })
+
   it("hiện bộ lọc con", () => {
     render(
       <FilterBar>
@@ -200,6 +255,26 @@ describe("EntitySheet", () => {
     expect(screen.getByRole("button", { name: "Cập nhật" })).toBeDisabled()
   })
 
+  it("không đóng được khi đang gửi (Escape, nút X)", async () => {
+    const onOpenChange = vi.fn()
+    render(
+      <EntitySheet
+        open
+        onOpenChange={onOpenChange}
+        title="Sửa khách"
+        submitting
+        onSubmit={vi.fn()}
+      >
+        <input aria-label="Tên" />
+      </EntitySheet>
+    )
+    expect(
+      screen.queryByRole("button", { name: "Close" })
+    ).not.toBeInTheDocument()
+    await userEvent.keyboard("{Escape}")
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
   it("không có onSubmit thì không có nút Lưu", () => {
     render(
       <EntitySheet open onOpenChange={vi.fn()} title="Chi tiết">
@@ -230,6 +305,21 @@ describe("ConfirmDialog", () => {
     expect(screen.getByText("Không thể hoàn tác.")).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Xoá" }))
     expect(onConfirm).toHaveBeenCalledTimes(1)
+  })
+
+  it("Escape không đóng khi đang xử lý", async () => {
+    const onOpenChange = vi.fn()
+    render(
+      <ConfirmDialog
+        open
+        onOpenChange={onOpenChange}
+        title="Xoá?"
+        pending
+        onConfirm={vi.fn()}
+      />
+    )
+    await userEvent.keyboard("{Escape}")
+    expect(onOpenChange).not.toHaveBeenCalled()
   })
 
   it("khoá nút xác nhận khi đang xử lý", () => {

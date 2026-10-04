@@ -687,9 +687,9 @@ export const supportPlaybook = [
   {
     title: "Tiếp nhận hồ sơ mới",
     steps:
-      "Đối chiếu CCCD, ảnh thẻ và giấy khám sức khỏe, sau đó xếp lịch tư vấn trong Lịch đăng ký.",
+      "Đối chiếu CCCD, ảnh thẻ và giấy khám sức khỏe, sau đó xếp lịch tư vấn trong Lịch hẹn.",
     href: "/admin/lich-dang-ky",
-    linkLabel: "Mở lịch đăng ký",
+    linkLabel: "Mở lịch hẹn",
   },
   {
     title: "Mở lớp khi sắp hết chỗ",

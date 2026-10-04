@@ -45,9 +45,9 @@ const faqs = [
 
 const quickLinks = [
   {
-    label: "Lịch đăng ký",
+    label: "Lịch hẹn",
     href: "/admin/lich-dang-ky",
-    note: "Xếp và theo dõi lịch tư vấn",
+    note: "Xếp và theo dõi lịch hẹn tư vấn",
   },
   {
     label: "Lớp học",

@@ -18,37 +18,34 @@ function SearchBox({
 }) {
   const [text, setText] = useState(value)
   const [synced, setSynced] = useState(value)
-  const [emitted, setEmitted] = useState(value)
+  // Giá trị ô này vừa gửi mà URL chưa phản ánh lại; null khi không có gì chờ
+  const [emitted, setEmitted] = useState<string | null>(null)
   const onChangeRef = useRef(onChange)
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
 
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current)
-    },
-    []
-  )
-
   // Giá trị ngoài đổi (vd. xoá bộ lọc, quay lại trang) → đồng bộ ô nhập;
-  // bỏ qua khi đó chỉ là giá trị chính ô này vừa gửi (URL cập nhật trễ)
+  // bỏ qua đúng một lần khi đó chỉ là giá trị chính ô này vừa gửi (URL cập
+  // nhật trễ), rồi coi như đã khớp để lần quay lại giá trị đó vẫn đồng bộ.
   if (value !== synced) {
     setSynced(value)
+    setEmitted(null)
     if (value !== emitted) setText(value)
   }
 
-  function handleChange(next: string) {
-    setText(next)
-    if (timer.current) clearTimeout(timer.current)
-    timer.current = setTimeout(() => {
-      timer.current = null
-      setEmitted(next.trim())
-      onChangeRef.current(next.trim())
+  // Debounce theo nội dung ô: mỗi lần ô đổi (kể cả do đồng bộ từ ngoài) thì
+  // huỷ lần gửi đang chờ, nên xoá bộ lọc không bị lần gõ cũ ghi đè lại.
+  useEffect(() => {
+    const next = text.trim()
+    if (next === value) return
+    const timer = setTimeout(() => {
+      setEmitted(next)
+      onChangeRef.current(next)
     }, DEBOUNCE_MS)
-  }
+    return () => clearTimeout(timer)
+  }, [text, value])
 
   return (
     <label className="relative min-w-0 sm:w-72">
@@ -61,7 +58,7 @@ function SearchBox({
         type="search"
         value={text}
         placeholder={placeholder}
-        onChange={(event) => handleChange(event.target.value)}
+        onChange={(event) => setText(event.target.value)}
         className="h-9 bg-background pl-9 text-[13px]"
       />
     </label>

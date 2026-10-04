@@ -391,7 +391,7 @@ export default function AdminDashboardPage() {
               "mt-4 h-9 w-full rounded-md text-[13px] font-medium"
             )}
           >
-            Mở lịch đăng ký
+            Mở lịch hẹn
           </Link>
         </section>
       </div>
