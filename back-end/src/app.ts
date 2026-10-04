@@ -21,7 +21,7 @@ export function createApp(): Express {
   app.set('json replacer', jsonDateReplacer);
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-  app.use(cors({ origin: env.CORS_ORIGINS, credentials: true }));
+  app.use(cors({ origin: env.CORS_ORIGINS, credentials: true, maxAge: 600 }));
   app.use(
     pinoHttp({
       logger,

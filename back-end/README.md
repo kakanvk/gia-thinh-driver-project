@@ -133,6 +133,17 @@ npm run seed:reset -- --yes   # bỏ qua bước xác nhận (script tự độn
 - **Quá hạn:** server tự chạy job mỗi 60 phút (và lúc khởi động); đợt có hạn hôm nay chỉ thành quá hạn từ 00:00 hôm sau (giờ VN).
 - **Tổng quan** (`/dashboard/*`): số liệu theo chi nhánh của người xem; doanh thu là **thực thu** theo ngày thu tiền; tỷ lệ đậu là sát hạch lần đầu. Chưa có chỉ tiêu doanh thu.
 
+## Chạy cùng front-end
+
+Front-end (`front-end/`) gọi API theo `NEXT_PUBLIC_API_URL`:
+
+- **Dev / preview Vercel** (`NEXT_PUBLIC_API_URL=/api/v1`): Next.js chuyển tiếp `/api/v1/*` và `/uploads/*` tới `API_ORIGIN` (dev: `http://localhost:4000`). Không cần CORS; backend thấy IP của máy chạy Next nên giới hạn đăng nhập tính chung.
+- **Production** (`NEXT_PUBLIC_API_URL=https://api.giathinh.vn/api/v1`): trình duyệt gọi thẳng backend. Cấu hình backend:
+  - `CORS_ORIGINS=https://giathinh.vn,https://www.giathinh.vn`
+  - `TRUST_PROXY=1` khi chạy sau nginx (nginx gắn `X-Forwarded-For`), để giới hạn đăng nhập tính theo IP người dùng.
+  - `COOKIE_DOMAIN` để trống (cookie `gt_refresh` thuộc `api.giathinh.vn`; `giathinh.vn` và `api.giathinh.vn` cùng site nên trình duyệt vẫn gửi).
+- Preflight CORS được trình duyệt cache 10 phút (`Access-Control-Max-Age: 600`).
+
 ## Lưu ảnh trên Google Cloud Storage
 
 1. Tạo bucket, bật *Uniform bucket-level access*, cấp `allUsers` quyền `Storage Object Viewer` để ảnh xem công khai.
