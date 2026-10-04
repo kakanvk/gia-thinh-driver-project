@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { env } from '../../config/env';
 import { listQuerySchema, paginate } from '../../shared/mongoose/paginate';
 import { WITH_DELETED } from '../../shared/mongoose/softDelete';
-import { getStorage } from '../../shared/storage';
+import { getStorage, StorageMoveConflictError } from '../../shared/storage';
 import { vnYearMonthPath } from '../../shared/time';
 import { ApiError, type ErrorDetail } from '../../utils/ApiError';
 import { escapeRegex } from '../../utils/regex';
@@ -112,7 +112,21 @@ export async function completeVideoUpload(input: CompleteVideoInput, actorId: st
     );
   }
   const key = `${vnYearMonthPath(new Date())}/${tmpKey.slice('tmp/'.length)}`;
-  const { url } = await storage.move(tmpKey, key);
+  // URL tải lên còn hạn sau khi hoàn tất: PUT lại cùng uploadId rồi complete lần nữa không được thay video đã lưu
+  if (await Media.exists({ key })) {
+    await storage.delete(tmpKey);
+    throw new ApiError(400, 'UPLOAD_INCOMPLETE', 'Video này đã được tải lên trước đó');
+  }
+  let url: string;
+  try {
+    ({ url } = await storage.move(tmpKey, key));
+  } catch (err) {
+    // complete gọi đồng thời: lượt sau thấy nguồn đã chuyển hoặc đích đã có
+    if (err instanceof StorageMoveConflictError) {
+      throw new ApiError(400, 'UPLOAD_INCOMPLETE', 'Video chưa tải lên xong hoặc đã được xử lý');
+    }
+    throw err;
+  }
   return Media.create({
     kind: 'video',
     key,

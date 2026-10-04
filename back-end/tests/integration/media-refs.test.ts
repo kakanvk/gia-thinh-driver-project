@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app';
-import { collectPostMediaIds, syncMediaRefs } from '../../src/modules/media/media.refs';
+import { collectPostMediaIds, syncMediaRefs, withMediaRefs } from '../../src/modules/media/media.refs';
 import { Media } from '../../src/modules/media/media.model';
 import { setStorage } from '../../src/shared/storage';
 import { authHeader, createCategory, createUser } from '../helpers/factories';
@@ -86,6 +86,49 @@ describe('syncMediaRefs', () => {
     expect(await refsOf(b.id)).toEqual(['post:p1']);
     await syncMediaRefs('post', 'p1', []);
     expect(await refsOf(b.id)).toEqual([]);
+  });
+});
+
+describe('withMediaRefs', () => {
+  it('media bị xoá giữa lúc kiểm và lúc lưu → 400, không lưu, không để lại ref', async () => {
+    const { user } = await createUser({ role: 'editor' });
+    const a = await makeMedia('image', user.id);
+    const gone = await makeMedia('image', user.id);
+    await gone.deleteOne();
+    let saved = false;
+    const run = withMediaRefs('post', 'p1', [a.id, gone.id], async () => {
+      saved = true;
+    });
+    await expect(run).rejects.toMatchObject({ status: 400 });
+    expect(saved).toBe(false);
+    expect(await refsOf(a.id)).toEqual([]);
+  });
+
+  it('gắn ref trước khi lưu (media không xoá được trong lúc lưu); lưu lỗi → gỡ ref vừa gắn, giữ ref cũ', async () => {
+    const { user } = await createUser({ role: 'editor' });
+    const a = await makeMedia('image', user.id);
+    const b = await makeMedia('image', user.id);
+    const pid = '0123456789abcdef01234567';
+    await syncMediaRefs('post', pid, [a.id]);
+    const app = createApp();
+    const run = withMediaRefs('post', pid, [a.id, b.id], async () => {
+      expect(await refsOf(b.id)).toEqual([`post:${pid}`]);
+      expect((await request(app).delete(`/api/v1/media/${b.id}`).set(authHeader(user))).status).toBe(409);
+      throw new Error('lưu lỗi');
+    });
+    await expect(run).rejects.toThrow('lưu lỗi');
+    expect(await refsOf(a.id)).toEqual([`post:${pid}`]);
+    expect(await refsOf(b.id)).toEqual([]);
+  });
+
+  it('lưu xong → gỡ ref khỏi media không còn dùng', async () => {
+    const { user } = await createUser({ role: 'editor' });
+    const a = await makeMedia('image', user.id);
+    const b = await makeMedia('image', user.id);
+    await syncMediaRefs('post', 'p1', [a.id]);
+    await expect(withMediaRefs('post', 'p1', [b.id], async () => 'ok')).resolves.toBe('ok');
+    expect(await refsOf(a.id)).toEqual([]);
+    expect(await refsOf(b.id)).toEqual(['post:p1']);
   });
 });
 

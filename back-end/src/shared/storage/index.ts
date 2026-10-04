@@ -26,4 +26,4 @@ export function setStorage(next: StorageDriver | undefined): void {
   driver = next;
 }
 
-export type { StorageDriver } from './types';
+export { StorageMoveConflictError, type StorageDriver } from './types';

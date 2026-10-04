@@ -187,6 +187,35 @@ describe('upload video thẳng lên kho', () => {
     expect((await complete(user, { uploadId })).status).toBe(400);
     expect(await Media.countDocuments()).toBe(1);
   });
+
+  it('PUT lại cùng uploadId (URL còn hạn) rồi complete → 400, video đã lưu không bị thay, tmp bị xoá', async () => {
+    const { user } = await createUser({ role: 'editor' });
+    const uploadId = (await init(user, { filename: 'a.mp4', contentType: 'video/mp4', size: 2048 })).body.data.uploadId;
+    storage.seed(uploadId, 'video/mp4', 2048);
+    const first = await complete(user, { uploadId });
+    expect(first.status).toBe(201);
+    const saved = storage.objects.get(first.body.data.key);
+
+    storage.objects.set(uploadId, { body: Buffer.from('noi dung khac'), contentType: 'video/mp4' });
+    const again = await complete(user, { uploadId });
+    expect(again.status).toBe(400);
+    expect(again.body.error.code).toBe('UPLOAD_INCOMPLETE');
+    expect(storage.objects.get(first.body.data.key)).toBe(saved);
+    expect(storage.objects.has(uploadId)).toBe(false);
+    expect(storage.callsOf('move')).toHaveLength(1);
+    expect(await Media.countDocuments()).toBe(1);
+  });
+
+  it('hai lượt complete đồng thời → một 201, một 400 (không 500)', async () => {
+    const { user } = await createUser({ role: 'editor' });
+    const uploadId = (await init(user, { filename: 'a.mp4', contentType: 'video/mp4', size: 2048 })).body.data.uploadId;
+    storage.seed(uploadId, 'video/mp4', 2048);
+    const statuses = (await Promise.all([complete(user, { uploadId }), complete(user, { uploadId })])).map(
+      (res) => res.status,
+    );
+    expect(statuses.sort()).toEqual([201, 400]);
+    expect(await Media.countDocuments()).toBe(1);
+  });
 });
 
 describe('sửa / lọc / xoá media', () => {

@@ -1,9 +1,9 @@
-import type { Types } from 'mongoose';
+import type { FilterQuery, Types } from 'mongoose';
 import { ApiError } from '../../utils/ApiError';
 import { recordAudit, snapshot } from '../audit/audit.service';
 import { Media, type IMedia, type MediaKind } from '../media/media.model';
-import { syncMediaRefs } from '../media/media.refs';
-import { GalleryItem, type GalleryItemDoc } from './gallery.model';
+import { syncMediaRefs, withMediaRefs } from '../media/media.refs';
+import { GalleryItem, type GalleryItemDoc, type IGalleryItem } from './gallery.model';
 import {
   MAX_GALLERY_ITEMS,
   type CreateGalleryItemInput,
@@ -57,12 +57,21 @@ async function presentMany(items: GalleryItemDoc[]) {
   return items.map((item) => present(item, media));
 }
 
-const sorted = () => GalleryItem.find().sort({ order: 1, createdAt: 1 }).limit(MAX_GALLERY_ITEMS);
+const sorted = (filter: FilterQuery<IGalleryItem> = {}) =>
+  GalleryItem.find(filter).sort({ order: 1, createdAt: 1 }).limit(MAX_GALLERY_ITEMS);
+
+/** Lọc loại trong truy vấn (trước `limit`), không lọc sau khi đã cắt danh sách. */
+async function kindFilter(kind: MediaKind | undefined): Promise<FilterQuery<IGalleryItem>> {
+  if (!kind) return {};
+  const used = await GalleryItem.distinct('mediaId');
+  const ids = await Media.distinct('_id', { _id: { $in: used }, kind: kind === 'image' ? { $ne: 'video' } : 'video' });
+  return { mediaId: { $in: ids } };
+}
 
 export async function listGallery(query: ListGalleryQuery) {
-  const filter = query.visible ? { visible: query.visible === 'true' } : {};
-  const items = await presentMany(await sorted().find(filter));
-  return query.kind ? items.filter((item) => item.media?.kind === query.kind) : items;
+  const filter: FilterQuery<IGalleryItem> = await kindFilter(query.kind);
+  if (query.visible) filter.visible = query.visible === 'true';
+  return presentMany(await sorted(filter));
 }
 
 async function findItem(id: string): Promise<GalleryItemDoc> {
@@ -98,9 +107,13 @@ export async function getGalleryItem(id: string) {
 }
 
 export async function createGalleryItem(actor: Actor, input: CreateGalleryItemInput) {
+  // Danh sách/sắp xếp chỉ xử lý tối đa MAX_GALLERY_ITEMS mục: mục vượt quá sẽ không bao giờ hiện
+  if ((await GalleryItem.countDocuments()) >= MAX_GALLERY_ITEMS) {
+    throw ApiError.badRequest(`Thư viện tối đa ${MAX_GALLERY_ITEMS} mục, hãy xoá bớt mục cũ`);
+  }
   await assertMedia(input.mediaId, input.posterMediaId);
   const last = await GalleryItem.findOne().sort({ order: -1 }).select({ order: 1 }).lean();
-  const item = await GalleryItem.create({
+  const item = new GalleryItem({
     mediaId: input.mediaId,
     posterMediaId: input.posterMediaId ?? null,
     caption: input.caption || null,
@@ -108,7 +121,7 @@ export async function createGalleryItem(actor: Actor, input: CreateGalleryItemIn
     order: last ? last.order + 1 : 0,
     createdBy: actor.id,
   });
-  await syncMediaRefs('gallery', item.id, refIds(item));
+  await withMediaRefs('gallery', item.id, refIds(item), () => item.save());
   await recordAudit({
     actorId: actor.id,
     action: 'gallery.create',
@@ -128,8 +141,7 @@ export async function updateGalleryItem(actor: Actor, id: string, input: UpdateG
   }
   if (input.caption !== undefined) item.caption = input.caption || null;
   if (input.visible !== undefined) item.visible = input.visible;
-  await item.save();
-  await syncMediaRefs('gallery', item.id, refIds(item));
+  await withMediaRefs('gallery', item.id, refIds(item), () => item.save());
   await recordAudit({
     actorId: actor.id,
     action: 'gallery.update',
@@ -164,11 +176,11 @@ export async function reorderGallery(actor: Actor, ids: string[]) {
 }
 
 export async function listPublicGallery(query: PublicGalleryQuery) {
-  const items = await sorted().find({ visible: true });
+  const items = await sorted({ ...(await kindFilter(query.kind)), visible: true });
   const media = await loadMedia(items.flatMap((item) => [item.mediaId, item.posterMediaId]));
   return items.flatMap((item) => {
     const main = media.get(String(item.mediaId));
-    if (!main || (query.kind && kindOf(main) !== query.kind)) return [];
+    if (!main) return [];
     const poster = item.posterMediaId ? media.get(String(item.posterMediaId)) : undefined;
     return [
       {

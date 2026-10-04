@@ -3,7 +3,15 @@ import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { env } from '../../config/env';
 import { ApiError } from '../../utils/ApiError';
-import { assertSafeKey, joinUrl, UPLOAD_URL_TTL_MS, type StorageDriver, type StoredObject, type UploadUrl } from './types';
+import {
+  assertSafeKey,
+  joinUrl,
+  StorageMoveConflictError,
+  UPLOAD_URL_TTL_MS,
+  type StorageDriver,
+  type StoredObject,
+  type UploadUrl,
+} from './types';
 
 export type DirectUploadClaims = { key: string; contentType: string; maxBytes: number; exp: number };
 
@@ -122,8 +130,12 @@ export class LocalStorageDriver implements StorageDriver {
   async move(fromKey: string, toKey: string): Promise<{ url: string }> {
     const from = this.filePath(fromKey);
     const to = this.filePath(toKey);
+    // fs.rename ghi đè đích: kiểm trước để không thay nội dung media đang dùng
+    if (await stat(to).then(() => true, () => false)) throw new StorageMoveConflictError(fromKey, toKey);
     await mkdir(path.dirname(to), { recursive: true });
-    await rename(from, to);
+    await rename(from, to).catch((err: NodeJS.ErrnoException) => {
+      throw err.code === 'ENOENT' ? new StorageMoveConflictError(fromKey, toKey) : err;
+    });
     await rename(from + META_SUFFIX, to + META_SUFFIX).catch((err: NodeJS.ErrnoException) => {
       if (err.code !== 'ENOENT') throw err;
     });

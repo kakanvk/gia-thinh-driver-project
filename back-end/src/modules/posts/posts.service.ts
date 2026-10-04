@@ -7,7 +7,7 @@ import { slugify } from '../../utils/slugify';
 import { recordAudit } from '../audit/audit.service';
 import { Category } from '../categories/category.model';
 import { Media } from '../media/media.model';
-import { collectContentMediaIds, collectPostMediaIds, syncMediaRefs } from '../media/media.refs';
+import { collectContentMediaIds, collectPostMediaIds, withMediaRefs } from '../media/media.refs';
 import { User } from '../users/user.model';
 import { plateToText, readTimeMinutes } from './plate';
 import { Post, type IPost, type PostDoc, type PostStatus } from './post.model';
@@ -118,7 +118,7 @@ export async function createPost(actor: Actor, input: CreatePostInput): Promise<
   const slug = input.slug ?? (await uniqueSlug(slugify(input.title)));
   const derived = deriveFromContent(input.content);
   const authorName = input.authorName ?? (await User.findById(actor.id))?.name ?? 'Ban biên tập';
-  const post = await Post.create({
+  const post = new Post({
     ...input,
     ...derived,
     slug,
@@ -130,7 +130,7 @@ export async function createPost(actor: Actor, input: CreatePostInput): Promise<
     status: 'draft',
     publishedAt: null,
   });
-  await syncMediaRefs('post', post.id, collectPostMediaIds(post));
+  await withMediaRefs('post', post.id, collectPostMediaIds(post), () => post.save(), MEDIA_MISSING);
   await recordAudit({ actorId: actor.id, action: 'post.create', entity: 'post', entityId: post.id, after: summary(post) });
   return post;
 }
@@ -145,9 +145,10 @@ export async function updatePost(actor: Actor, id: string, input: UpdatePostInpu
   post.set({ ...input, ...derived });
   if (input.excerpt !== undefined) post.excerptAuto = false;
   else if (derived && post.excerptAuto) post.excerpt = excerptFrom(derived.contentText);
-  await post.save();
   if (input.content !== undefined || input.cover !== undefined) {
-    await syncMediaRefs('post', id, collectPostMediaIds(post));
+    await withMediaRefs('post', id, collectPostMediaIds(post), () => post.save(), MEDIA_MISSING);
+  } else {
+    await post.save();
   }
   await recordAudit({
     actorId: actor.id,
@@ -191,7 +192,7 @@ export async function transitionPost(
 
 export async function duplicatePost(actor: Actor, id: string): Promise<PostDoc> {
   const source = await getPost(id);
-  const copy = await Post.create({
+  const copy = new Post({
     title: `${source.title} (bản sao)`,
     slug: await uniqueSlug(source.slug),
     excerpt: source.excerpt,
@@ -209,7 +210,7 @@ export async function duplicatePost(actor: Actor, id: string): Promise<PostDoc> 
     publishedAt: null,
     views: 0,
   });
-  await syncMediaRefs('post', copy.id, collectPostMediaIds(copy));
+  await withMediaRefs('post', copy.id, collectPostMediaIds(copy), () => copy.save(), MEDIA_MISSING);
   await recordAudit({
     actorId: actor.id,
     action: 'post.duplicate',

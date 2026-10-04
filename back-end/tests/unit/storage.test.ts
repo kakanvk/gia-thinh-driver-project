@@ -4,7 +4,7 @@ import path from 'node:path';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../../src/app';
-import { setStorage } from '../../src/shared/storage';
+import { setStorage, StorageMoveConflictError } from '../../src/shared/storage';
 import { GcsStorageDriver, type BucketLike } from '../../src/shared/storage/gcs';
 import { LocalStorageDriver } from '../../src/shared/storage/local';
 
@@ -52,7 +52,7 @@ describe('GcsStorageDriver — signed URL, stat, move', () => {
       delete: vi.fn().mockResolvedValue(undefined),
       getSignedUrl: vi.fn().mockResolvedValue(['https://signed.example/upload']),
       getMetadata: vi.fn().mockResolvedValue([{ size: '1234', contentType: 'video/mp4' }]),
-      move: vi.fn().mockResolvedValue(undefined),
+      copy: vi.fn().mockResolvedValue(undefined),
       setMetadata: vi.fn().mockResolvedValue(undefined),
       ...overrides,
     };
@@ -101,9 +101,27 @@ describe('GcsStorageDriver — signed URL, stat, move', () => {
     bucket.file.mockImplementation(((name: string) => (name === '2026/10/a.mp4' ? moved : file)) as never);
     const driver = new GcsStorageDriver(bucket, 'https://cdn.giathinh.vn');
     const { url } = await driver.move('tmp/a.mp4', '2026/10/a.mp4');
-    expect(file.move).toHaveBeenCalledWith('2026/10/a.mp4');
+    // không ghi đè object đích đã có (ifGenerationMatch: 0), rồi xoá nguồn
+    expect(file.copy).toHaveBeenCalledWith('2026/10/a.mp4', { preconditionOpts: { ifGenerationMatch: 0 } });
+    expect(file.delete).toHaveBeenCalledWith({ ignoreNotFound: true });
     expect(moved.setMetadata).toHaveBeenCalledWith({ cacheControl: 'public, max-age=31536000, immutable' });
     expect(url).toBe('https://cdn.giathinh.vn/2026/10/a.mp4');
+  });
+
+  it('move: đích đã có (412) hoặc nguồn không còn (404) → StorageMoveConflictError, không xoá nguồn', async () => {
+    for (const code of [412, 404]) {
+      const { bucket, file } = fakeBucket({
+        copy: vi.fn().mockRejectedValue(Object.assign(new Error('x'), { code })),
+      });
+      await expect(new GcsStorageDriver(bucket).move('tmp/a.mp4', '2026/10/a.mp4')).rejects.toBeInstanceOf(
+        StorageMoveConflictError,
+      );
+      expect(file.delete).not.toHaveBeenCalled();
+    }
+    const { bucket } = fakeBucket({ copy: vi.fn().mockRejectedValue(Object.assign(new Error('x'), { code: 500 })) });
+    await expect(new GcsStorageDriver(bucket).move('tmp/a.mp4', '2026/10/a.mp4')).rejects.not.toBeInstanceOf(
+      StorageMoveConflictError,
+    );
   });
 
   it('chặn key không an toàn', async () => {
@@ -153,6 +171,14 @@ describe('LocalStorageDriver — upload thẳng qua route nội bộ', () => {
     expect(await driver.stat('tmp/a.mp4')).toBeNull();
     expect(await driver.stat('2026/10/a.mp4')).toEqual({ size: 10, contentType: 'video/mp4' });
     expect(await readFile(path.join(root, '2026/10/a.mp4'), 'utf8')).toBe('0123456789');
+  });
+
+  it('move không ghi đè đích đã có; nguồn không còn → StorageMoveConflictError', async () => {
+    await driver.put('tmp/a.mp4', Buffer.from('new'), 'video/mp4');
+    await driver.put('2026/10/a.mp4', Buffer.from('old'), 'video/mp4');
+    await expect(driver.move('tmp/a.mp4', '2026/10/a.mp4')).rejects.toBeInstanceOf(StorageMoveConflictError);
+    expect(await readFile(path.join(root, '2026/10/a.mp4'), 'utf8')).toBe('old');
+    await expect(driver.move('tmp/none.mp4', '2026/10/b.mp4')).rejects.toBeInstanceOf(StorageMoveConflictError);
   });
 
   it('stat suy contentType từ đuôi file khi không có meta', async () => {

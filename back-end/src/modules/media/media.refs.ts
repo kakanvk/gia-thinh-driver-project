@@ -1,3 +1,4 @@
+import { ApiError } from '../../utils/ApiError';
 import { Media } from './media.model';
 
 export type MediaRefEntity = 'post' | 'gallery';
@@ -40,4 +41,45 @@ export async function syncMediaRefs(entity: MediaRefEntity, entityId: string, me
   const ref = { entity, entityId };
   await Media.updateMany({ _id: { $nin: ids }, refs: { $elemMatch: ref } }, { $pull: { refs: ref } });
   if (ids.length > 0) await Media.updateMany({ _id: { $in: ids } }, { $addToSet: { refs: ref } });
+}
+
+/**
+ * Gắn ref cho media **trước** khi lưu thực thể rồi mới lưu: `DELETE /media/:id` chỉ xoá media có `refs` rỗng,
+ * nên media đã kiểm tồn tại không thể bị xoá xen giữa lúc kiểm và lúc lưu. Media nào không còn → gỡ phần vừa gắn,
+ * 400 và không lưu; `save` lỗi → gỡ phần vừa gắn. Lưu xong thì gỡ ref khỏi media không còn dùng.
+ */
+export async function withMediaRefs<T>(
+  entity: MediaRefEntity,
+  entityId: string,
+  mediaIds: string[],
+  save: () => Promise<T>,
+  missingMessage = 'Media không tồn tại trong kho media',
+): Promise<T> {
+  const ids = [...new Set(mediaIds.filter((id) => OBJECT_ID.test(id)))];
+  const ref = { entity, entityId };
+  const held = ids.length
+    ? new Set(
+        (await Media.find({ _id: { $in: ids }, refs: { $elemMatch: ref } }, { _id: 1 }).lean()).map((m) => String(m._id)),
+      )
+    : new Set<string>();
+  const added = ids.filter((id) => !held.has(id));
+  const release = async () => {
+    if (added.length > 0) await Media.updateMany({ _id: { $in: added } }, { $pull: { refs: ref } });
+  };
+  if (added.length > 0) {
+    const result = await Media.updateMany({ _id: { $in: added } }, { $addToSet: { refs: ref } });
+    if (result.matchedCount < added.length) {
+      await release();
+      throw ApiError.badRequest(missingMessage, [{ path: 'body', message: missingMessage }]);
+    }
+  }
+  let saved: T;
+  try {
+    saved = await save();
+  } catch (err) {
+    await release();
+    throw err;
+  }
+  await syncMediaRefs(entity, entityId, ids);
+  return saved;
 }

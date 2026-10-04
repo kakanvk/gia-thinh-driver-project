@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../../src/app';
+import { GalleryItem } from '../../src/modules/gallery/gallery.model';
 import { Media } from '../../src/modules/media/media.model';
 import { setStorage } from '../../src/shared/storage';
 import { authHeader, createUser } from '../helpers/factories';
@@ -196,6 +197,31 @@ describe('gallery — thêm/sửa/xoá mục', () => {
     expect((await request(app).delete(`/api/v1/media/${poster.id}`).set(authHeader(editor))).status).toBe(204);
     expect(storage.callsOf('delete')).toEqual([[poster.key]]);
     expect((await request(app).delete(`/api/v1/gallery/${item.id}`).set(authHeader(editor))).status).toBe(404);
+  });
+});
+
+describe('gallery — giới hạn số mục', () => {
+  it('đủ 500 mục → thêm nữa 400', async () => {
+    const { app, editor, image, video } = await setup();
+    await GalleryItem.insertMany(
+      Array.from({ length: 499 }, (_, order) => ({ mediaId: image.id, order, visible: true, createdBy: editor.id })),
+    );
+    const add = (mediaId: string) => request(app).post('/api/v1/gallery').set(authHeader(editor)).send({ mediaId });
+    expect((await add(video.id)).status).toBe(201);
+    expect((await add(image.id)).status).toBe(400);
+    expect(await GalleryItem.countDocuments()).toBe(500);
+  });
+
+  it('?kind lọc trong truy vấn trước giới hạn: dữ liệu cũ quá 500 mục vẫn thấy video ở cuối', async () => {
+    const { app, editor, image, video } = await setup();
+    await GalleryItem.insertMany([
+      ...Array.from({ length: 500 }, (_, order) => ({ mediaId: image.id, order, visible: true, createdBy: editor.id })),
+      { mediaId: video.id, order: 500, visible: true, createdBy: editor.id },
+    ]);
+    const videos = await request(app).get('/api/v1/gallery?kind=video').set(authHeader(editor));
+    expect(videos.body.data.map((item: { mediaId: string }) => item.mediaId)).toEqual([video.id]);
+    const pub = await request(app).get('/api/v1/public/gallery?kind=video');
+    expect(pub.body.data.map((item: { kind: string }) => item.kind)).toEqual(['video']);
   });
 });
 

@@ -8,7 +8,16 @@ export interface StorageDriver {
   /** URL ký sẵn để trình duyệt PUT thẳng file lên (hết hạn sau UPLOAD_URL_TTL_MS). */
   createUploadUrl(key: string, contentType: string, maxBytes: number): Promise<UploadUrl>;
   stat(key: string): Promise<StoredObject | null>;
+  /** Không ghi đè: nguồn không còn hoặc đích đã tồn tại → `StorageMoveConflictError`. */
   move(fromKey: string, toKey: string): Promise<{ url: string }>;
+}
+
+/** `move` không thực hiện được vì object nguồn không còn hoặc object đích đã tồn tại. */
+export class StorageMoveConflictError extends Error {
+  constructor(fromKey: string, toKey: string) {
+    super(`Không chuyển được ${fromKey} → ${toKey}: nguồn không còn hoặc đích đã tồn tại`);
+    this.name = 'StorageMoveConflictError';
+  }
 }
 
 export const UPLOAD_URL_TTL_MS = 15 * 60_000;

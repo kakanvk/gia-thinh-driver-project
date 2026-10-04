@@ -1,4 +1,4 @@
-import type { StorageDriver } from '../../src/shared/storage';
+import { StorageMoveConflictError, type StorageDriver } from '../../src/shared/storage';
 
 type Stored = { body: Buffer; contentType: string; size?: number };
 
@@ -51,7 +51,7 @@ export class MemoryStorage implements StorageDriver {
   async move(fromKey: string, toKey: string) {
     this.record('move', fromKey, toKey);
     const object = this.objects.get(fromKey);
-    if (!object) throw new Error(`Không có object ${fromKey}`);
+    if (!object || this.objects.has(toKey)) throw new StorageMoveConflictError(fromKey, toKey);
     this.objects.delete(fromKey);
     this.objects.set(toKey, object);
     return { url: `${this.baseUrl}/${toKey}` };
