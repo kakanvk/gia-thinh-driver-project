@@ -38,3 +38,18 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export function addFixedDays(date: Date, days: number): Date {
   return new Date(date.getTime() + days * DAY_MS);
 }
+
+export function formatVn(date: Date, pattern: string): string {
+  return formatInTimeZone(date, VN_OFFSET, pattern);
+}
+
+export function vnMonthRange(month: string): { start: Date; end: Date } {
+  const year = Number(month.slice(0, 4));
+  const monthIndex = Number(month.slice(5, 7));
+  const nextYear = monthIndex === 12 ? year + 1 : year;
+  const nextMonth = monthIndex === 12 ? 1 : monthIndex + 1;
+  return {
+    start: parseDateOnly(`${month}-01`),
+    end: parseDateOnly(`${nextYear}-${String(nextMonth).padStart(2, '0')}-01`),
+  };
+}

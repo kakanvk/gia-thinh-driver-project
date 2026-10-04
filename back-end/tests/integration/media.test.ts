@@ -21,7 +21,9 @@ afterAll(async () => {
 });
 
 async function bigPng(): Promise<Buffer> {
-  return sharp({ create: { width: 3000, height: 1000, channels: 3, background: '#d32f2f' } }).png().toBuffer();
+  return sharp({ create: { width: 3000, height: 1000, channels: 3, background: '#d32f2f' } })
+    .png()
+    .toBuffer();
 }
 
 describe('POST /media', () => {

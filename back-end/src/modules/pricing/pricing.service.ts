@@ -71,7 +71,11 @@ async function resolveFor(branchIds: string[]): Promise<Map<string, ResolvedCour
     branchIds.map((branchId) => {
       const branchOverrides: ResolverOverride[] = overrides
         .filter((override) => override.branchId.toString() === branchId)
-        .map((override) => ({ courseId: override.courseId.toString(), price: override.price, priceNote: override.priceNote }));
+        .map((override) => ({
+          courseId: override.courseId.toString(),
+          price: override.price,
+          priceNote: override.priceNote,
+        }));
       return [branchId, resolveBranchPricing(branchId, courses, branchOverrides, resolverItems)];
     }),
   );
@@ -129,12 +133,21 @@ function assertItemScope(scope: Scope, branchId: string | null): void {
   assertBranchAccess(scope, branchId);
 }
 
-function assertItemValues(values: { amount?: number | null; amountMax?: number | null; hidden?: boolean; branchId: string | null }): void {
+function assertItemValues(values: {
+  amount?: number | null;
+  amountMax?: number | null;
+  hidden?: boolean;
+  branchId: string | null;
+}): void {
   if (values.amount != null && values.amountMax != null && values.amountMax < values.amount) {
-    throw ApiError.badRequest('Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu', [{ path: 'body.amountMax', message: 'Không hợp lệ' }]);
+    throw ApiError.badRequest('Giá tối đa phải lớn hơn hoặc bằng giá tối thiểu', [
+      { path: 'body.amountMax', message: 'Không hợp lệ' },
+    ]);
   }
   if (values.hidden && values.branchId === null) {
-    throw ApiError.badRequest('Chỉ mục riêng của chi nhánh mới dùng để ẩn mục chung', [{ path: 'body.hidden', message: 'Không hợp lệ' }]);
+    throw ApiError.badRequest('Chỉ mục riêng của chi nhánh mới dùng để ẩn mục chung', [
+      { path: 'body.hidden', message: 'Không hợp lệ' },
+    ]);
   }
 }
 
@@ -154,7 +167,13 @@ export async function createPriceItem(actor: Actor, scope: Scope, input: CreateP
   if (branchId) await getBranch(branchId);
   if (courseId) await assertCourseExists(courseId);
   const item = await PriceItem.create({ ...input, branchId, courseId });
-  await recordAudit({ actorId: actor.id, action: 'price_item.create', entity: 'price_item', entityId: item.id, after: snapshot(item) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'price_item.create',
+    entity: 'price_item',
+    entityId: item.id,
+    after: snapshot(item),
+  });
   return item;
 }
 
@@ -164,7 +183,12 @@ async function getPriceItem(id: string): Promise<PriceItemDoc> {
   return item;
 }
 
-export async function updatePriceItem(actor: Actor, scope: Scope, id: string, input: UpdatePriceItemInput): Promise<PriceItemDoc> {
+export async function updatePriceItem(
+  actor: Actor,
+  scope: Scope,
+  id: string,
+  input: UpdatePriceItemInput,
+): Promise<PriceItemDoc> {
   const item = await getPriceItem(id);
   const branchId = idOf(item.branchId);
   assertItemScope(scope, branchId);
@@ -177,7 +201,14 @@ export async function updatePriceItem(actor: Actor, scope: Scope, id: string, in
   const before = snapshot(item);
   item.set(input);
   await item.save();
-  await recordAudit({ actorId: actor.id, action: 'price_item.update', entity: 'price_item', entityId: id, before, after: snapshot(item) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'price_item.update',
+    entity: 'price_item',
+    entityId: id,
+    before,
+    after: snapshot(item),
+  });
   return item;
 }
 
@@ -185,7 +216,13 @@ export async function removePriceItem(actor: Actor, scope: Scope, id: string): P
   const item = await getPriceItem(id);
   assertItemScope(scope, idOf(item.branchId));
   await item.deleteOne();
-  await recordAudit({ actorId: actor.id, action: 'price_item.delete', entity: 'price_item', entityId: id, before: snapshot(item) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'price_item.delete',
+    entity: 'price_item',
+    entityId: id,
+    before: snapshot(item),
+  });
 }
 
 function publicBranch(branch: BranchDoc) {

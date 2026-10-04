@@ -16,7 +16,12 @@ const keySchema = z
   .string()
   .trim()
   .toLowerCase()
-  .pipe(z.string().max(50).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Key chỉ gồm chữ thường không dấu, số và dấu gạch ngang'));
+  .pipe(
+    z
+      .string()
+      .max(50)
+      .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Key chỉ gồm chữ thường không dấu, số và dấu gạch ngang'),
+  );
 
 const editable = {
   label: z.string().trim().min(1).max(150),

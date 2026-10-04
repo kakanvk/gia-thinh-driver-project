@@ -69,6 +69,13 @@ docker compose up -d          # MongoDB ở localhost:27017
 - Trạng thái: `draft → (pending) → published → draft`; `archived` khôi phục về `draft` qua `POST /posts/:id/restore`. Người có quyền bài viết được xuất bản trực tiếp; `publishedAt` ở tương lai = hẹn giờ.
 - Nội dung là Plate JSON; link/ảnh chỉ nhận `http(s)://`, đường dẫn `/...`, `#`, `mailto:`, `tel:`.
 
+## Khách hàng (CRM) và lịch hẹn
+
+- Form tư vấn trên website gửi `POST /api/v1/public/leads` với `branch` (slug từ `/public/branches`), `courseCode` (mã từ `/public/pricing`, bỏ trống nếu chưa chọn), `consent: true`. Trường ẩn `website` phải để trống (chống spam). Giới hạn 10 lần/giờ/IP và 3 lần/24 giờ/SĐT.
+- Cùng SĐT gửi lại khi khách còn đang chăm sóc → không tạo khách mới, ghi "gửi lại form" vào lịch sử.
+- Trạng thái: `new → contacted → consulted → deposited → docs_completed` (đi tiến, có thể nhảy bước); `lost` cần lý do, mở lại bằng `contacted`. "Nhập học" sẽ có ở đợt học viên.
+- Nhân viên chỉ thấy khách và lịch hẹn của chi nhánh mình. Xuất CSV (`/leads/export`) và xóa khách chỉ dành cho quản lý chi nhánh / quản trị viên.
+
 ## Lưu ảnh trên Google Cloud Storage
 
 1. Tạo bucket, bật *Uniform bucket-level access*, cấp `allUsers` quyền `Storage Object Viewer` để ảnh xem công khai.

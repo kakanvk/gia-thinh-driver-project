@@ -21,7 +21,12 @@ describe('admin /courses', () => {
     const { user: admin } = await createUser();
     const res = await request(createApp()).post('/api/v1/courses').set(authHeader(admin)).send(payload);
     expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({ code: 'B', defaultPrice: 16_500_000, active: true, image: { url: '/vehicles/car-b.png' } });
+    expect(res.body.data).toMatchObject({
+      code: 'B',
+      defaultPrice: 16_500_000,
+      active: true,
+      image: { url: '/vehicles/car-b.png' },
+    });
     expect(await AuditLog.countDocuments({ action: 'course.create' })).toBe(1);
   });
 
@@ -50,7 +55,10 @@ describe('admin /courses', () => {
     const { user: manager } = await createUser({ role: 'branch_manager', branchIds: [branch.id] });
     const { user: consultant } = await createUser({ role: 'consultant', branchIds: [branch.id] });
     const app = createApp();
-    const patch = await request(app).patch(`/api/v1/courses/${course.id}`).set(authHeader(manager)).send({ defaultPrice: 1 });
+    const patch = await request(app)
+      .patch(`/api/v1/courses/${course.id}`)
+      .set(authHeader(manager))
+      .send({ defaultPrice: 1 });
     expect(patch.status).toBe(403);
     const list = await request(app).get('/api/v1/courses').set(authHeader(consultant));
     expect(list.status).toBe(200);

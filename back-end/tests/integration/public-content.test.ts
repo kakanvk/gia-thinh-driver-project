@@ -48,7 +48,9 @@ describe('public content', () => {
     const app = createApp();
     expect((await request(app).get('/api/v1/public/posts?category=b')).body.data).toHaveLength(1);
     expect((await request(app).get('/api/v1/public/posts?category=khong-co')).body.meta.total).toBe(0);
-    expect((await request(app).get('/api/v1/public/posts?q=v%C3%B2ng%20s%E1%BB%91')).body.data[0].title).toBe('Mẹo vòng số 8');
+    expect((await request(app).get('/api/v1/public/posts?q=v%C3%B2ng%20s%E1%BB%91')).body.data[0].title).toBe(
+      'Mẹo vòng số 8',
+    );
   });
 
   it('chi tiết: trả content, tăng lượt xem; bài nháp/hẹn giờ/đã xóa → 404', async () => {

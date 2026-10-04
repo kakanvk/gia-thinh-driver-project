@@ -25,9 +25,7 @@ function visibleFilter(): FilterQuery<IPost> {
 }
 
 function publicCategory(category: CategoryDoc | undefined) {
-  return category
-    ? { name: category.name, slug: category.slug, isAnnouncement: category.isAnnouncement }
-    : null;
+  return category ? { name: category.name, slug: category.slug, isAnnouncement: category.isAnnouncement } : null;
 }
 
 function summarize(post: PostDoc, categories: Map<string, CategoryDoc>) {

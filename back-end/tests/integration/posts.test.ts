@@ -128,7 +128,10 @@ describe('trạng thái bài viết', () => {
     const again = await request(app).post(`${base}/publish`).set(authHeader(editor)).send({});
     expect(new Date(again.body.data.publishedAt).getTime()).toBeLessThanOrEqual(Date.now());
 
-    const second = await request(app).post('/api/v1/posts').set(authHeader(editor)).send(newPost(category.id, { title: 'Bài thứ hai' }));
+    const second = await request(app)
+      .post('/api/v1/posts')
+      .set(authHeader(editor))
+      .send(newPost(category.id, { title: 'Bài thứ hai' }));
     const base2 = `/api/v1/posts/${second.body.data.id}`;
     const first = await request(app).post(`${base2}/publish`).set(authHeader(editor)).send({});
     await request(app).post(`${base2}/unpublish`).set(authHeader(editor));
@@ -182,7 +185,10 @@ describe('danh sách / xóa', () => {
   it('xóa mềm bài viết; bài đã xóa mềm không chặn xóa chuyên mục, bài còn sống thì 409', async () => {
     const { app, category, editor } = await setup();
     const { body } = await request(app).post('/api/v1/posts').set(authHeader(editor)).send(newPost(category.id));
-    const live = await request(app).post('/api/v1/posts').set(authHeader(editor)).send(newPost(category.id, { title: 'Bài còn sống' }));
+    const live = await request(app)
+      .post('/api/v1/posts')
+      .set(authHeader(editor))
+      .send(newPost(category.id, { title: 'Bài còn sống' }));
     expect((await request(app).delete(`/api/v1/posts/${body.data.id}`).set(authHeader(editor))).status).toBe(204);
     expect(await Post.countDocuments()).toBe(1);
     const blocked = await request(app).delete(`/api/v1/categories/${category.id}`).set(authHeader(editor));
@@ -204,8 +210,14 @@ describe('tóm tắt tự động', () => {
     expect(auto.body.data.excerptAuto).toBe(true);
     expect(manual.body.data.excerptAuto).toBe(false);
     const newContent = [{ type: 'p', children: [{ text: 'Nội dung hoàn toàn mới' }] }];
-    const a = await request(app).patch(`/api/v1/posts/${auto.body.data.id}`).set(authHeader(editor)).send({ content: newContent });
-    const m = await request(app).patch(`/api/v1/posts/${manual.body.data.id}`).set(authHeader(editor)).send({ content: newContent });
+    const a = await request(app)
+      .patch(`/api/v1/posts/${auto.body.data.id}`)
+      .set(authHeader(editor))
+      .send({ content: newContent });
+    const m = await request(app)
+      .patch(`/api/v1/posts/${manual.body.data.id}`)
+      .set(authHeader(editor))
+      .send({ content: newContent });
     expect(a.body.data.excerpt).toBe('Nội dung hoàn toàn mới');
     expect(m.body.data.excerpt).toBe('Tóm tắt của tôi');
   });

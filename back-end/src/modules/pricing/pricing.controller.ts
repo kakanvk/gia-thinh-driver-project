@@ -19,7 +19,10 @@ export async function getBranch(req: Request, res: Response): Promise<void> {
 
 export async function setOverride(req: Request, res: Response): Promise<void> {
   const { branchId, courseId } = validated<BranchCourseParams>(req, 'params');
-  sendData(res, await service.setOverride(req.user!, req.scope, branchId, courseId, validated<SetOverrideInput>(req, 'body')));
+  sendData(
+    res,
+    await service.setOverride(req.user!, req.scope, branchId, courseId, validated<SetOverrideInput>(req, 'body')),
+  );
 }
 
 export async function removeOverride(req: Request, res: Response): Promise<void> {

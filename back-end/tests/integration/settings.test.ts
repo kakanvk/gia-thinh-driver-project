@@ -33,7 +33,9 @@ describe('/settings', () => {
     const { user: admin } = await createUser();
     const app = createApp();
     expect((await request(app).patch('/api/v1/settings').set(authHeader(admin)).send({ khongCo: 1 })).status).toBe(400);
-    expect((await request(app).patch('/api/v1/settings').set(authHeader(admin)).send({ supportEmail: 'sai' })).status).toBe(400);
+    expect((await request(app).patch('/api/v1/settings').set(authHeader(admin)).send({ supportEmail: 'sai' })).status).toBe(
+      400,
+    );
   });
 
   it('nhân viên khác đọc được nhưng không sửa được', async () => {
@@ -41,7 +43,9 @@ describe('/settings', () => {
     const { user } = await createUser({ role: 'consultant', branchIds: [branch.id] });
     const app = createApp();
     expect((await request(app).get('/api/v1/settings').set(authHeader(user))).status).toBe(200);
-    expect((await request(app).patch('/api/v1/settings').set(authHeader(user)).send({ hotline: '0909000000' })).status).toBe(403);
+    expect((await request(app).patch('/api/v1/settings').set(authHeader(user)).send({ hotline: '0909000000' })).status).toBe(
+      403,
+    );
   });
 });
 

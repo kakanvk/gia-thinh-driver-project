@@ -213,7 +213,10 @@ describe('cô lập chi nhánh (branch_manager A không chạm dữ liệu chi n
   it('không chuyển consultant của mình sang chi nhánh B (BRANCH_FORBIDDEN)', async () => {
     const { app, managerA, a, b } = await setup();
     const { user } = await createUser({ role: 'consultant', branchIds: [a.id] });
-    const res = await request(app).patch(`/api/v1/users/${user.id}`).set(authHeader(managerA)).send({ branchIds: [b.id] });
+    const res = await request(app)
+      .patch(`/api/v1/users/${user.id}`)
+      .set(authHeader(managerA))
+      .send({ branchIds: [b.id] });
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('BRANCH_FORBIDDEN');
   });
@@ -221,7 +224,10 @@ describe('cô lập chi nhánh (branch_manager A không chạm dữ liệu chi n
   it('không nâng consultant lên branch_manager (FORBIDDEN)', async () => {
     const { app, managerA, a } = await setup();
     const { user } = await createUser({ role: 'consultant', branchIds: [a.id] });
-    const res = await request(app).patch(`/api/v1/users/${user.id}`).set(authHeader(managerA)).send({ role: 'branch_manager' });
+    const res = await request(app)
+      .patch(`/api/v1/users/${user.id}`)
+      .set(authHeader(managerA))
+      .send({ role: 'branch_manager' });
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('FORBIDDEN');
   });

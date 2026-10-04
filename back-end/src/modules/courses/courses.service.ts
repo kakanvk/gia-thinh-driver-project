@@ -34,7 +34,13 @@ async function assertCodeFree(code: string, exceptId?: string): Promise<void> {
 export async function createCourse(actor: Actor, input: CreateCourseInput): Promise<CourseDoc> {
   await assertCodeFree(input.code);
   const course = await Course.create(input);
-  await recordAudit({ actorId: actor.id, action: 'course.create', entity: 'course', entityId: course.id, after: snapshot(course) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'course.create',
+    entity: 'course',
+    entityId: course.id,
+    after: snapshot(course),
+  });
   return course;
 }
 
@@ -44,7 +50,14 @@ export async function updateCourse(actor: Actor, id: string, input: UpdateCourse
   const before = snapshot(course);
   course.set(input);
   await course.save();
-  await recordAudit({ actorId: actor.id, action: 'course.update', entity: 'course', entityId: id, before, after: snapshot(course) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'course.update',
+    entity: 'course',
+    entityId: id,
+    before,
+    after: snapshot(course),
+  });
   return course;
 }
 

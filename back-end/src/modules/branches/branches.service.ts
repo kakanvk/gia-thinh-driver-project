@@ -46,7 +46,13 @@ export async function createBranch(actor: Actor, input: CreateBranchInput): Prom
   const slug = input.slug ?? slugify(input.name);
   await assertSlugFree(slug);
   const branch = await Branch.create({ ...input, slug });
-  await recordAudit({ actorId: actor.id, action: 'branch.create', entity: 'branch', entityId: branch.id, after: snapshot(branch) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'branch.create',
+    entity: 'branch',
+    entityId: branch.id,
+    after: snapshot(branch),
+  });
   return branch;
 }
 
@@ -57,7 +63,14 @@ export async function updateBranch(actor: Actor, id: string, input: UpdateBranch
   const before = snapshot(branch);
   branch.set(input);
   await branch.save();
-  await recordAudit({ actorId: actor.id, action: 'branch.update', entity: 'branch', entityId: id, before, after: snapshot(branch) });
+  await recordAudit({
+    actorId: actor.id,
+    action: 'branch.update',
+    entity: 'branch',
+    entityId: id,
+    before,
+    after: snapshot(branch),
+  });
   return branch;
 }
 

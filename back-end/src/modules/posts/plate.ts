@@ -55,9 +55,7 @@ function checkUrls(root: unknown, ctx: z.RefinementCtx): void {
       ctx.addIssue({ code: 'custom', path, message: 'Nội dung lồng quá sâu' });
       return false;
     }
-    const entries: [string | number, unknown][] = Array.isArray(value)
-      ? value.map((v, i) => [i, v])
-      : Object.entries(value);
+    const entries: [string | number, unknown][] = Array.isArray(value) ? value.map((v, i) => [i, v]) : Object.entries(value);
     for (const [key, child] of entries) {
       if (typeof key === 'string' && isUrlKey(key) && (typeof child !== 'string' || !SAFE_URL.test(child.trim()))) {
         ctx.addIssue({ code: 'custom', path: [...path, key], message: 'Đường dẫn không an toàn' });

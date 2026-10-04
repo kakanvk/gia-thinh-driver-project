@@ -4,6 +4,7 @@ import { hashPassword, User, type UserDoc, type UserStatus } from '../../src/mod
 
 import { signAccessToken } from '../../src/utils/jwt';
 import { Course, type CourseDoc } from '../../src/modules/courses/course.model';
+import { Lead, type LeadDoc, type LeadSource, type LeadStatus } from '../../src/modules/leads/lead.model';
 
 let seq = 0;
 
@@ -92,4 +93,37 @@ export async function createCategory(
     isAnnouncement: overrides.isAnnouncement ?? false,
     order: overrides.order ?? categorySeq,
   });
+}
+
+let leadSeq = 0;
+
+export async function createLead(
+  overrides: { branchId: string } & Partial<{
+    name: string;
+    phone: string;
+    status: LeadStatus;
+    source: LeadSource;
+    assigneeId: string;
+    nextFollowUpAt: Date;
+    createdAt: Date;
+  }>,
+): Promise<LeadDoc> {
+  leadSeq += 1;
+  const lead = await Lead.create({
+    code: `GT-TEST-${leadSeq}`,
+    name: overrides.name ?? `Khách ${leadSeq}`,
+    phone: overrides.phone ?? `07${String(leadSeq).padStart(8, '0')}`,
+    branchId: overrides.branchId,
+    courseId: null,
+    courseCode: null,
+    source: overrides.source ?? 'website',
+    status: overrides.status ?? 'new',
+    assigneeId: overrides.assigneeId ?? null,
+    nextFollowUpAt: overrides.nextFollowUpAt ?? null,
+    lastActivityAt: new Date(),
+  });
+  if (!overrides.createdAt) return lead;
+  // Ghi thẳng qua driver để Mongoose timestamps không ghi đè createdAt.
+  await Lead.collection.updateOne({ _id: lead._id }, { $set: { createdAt: overrides.createdAt } });
+  return (await Lead.findById(lead._id))!;
 }

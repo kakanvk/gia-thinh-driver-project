@@ -4,12 +4,7 @@ import { authorize } from '../../middlewares/authorize.middleware';
 import { validate } from '../../middlewares/validate.middleware';
 import { idParamsSchema } from '../../shared/zod';
 import * as controller from './courses.controller';
-import {
-  createCourseSchema,
-  listCoursesQuerySchema,
-  reorderCoursesSchema,
-  updateCourseSchema,
-} from './courses.validation';
+import { createCourseSchema, listCoursesQuerySchema, reorderCoursesSchema, updateCourseSchema } from './courses.validation';
 
 export function createCoursesRouter(): Router {
   const router = Router();

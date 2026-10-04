@@ -29,8 +29,7 @@ export const seedBranches: SeedBranch[] = [
     slug: 'long-chau',
     officeName: 'VP3 — Long Châu',
     address: 'Số 15C, đường Phạm Hùng, P. Long Châu, T. Vĩnh Long',
-    mapUrl:
-      'https://www.google.com/maps/search/?api=1&query=15C+Ph%E1%BA%A1m+H%C3%B9ng+Long+Ch%C3%A2u+V%C4%A9nh+Long',
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=15C+Ph%E1%BA%A1m+H%C3%B9ng+Long+Ch%C3%A2u+V%C4%A9nh+Long',
     openingHours: '7:30–17:00 · T2–T7',
     order: 3,
   },

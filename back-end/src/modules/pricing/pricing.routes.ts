@@ -17,7 +17,12 @@ export function createPricingRouter(): Router {
   const router = Router();
   const manage = authorize('pricing.manage', { branchScoped: true });
   router.use(authenticate);
-  router.get('/branches/:branchId', authorize('course.read'), validate({ params: branchParamsSchema }), controller.getBranch);
+  router.get(
+    '/branches/:branchId',
+    authorize('course.read'),
+    validate({ params: branchParamsSchema }),
+    controller.getBranch,
+  );
   router.put(
     '/branches/:branchId/courses/:courseId',
     manage,
@@ -32,7 +37,12 @@ export function createPricingRouter(): Router {
   );
   router.get('/items', authorize('course.read'), validate({ query: listPriceItemsQuerySchema }), controller.listItems);
   router.post('/items', manage, validate({ body: createPriceItemSchema }), controller.createItem);
-  router.patch('/items/:id', manage, validate({ params: idParamsSchema, body: updatePriceItemSchema }), controller.updateItem);
+  router.patch(
+    '/items/:id',
+    manage,
+    validate({ params: idParamsSchema, body: updatePriceItemSchema }),
+    controller.updateItem,
+  );
   router.delete('/items/:id', manage, validate({ params: idParamsSchema }), controller.removeItem);
   return router;
 }

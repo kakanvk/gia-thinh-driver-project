@@ -29,7 +29,9 @@ export function toApiError(err: unknown): ApiError {
     );
   }
   if (err instanceof mongoose.Error.CastError) {
-    return ApiError.badRequest(`Giá trị không hợp lệ cho trường ${err.path}`, [{ path: err.path, message: 'Sai định dạng' }]);
+    return ApiError.badRequest(`Giá trị không hợp lệ cho trường ${err.path}`, [
+      { path: err.path, message: 'Sai định dạng' },
+    ]);
   }
   if (err instanceof mongoose.Error.ValidationError) {
     return ApiError.badRequest(
@@ -51,9 +53,10 @@ export function toApiError(err: unknown): ApiError {
   if (isBodyParseError(err)) return ApiError.badRequest('JSON không hợp lệ');
   if (isClientError(err)) {
     const e = err as { type?: string; status?: number; statusCode?: number };
-    const message = e.type === 'entity.too.large' || e.status === 413 || e.statusCode === 413
-      ? 'Dữ liệu gửi lên quá lớn'
-      : 'Yêu cầu không hợp lệ';
+    const message =
+      e.type === 'entity.too.large' || e.status === 413 || e.statusCode === 413
+        ? 'Dữ liệu gửi lên quá lớn'
+        : 'Yêu cầu không hợp lệ';
     return ApiError.badRequest(message);
   }
   return new ApiError(500, 'INTERNAL_ERROR', 'Đã có lỗi xảy ra, vui lòng thử lại sau');

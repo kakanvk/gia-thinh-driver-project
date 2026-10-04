@@ -254,6 +254,109 @@ export const openApiDocument = {
     '/posts/{id}/archive': { post: op('Bài viết', 'Lưu trữ', { parameters: [idParam] }) },
     '/posts/{id}/restore': { post: op('Bài viết', 'Khôi phục bài lưu trữ về bản nháp', { parameters: [idParam] }) },
     '/posts/{id}/duplicate': { post: op('Bài viết', 'Nhân bản thành bản nháp', { parameters: [idParam] }) },
+    '/leads': {
+      get: op('CRM', 'Danh sách khách (theo chi nhánh của nhân viên)', {
+        parameters: [
+          ...listParams,
+          ...['status', 'branchId', 'assigneeId', 'source', 'courseId', 'followUpDue', 'from', 'to'].map((name) => ({
+            name,
+            in: 'query',
+            schema: { type: 'string' },
+          })),
+        ],
+      }),
+      post: op('CRM', 'Tạo khách (tại quầy/điện thoại)', {
+        requestBody: json({
+          name: 'Nguyễn Văn An',
+          phone: '0903412869',
+          branchId: '<branchId>',
+          courseId: '<courseId>',
+          source: 'walk_in',
+        }),
+      }),
+    },
+    '/leads/export': {
+      get: op('CRM', 'Xuất CSV (quản lý)', {
+        parameters: ['status', 'branchId', 'from', 'to'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
+    '/leads/{id}': {
+      get: op('CRM', 'Chi tiết khách', { parameters: [idParam] }),
+      patch: op('CRM', 'Sửa thông tin khách', { parameters: [idParam], requestBody: json({ note: 'Hỏi lịch cuối tuần' }) }),
+      delete: op('CRM', 'Xóa (mềm) khách (quản lý)', { parameters: [idParam] }),
+    },
+    '/leads/{id}/status': {
+      patch: op('CRM', 'Chuyển trạng thái', {
+        parameters: [idParam],
+        requestBody: json({ status: 'lost', lostReason: 'Chọn trung tâm khác' }),
+      }),
+    },
+    '/leads/{id}/assign': {
+      patch: op('CRM', 'Phân công người phụ trách', {
+        parameters: [idParam],
+        requestBody: json({ assigneeId: '<userId>' }),
+      }),
+    },
+    '/leads/{id}/activities': {
+      get: op('CRM', 'Lịch sử chăm sóc', {
+        parameters: [idParam, ...['page', 'limit'].map((name) => ({ name, in: 'query', schema: { type: 'string' } }))],
+      }),
+      post: op('CRM', 'Ghi cuộc gọi / ghi chú', {
+        parameters: [idParam],
+        requestBody: json({ type: 'call', content: 'Khách hẹn gọi lại', nextFollowUpAt: '2026-10-10T09:00' }),
+      }),
+    },
+    '/appointments': {
+      get: op('Lịch hẹn', 'Danh sách lịch hẹn', {
+        parameters: [
+          ...listParams,
+          ...['from', 'to', 'branchId', 'assigneeId', 'leadId', 'status'].map((name) => ({
+            name,
+            in: 'query',
+            schema: { type: 'string' },
+          })),
+        ],
+      }),
+      post: op('Lịch hẹn', 'Đặt lịch hẹn', {
+        requestBody: json({ leadId: '<leadId>', startAt: '2026-10-24T08:00', type: 'consult', assigneeId: '<userId>' }),
+      }),
+    },
+    '/appointments/calendar': {
+      get: op('Lịch hẹn', 'Lịch theo tháng', {
+        parameters: ['month', 'branchId', 'assigneeId'].map((name) => ({ name, in: 'query', schema: { type: 'string' } })),
+      }),
+    },
+    '/appointments/{id}': {
+      get: op('Lịch hẹn', 'Chi tiết lịch hẹn', { parameters: [idParam] }),
+      patch: op('Lịch hẹn', 'Dời lịch / đổi người phụ trách', {
+        parameters: [idParam],
+        requestBody: json({ startAt: '2026-10-25T14:00' }),
+      }),
+      delete: op('Lịch hẹn', 'Xóa (mềm) lịch hẹn', { parameters: [idParam] }),
+    },
+    '/appointments/{id}/status': {
+      patch: op('Lịch hẹn', 'Đổi trạng thái lịch hẹn', {
+        parameters: [idParam],
+        requestBody: json({ status: 'done', note: 'Khách đã đặt cọc' }),
+      }),
+    },
+    '/public/leads': {
+      post: op(
+        'Công khai',
+        'Gửi form tư vấn',
+        {
+          requestBody: json({
+            name: 'Nguyễn Văn An',
+            phone: '0779666664',
+            branch: 'tan-ngai',
+            courseCode: 'B',
+            preferredContactTime: 'Buổi chiều (13:00–17:30)',
+            consent: true,
+          }),
+        },
+        false,
+      ),
+    },
     '/public/pricing': {
       get: op(
         'Công khai',
