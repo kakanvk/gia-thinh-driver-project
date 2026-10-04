@@ -17,6 +17,7 @@ export const ADMIN_ROUTES: AdminRoute[] = [
   { href: "/admin/giao-vien", permission: "instructor.read" },
   { href: "/admin/xe-tap-lai", permission: "vehicle.read" },
   { href: "/admin/hoc-phi", permission: "tuition.read" },
+  { href: "/admin/thu-vien", permission: "gallery.manage" },
   { href: "/admin/bai-viet", permission: "post.manage" },
   { href: "/admin/cai-dat", permission: null },
   { href: "/admin/tro-giup", permission: null },

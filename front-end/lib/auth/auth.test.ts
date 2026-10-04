@@ -16,6 +16,7 @@ const editor = [
   "course.read",
   "media.read",
   "media.upload",
+  "gallery.manage",
   "category.manage",
   "post.manage",
 ]
@@ -74,13 +75,21 @@ describe("routeFor", () => {
 })
 
 describe("canAccess / firstAllowedPath", () => {
-  it("editor chỉ vào bài viết và trang chung", () => {
+  it("editor chỉ vào thư viện, bài viết và trang chung", () => {
     expect(canAccess("/admin/bai-viet/tao-moi", editor)).toBe(true)
+    expect(canAccess("/admin/thu-vien", editor)).toBe(true)
     expect(canAccess("/admin/hoc-phi", editor)).toBe(false)
     expect(canAccess("/admin", editor)).toBe(false)
     expect(canAccess("/admin/tai-khoan", editor)).toBe(true)
     expect(canAccess("/admin/chi-nhanh", [])).toBe(true)
-    expect(firstAllowedPath(editor)).toBe("/admin/bai-viet")
+    expect(firstAllowedPath(editor)).toBe("/admin/thu-vien")
+  })
+
+  it("thư viện theo gallery.manage", () => {
+    expect(routeFor("/admin/thu-vien")?.permission).toBe("gallery.manage")
+    expect(canAccess("/admin/thu-vien", ["post.manage"])).toBe(false)
+    expect(canAccess("/admin/thu-vien", ["gallery.manage"])).toBe(true)
+    expect(canAccess("/admin/thu-vien", consultant)).toBe(false)
   })
 
   it("giáo viên về lớp học, quản lý về tổng quan", () => {

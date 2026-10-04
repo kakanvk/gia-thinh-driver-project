@@ -17,6 +17,7 @@ import {
   FileText,
   GraduationCap,
   HelpCircle,
+  Images,
   LayoutDashboard,
   LogOut,
   Search,
@@ -78,7 +79,10 @@ const navGroups: NavGroup[] = [
   },
   {
     label: "Nội dung",
-    items: [{ label: "Bài viết", href: "/admin/bai-viet", icon: FileText }],
+    items: [
+      { label: "Thư viện", href: "/admin/thu-vien", icon: Images },
+      { label: "Bài viết", href: "/admin/bai-viet", icon: FileText },
+    ],
   },
   {
     label: "Hệ thống",

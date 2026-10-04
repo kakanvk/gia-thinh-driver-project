@@ -21,7 +21,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MEDIA_PAGE_SIZE, useMediaList } from "@/lib/admin/media"
+import {
+  formatFileSize,
+  MEDIA_PAGE_SIZE,
+  useMediaList,
+} from "@/lib/admin/media"
 import {
   acceptOf,
   readVideoMeta,
@@ -45,11 +49,6 @@ function defaultTitle(kind: PickerKind): string {
   if (kind === "image") return "Chọn ảnh"
   if (kind === "video") return "Chọn video"
   return "Chọn media"
-}
-
-function formatSize(bytes: number): string {
-  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-  return `${Math.max(1, Math.round(bytes / 1024))} KB`
 }
 
 function LibraryPanel({
@@ -295,7 +294,7 @@ function UploadPanel({
           <p className="truncate text-[13px]">
             <span className="font-medium">{file.name}</span>{" "}
             <span className="text-muted-foreground">
-              ({formatSize(file.size)})
+              ({formatFileSize(file.size)})
             </span>
           </p>
         ) : null}
@@ -369,12 +368,15 @@ export function MediaPicker({
   kind = "all",
   onSelect,
   title,
+  defaultTab = "library",
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   kind?: PickerKind
   onSelect: (media: MediaItem) => void
   title?: string
+  // Tab mở sẵn; "upload" chỉ có tác dụng khi có quyền media.upload
+  defaultTab?: "library" | "upload"
 }) {
   const canUpload = useCan("media.upload")
   const [busy, setBusy] = useState(false)
@@ -407,7 +409,10 @@ export function MediaPicker({
               : "Chọn từ kho media"}
           </SheetDescription>
         </SheetHeader>
-        <Tabs defaultValue="library" className="min-h-0 flex-1 gap-0">
+        <Tabs
+          defaultValue={canUpload ? defaultTab : "library"}
+          className="min-h-0 flex-1 gap-0"
+        >
           <TabsList className="mx-4 mt-3">
             <TabsTrigger value="library">Kho media</TabsTrigger>
             {canUpload ? (

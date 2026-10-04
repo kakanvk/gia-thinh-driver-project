@@ -141,3 +141,26 @@ export type MediaItem = {
   refsCount: number
   createdAt: string
 }
+
+// back-end/src/modules/gallery/gallery.service.ts (present)
+export type GalleryItem = {
+  id: string
+  mediaId: string
+  posterMediaId: string | null
+  caption: string | null
+  order: number
+  visible: boolean
+  // null khi media gốc không còn
+  media: {
+    id: string
+    url: string
+    kind: MediaKind
+    alt: string | null
+    width: number | null
+    height: number | null
+    duration: number | null
+  } | null
+  poster: { url: string; alt: string | null } | null
+  createdAt: string
+  updatedAt: string
+}
