@@ -5,11 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AdminGuard } from "@/components/admin/admin-guard"
 
 const replace = vi.fn()
+const push = vi.fn()
 let pathname = "/admin/hoc-phi"
 let auth: Record<string, unknown>
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace, push: vi.fn() }),
+  useRouter: () => ({ replace, push }),
   usePathname: () => pathname,
 }))
 vi.mock("@/components/admin/auth-provider", () => ({ useAuth: () => auth }))
@@ -33,6 +34,8 @@ const editor = {
 
 beforeEach(() => {
   replace.mockClear()
+  push.mockClear()
+  editor.logout.mockClear()
   pathname = "/admin/hoc-phi"
   window.history.replaceState(null, "", "/admin/hoc-phi?page=2")
 })
@@ -137,5 +140,39 @@ describe("AdminGuard", () => {
     expect(
       screen.queryByText("Không có quyền truy cập")
     ).not.toBeInTheDocument()
+  })
+
+  it("menu tài khoản: Tài khoản → /admin/tai-khoan", async () => {
+    auth = editor
+    pathname = "/admin/bai-viet"
+    render(
+      <AdminGuard>
+        <p>nội dung</p>
+      </AdminGuard>
+    )
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mở menu tài khoản" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Tài khoản" })
+    )
+    expect(push).toHaveBeenCalledWith("/admin/tai-khoan")
+  })
+
+  it("menu tài khoản: Đăng xuất gọi logout", async () => {
+    auth = editor
+    pathname = "/admin/bai-viet"
+    render(
+      <AdminGuard>
+        <p>nội dung</p>
+      </AdminGuard>
+    )
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mở menu tài khoản" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Đăng xuất" })
+    )
+    expect(editor.logout).toHaveBeenCalledTimes(1)
   })
 })

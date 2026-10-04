@@ -290,28 +290,28 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onSelect={() => router.push("/admin/tai-khoan")}
+                    onClick={() => router.push("/admin/tai-khoan")}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
                   >
                     <UserCircle aria-hidden="true" className="size-4" />
                     Tài khoản
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => router.push("/admin")}
+                    onClick={() => router.push("/admin")}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
                   >
                     <LayoutDashboard aria-hidden="true" className="size-4" />
                     Tổng quan quản trị
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => router.push("/")}
+                    onClick={() => router.push("/")}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
                   >
                     <ExternalLink aria-hidden="true" className="size-4" />
                     Xem trang web
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => {
+                    onClick={() => {
                       void navigator.clipboard?.writeText("support@giathinh.vn")
                     }}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
@@ -322,7 +322,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={logOut}
+                    onClick={logOut}
                     className="min-h-9 gap-2 px-2 text-[13px]"
                   >
                     <LogOut aria-hidden="true" className="size-4" />
