@@ -8,6 +8,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { SectionHeading, StatusPill } from "@/components/admin/admin-ui"
+import { LeadAppointments } from "@/components/admin/appointments/lead-appointments"
 import { ConfirmDialog } from "@/components/admin/confirm-dialog"
 import { LeadActivities } from "@/components/admin/leads/lead-activities"
 import { LeadAssign } from "@/components/admin/leads/lead-assign"
@@ -242,6 +243,7 @@ export function LeadDetail({ id }: { id: string }) {
               </InfoRow>
             </dl>
           </section>
+          <LeadAppointments lead={lead} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">

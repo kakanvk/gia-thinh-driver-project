@@ -141,6 +141,8 @@ function setup(
   return mockFetch({
     "GET /leads/l1": () => jsonResponse(200, { data: current }),
     "GET /leads/l1/activities": () => jsonResponse(200, activitiesPage),
+    "GET /appointments": () =>
+      jsonResponse(200, { data: [], meta: { page: 1, limit: 20, total: 0 } }),
     ...lookups,
     ...extra,
   })

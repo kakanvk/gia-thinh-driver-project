@@ -9,18 +9,15 @@ import { toast } from "sonner"
 import { AdminPageHeader, StatusPill } from "@/components/admin/admin-ui"
 import { useAuth } from "@/components/admin/auth-provider"
 import { DataTable, type DataTableColumn } from "@/components/admin/data-table"
-import { FilterBar } from "@/components/admin/filter-bar"
+import {
+  FilterBar,
+  FilterSelect,
+  type FilterItem,
+} from "@/components/admin/filter-bar"
 import { LeadFormSheet } from "@/components/admin/leads/lead-form-sheet"
 import { Pagination } from "@/components/admin/pagination"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   formatDate,
   formatTime,
@@ -51,46 +48,6 @@ const FILTER_KEYS = [
   "source",
   "followUpDue",
 ] as const
-// Giá trị "Tất cả" cho Select lọc (Base UI không có item rỗng)
-const ALL = "all"
-
-type Item = { value: string; label: string }
-
-function FilterSelect({
-  label,
-  items,
-  value,
-  onChange,
-}: {
-  label: string
-  items: Item[]
-  value: string
-  onChange: (value: string) => void
-}) {
-  const all = [{ value: ALL, label: `${label}: Tất cả` }, ...items]
-  return (
-    <Select
-      items={all}
-      value={value || ALL}
-      onValueChange={(next) => onChange(!next || next === ALL ? "" : next)}
-    >
-      <SelectTrigger
-        aria-label={label}
-        className="h-9 bg-background text-[13px]"
-      >
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {all.map((item) => (
-          <SelectItem key={item.value} value={item.value}>
-            {item.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-}
-
 // "dd/MM HH:mm" cắt từ chuỗi ISO (không phụ thuộc múi giờ máy)
 function shortDateTime(iso: string): string {
   return `${formatDate(iso).slice(0, 5)} ${formatTime(iso)}`
@@ -129,7 +86,7 @@ export function LeadList() {
     }
   }
 
-  const staffItems: Item[] = [
+  const staffItems: FilterItem[] = [
     ...(user ? [{ value: user.id, label: "Của tôi" }] : []),
     { value: "none", label: "Chưa phân công" },
     ...(staff.data ?? [])

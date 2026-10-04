@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from "react"
 import { Search } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const DEBOUNCE_MS = 300
 
@@ -83,5 +90,45 @@ export function FilterBar({
       ) : null}
       {children}
     </div>
+  )
+}
+
+// Giá trị "Tất cả" cho Select lọc (Base UI không có item rỗng)
+const ALL = "all"
+
+export type FilterItem = { value: string; label: string }
+
+export function FilterSelect({
+  label,
+  items,
+  value,
+  onChange,
+}: {
+  label: string
+  items: FilterItem[]
+  value: string
+  onChange: (value: string) => void
+}) {
+  const all = [{ value: ALL, label: `${label}: Tất cả` }, ...items]
+  return (
+    <Select
+      items={all}
+      value={value || ALL}
+      onValueChange={(next) => onChange(!next || next === ALL ? "" : next)}
+    >
+      <SelectTrigger
+        aria-label={label}
+        className="h-9 bg-background text-[13px]"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {all.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
