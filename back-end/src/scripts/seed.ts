@@ -10,9 +10,25 @@ import { WITH_DELETED } from '../shared/mongoose/softDelete';
 import { seedCatalog } from './seed-catalog';
 import { seedBranches, seedSettings } from './seed-data';
 
-export async function runSeed(
-  opts: { adminUsername?: string; adminPhone?: string; adminPassword?: string } = {},
-): Promise<void> {
+type SeedAdmin = { adminUsername?: string; adminPhone?: string; adminPassword?: string };
+
+export function missingAdminVars(opts: SeedAdmin): string[] {
+  const adminVars = {
+    SEED_ADMIN_USERNAME: opts.adminUsername,
+    SEED_ADMIN_PHONE: opts.adminPhone,
+    SEED_ADMIN_PASSWORD: opts.adminPassword,
+  };
+  return Object.entries(adminVars)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+}
+
+export async function runSeed(opts: SeedAdmin = {}): Promise<void> {
+  const missing = missingAdminVars(opts);
+  if (missing.length > 0 && missing.length < 3) {
+    throw new Error(`Thiếu ${missing.join(', ')} trong .env — cần đủ cả 3 biến SEED_ADMIN_* để tạo admin`);
+  }
+
   for (const branch of seedBranches) {
     await Branch.updateOne({ slug: branch.slug, ...WITH_DELETED }, { $setOnInsert: branch }, { upsert: true });
   }
@@ -49,6 +65,9 @@ if (require.main === module) {
       adminPhone: env.SEED_ADMIN_PHONE,
       adminPassword: env.SEED_ADMIN_PASSWORD,
     });
+    if (!(await User.exists({ role: 'super_admin' }))) {
+      logger.warn('Chưa có tài khoản super_admin: điền SEED_ADMIN_USERNAME, SEED_ADMIN_PHONE, SEED_ADMIN_PASSWORD rồi chạy lại');
+    }
     logger.info('Seed xong');
     await disconnectDb();
   })().catch((err: unknown) => {

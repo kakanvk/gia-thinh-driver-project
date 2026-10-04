@@ -32,8 +32,13 @@ describe('runSeed', () => {
     expect((await Setting.findOne({ key: 'hotline' }))?.value).toBe('0909 000 000');
   });
 
-  it('bỏ qua tạo admin khi thiếu username, SĐT hoặc mật khẩu', async () => {
+  it('bỏ qua tạo admin khi không khai báo SEED_ADMIN_*', async () => {
     await runSeed();
     expect(await User.countDocuments()).toBe(0);
+  });
+
+  it('báo lỗi khi chỉ khai báo một phần SEED_ADMIN_*', async () => {
+    await expect(runSeed({ adminUsername: 'admin', adminPassword: 'Matkhau123' })).rejects.toThrow('SEED_ADMIN_PHONE');
+    expect(await Branch.countDocuments()).toBe(0);
   });
 });
