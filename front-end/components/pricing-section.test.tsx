@@ -59,6 +59,20 @@ describe("PricingSection", () => {
     expect(screen.getByText(/chưa công bố học phí/)).toBeInTheDocument()
   })
 
+  it("điều hướng tab bằng phím mũi tên, chỉ một tab nằm trong thứ tự Tab", async () => {
+    render(<PricingSection pricing={pricing} hotline={hotline} />)
+    const first = screen.getByRole("tab", { name: "VP1 — Tân Ngãi" })
+    const second = screen.getByRole("tab", { name: "VP Vũng Liêm" })
+    expect(first).toHaveAttribute("aria-selected", "true")
+    expect(second).toHaveAttribute("tabindex", "-1")
+    first.focus()
+    await userEvent.keyboard("{ArrowRight}")
+    expect(second).toHaveFocus()
+    await userEvent.keyboard("{Enter}")
+    expect(second).toHaveAttribute("aria-selected", "true")
+    expect(screen.getByText("790.000đ")).toBeInTheDocument()
+  })
+
   it("không có dữ liệu → khối dự phòng có hotline", () => {
     render(<PricingSection pricing={null} hotline={hotline} />)
     expect(screen.getByRole("link", { name: /0779 666 664/ })).toHaveAttribute("href", "tel:0779666664")

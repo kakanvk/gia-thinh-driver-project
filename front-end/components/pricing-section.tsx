@@ -2,11 +2,11 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
 import { ArrowRight, CalendarDays, Check, FileText } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { consultHref, formatPricingItem, formatVnd, VEHICLE_LABELS } from "@/lib/public/format"
 import type { BranchPricing, PricingCourse, PricingItem } from "@/lib/public/types"
 import { cn } from "@/lib/utils"
@@ -141,8 +141,6 @@ function CourseCard({ course, branch }: { course: PricingCourse; branch: BranchP
 }
 
 export function PricingSection({ pricing, hotline }: { pricing: BranchPricing[] | null; hotline: Hotline }) {
-  const [activeSlug, setActiveSlug] = useState(pricing?.[0]?.branch.slug)
-
   if (!pricing || pricing.length === 0) {
     return (
       <div className="rounded-md border border-primary/15 bg-background p-7">
@@ -157,53 +155,42 @@ export function PricingSection({ pricing, hotline }: { pricing: BranchPricing[] 
     )
   }
 
-  const active = pricing.find((item) => item.branch.slug === activeSlug) ?? pricing[0]
-
   return (
-    <div>
-      <div role="tablist" aria-label="Chọn chi nhánh" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {pricing.map((item) => {
-          const selected = item.branch.slug === active.branch.slug
-          return (
-            <button
-              key={item.branch.slug}
-              type="button"
-              role="tab"
-              id={`pricing-tab-${item.branch.slug}`}
-              aria-selected={selected}
-              aria-controls="pricing-panel"
-              onClick={() => setActiveSlug(item.branch.slug)}
-              className={cn(
-                "min-h-11 shrink-0 rounded-full px-4 text-sm font-bold whitespace-nowrap transition-colors",
-                selected
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-primary/15 bg-background text-navy hover:bg-primary/5"
-              )}
-            >
-              {item.branch.officeName || item.branch.name}
-            </button>
-          )
-        })}
-      </div>
-
-      <div
-        role="tabpanel"
-        id="pricing-panel"
-        aria-labelledby={`pricing-tab-${active.branch.slug}`}
-        className="mt-6"
+    <Tabs defaultValue={pricing[0].branch.slug} className="gap-6">
+      <TabsList
+        aria-label="Chọn chi nhánh"
+        className="-mx-1 flex w-full justify-start gap-2 overflow-x-auto rounded-none bg-transparent px-1 pt-0 pb-1 group-data-horizontal/tabs:h-auto"
       >
-        {active.courses.length === 0 ? (
-          <p className="rounded-md border border-primary/15 bg-background p-7 text-sm leading-6 text-muted-foreground">
-            Chi nhánh này chưa công bố học phí trực tuyến, vui lòng gọi hotline để được báo giá.
-          </p>
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
-            {active.courses.map((course) => (
-              <CourseCard key={course.code} course={course} branch={active.branch} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+        {pricing.map((item) => (
+          <TabsTrigger
+            key={item.branch.slug}
+            value={item.branch.slug}
+            className={cn(
+              "h-auto min-h-11 flex-none shrink-0 rounded-full border-primary/15 bg-background px-4 py-0 text-sm font-bold text-navy transition-colors hover:bg-primary/5 hover:text-navy",
+              "data-active:border-transparent data-active:bg-primary data-active:text-primary-foreground data-active:shadow-none data-active:hover:bg-primary",
+              "dark:data-active:border-transparent dark:data-active:bg-primary dark:data-active:text-primary-foreground"
+            )}
+          >
+            {item.branch.officeName || item.branch.name}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      {pricing.map((item) => (
+        <TabsContent key={item.branch.slug} value={item.branch.slug}>
+          {item.courses.length === 0 ? (
+            <p className="rounded-md border border-primary/15 bg-background p-7 text-sm leading-6 text-muted-foreground">
+              Chi nhánh này chưa công bố học phí trực tuyến, vui lòng gọi hotline để được báo giá.
+            </p>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {item.courses.map((course) => (
+                <CourseCard key={course.code} course={course} branch={item.branch} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      ))}
+    </Tabs>
   )
 }
