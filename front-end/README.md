@@ -21,11 +21,19 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 |---|---|---|
 | Dev | `/api/v1` | `http://localhost:4000` |
 | Preview Vercel (`*.vercel.app`) | `/api/v1` | `https://api.giathinh.vn` |
-| Production (`giathinh.vn`) | `https://api.giathinh.vn/api/v1` | không cần |
+| Production (`giathinh.vn`) | `https://api.giathinh.vn/api/v1` | `https://api.giathinh.vn` |
+
+`API_ORIGIN` bắt buộc ở mọi môi trường: server Next.js dùng nó để lấy dữ liệu trang công khai (cache 5 phút). Thiếu hoặc backend không phản hồi thì trang vẫn hiện, các khối dữ liệu hiện thông báo dự phòng.
 
 - Đường dẫn tương đối: Next.js chuyển tiếp `/api/v1/*` và `/uploads/*` tới `API_ORIGIN` (bắt buộc cho preview vì `vercel.app` khác site với `api.giathinh.vn`, cookie đăng nhập sẽ không được gửi).
 - Đường dẫn tuyệt đối: trình duyệt gọi thẳng; backend phải có `CORS_ORIGINS` chứa domain front-end.
 - Cả hai biến được đọc lúc build: đổi giá trị thì build/deploy lại.
+
+## Website công khai
+
+- Trang chủ, `/tu-van`, `/dien-dan`, header và footer lấy dữ liệu từ `/api/v1/public/*`; admin sửa thì website cập nhật trễ tối đa 5 phút.
+- Form tư vấn tạo khách trong CRM.
+- Diễn đàn `/thao-luan` lưu trên trình duyệt (không có backend).
 
 ## Đăng nhập quản trị
 

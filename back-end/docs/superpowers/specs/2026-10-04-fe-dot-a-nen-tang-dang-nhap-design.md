@@ -30,7 +30,7 @@ Dự kiến: front-end trên **Vercel** (tên miền `giathinh.vn`), backend tr�
 | Biến (front-end) | Ý nghĩa | Dev | Preview Vercel | Production |
 |---|---|---|---|---|
 | `NEXT_PUBLIC_API_URL` | Địa chỉ gốc trình duyệt gọi | `/api/v1` (mặc định) | `/api/v1` | `https://api.giathinh.vn/api/v1` |
-| `API_ORIGIN` | Đích rewrite `/api/v1/*`, `/uploads/*` | `http://localhost:4000` | `https://api.giathinh.vn` | (không cần) |
+| `API_ORIGIN` | Đích rewrite `/api/v1/*`, `/uploads/*` | `http://localhost:4000` | `https://api.giathinh.vn` | `https://api.giathinh.vn` (bắt buộc từ đợt B: server lấy dữ liệu công khai) |
 
 - **Chế độ proxy** (`NEXT_PUBLIC_API_URL` tương đối): `next.config.ts` khai báo `rewrites` từ `/api/v1/:path*` và `/uploads/:path*` sang `${API_ORIGIN}`. Trình duyệt chỉ thấy một origin nên cookie `gt_refresh` là cookie first-party, không cần CORS. Bắt buộc ở preview `*.vercel.app` vì `vercel.app` là public suffix: gọi thẳng `api.giathinh.vn` từ đó là cross-site và cookie `SameSite=Lax` không được gửi. Thiếu `API_ORIGIN` thì không khai báo rewrite (build vẫn chạy).
 - **Chế độ gọi thẳng** (`NEXT_PUBLIC_API_URL` tuyệt đối): `giathinh.vn` và `api.giathinh.vn` cùng site nên cookie vẫn được gửi với `credentials: "include"`. Backend cần `CORS_ORIGINS=https://giathinh.vn,https://www.giathinh.vn`.

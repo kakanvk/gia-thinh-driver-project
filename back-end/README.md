@@ -143,6 +143,7 @@ Front-end (`front-end/`) gọi API theo `NEXT_PUBLIC_API_URL`:
   - `TRUST_PROXY=1` khi chạy sau nginx (nginx gắn `X-Forwarded-For`), để giới hạn đăng nhập tính theo IP người dùng.
   - `COOKIE_DOMAIN` để trống (cookie `gt_refresh` thuộc `api.giathinh.vn`; `giathinh.vn` và `api.giathinh.vn` cùng site nên trình duyệt vẫn gửi).
 - Preflight CORS được trình duyệt cache 10 phút (`Access-Control-Max-Age: 600`).
+- Server Next.js gọi `/api/v1/public/*` từ `API_ORIGIN` (cache 5 phút); lượt xem tin đếm qua `POST /public/posts/:slug/view`.
 
 ## Lưu ảnh trên Google Cloud Storage
 
