@@ -243,6 +243,7 @@ export type PricingItem = {
   note: string | null
 }
 
+// API không trả `order`: các gói đã được sắp theo thứ tự hiển thị trong từng chi nhánh
 export type PricingCourse = {
   code: string
   name: string
@@ -252,7 +253,6 @@ export type PricingCourse = {
   image: PublicImage | null
   price: number
   priceNote: string | null
-  order: number
   fees: PricingItem[]
   discounts: PricingItem[]
 }
@@ -415,14 +415,15 @@ describe("toSiteContact", () => {
 })
 
 describe("lead", () => {
+  // API trả gói đã sắp theo thứ tự hiển thị trong từng chi nhánh (không có trường order)
   const pricing = [
     { branch: { name: "A", slug: "a", officeName: "VP A", address: "" }, courses: [
-      { code: "B", name: "Hạng B", order: 3 },
-      { code: "A1", name: "Hạng A1", order: 1 },
+      { code: "A1", name: "Hạng A1" },
+      { code: "B", name: "Hạng B" },
     ] },
     { branch: { name: "C", slug: "c", officeName: "VP C", address: "" }, courses: [
-      { code: "A1", name: "Hạng A1", order: 1 },
-      { code: "C1", name: "Hạng C1", order: 4 },
+      { code: "A1", name: "Hạng A1" },
+      { code: "C1", name: "Hạng C1" },
     ] },
   ] as unknown as BranchPricing[]
 
@@ -606,18 +607,15 @@ export const NO_COURSE = "none"
 
 export type CourseOption = { code: string; name: string }
 
+// API trả gói đã sắp theo thứ tự hiển thị trong từng chi nhánh: giữ thứ tự gặp đầu tiên
 export function courseOptions(pricing: BranchPricing[] | null): CourseOption[] {
-  const byCode = new Map<string, { code: string; name: string; order: number }>()
+  const byCode = new Map<string, CourseOption>()
   for (const branch of pricing ?? []) {
     for (const course of branch.courses) {
-      if (!byCode.has(course.code)) {
-        byCode.set(course.code, { code: course.code, name: course.name, order: course.order })
-      }
+      if (!byCode.has(course.code)) byCode.set(course.code, { code: course.code, name: course.name })
     }
   }
   return [...byCode.values()]
-    .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, "vi"))
-    .map(({ code, name }) => ({ code, name }))
 }
 
 export type LeadFields = {
@@ -1134,7 +1132,6 @@ const course = (over: Partial<PricingCourse>): PricingCourse => ({
   image: null,
   price: 620000,
   priceNote: "Đã gồm lệ phí",
-  order: 1,
   fees: [{ key: "cb", label: "Xe cảm biến", amount: 20000, amountMax: null, unit: "vòng", note: null }],
   discounts: [{ key: "hssv", label: "HSSV giảm", amount: 500000, amountMax: null, unit: null, note: null }],
   ...over,
@@ -1143,7 +1140,7 @@ const course = (over: Partial<PricingCourse>): PricingCourse => ({
 const pricing: BranchPricing[] = [
   {
     branch: { name: "Tân Ngãi", slug: "tan-ngai", officeName: "VP1 — Tân Ngãi", address: "" },
-    courses: [course({}), course({ code: "B", name: "Hạng B", vehicleType: "car", price: 16500000, order: 3 })],
+    courses: [course({}), course({ code: "B", name: "Hạng B", vehicleType: "car", price: 16500000 })],
   },
   {
     branch: { name: "Vũng Liêm", slug: "vung-liem", officeName: "VP Vũng Liêm", address: "" },
@@ -1254,7 +1251,7 @@ describe("ExamSchedule", () => {
 - [ ] **Step 3: PricingSection** — `components/pricing-section.tsx` (client). Yêu cầu:
   - `"use client"`; state `activeSlug` mặc định `pricing?.[0]?.branch.slug`.
   - Thanh tab: `<div role="tablist" aria-label="Chọn chi nhánh">` với mỗi chi nhánh một `<button role="tab" aria-selected={...} type="button">{branch.officeName || branch.name}</button>`; style giống pill: chọn → `bg-primary text-primary-foreground`, còn lại `bg-background text-navy border border-primary/15`; cuộn ngang trên mobile (`overflow-x-auto`).
-  - Lưới thẻ `grid gap-6 lg:grid-cols-2` (`role="tabpanel"`). Mỗi gói một `<article>` theo markup thẻ khoá học hiện tại trong `app/page.tsx` (đoạn `courses.map` ở `#khoa-hoc`), với ánh xạ:
+  - Lưới thẻ `grid gap-6 lg:grid-cols-2` (`role="tabpanel"`), hiển thị `courses` đúng thứ tự API trả (API đã sắp theo thứ tự hiển thị, `PricingCourse` không có `order` — không tự sắp lại). Mỗi gói một `<article>` theo markup thẻ khoá học hiện tại trong `app/page.tsx` (đoạn `courses.map` ở `#khoa-hoc`), với ánh xạ:
     - `isDark = course.vehicleType !== "moto"`.
     - Badge loại xe `VEHICLE_LABELS[course.vehicleType]`, badge chi nhánh `activeBranch.branch.name`.
     - Tiêu đề `course.name`; mô tả `course.description` (nếu có); ảnh `course.image` → `<Image src={image.url} alt={image.alt || course.name} width={352} height={352} unoptimized …>` (không có thì bỏ ảnh).
