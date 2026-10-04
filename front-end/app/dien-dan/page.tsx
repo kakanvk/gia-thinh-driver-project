@@ -19,7 +19,7 @@ export default async function NewsPage() {
     <main className="min-h-svh bg-background">
       <SiteHeader />
       <NewsExplorer
-        posts={(posts ?? []).map(toNewsPost)}
+        posts={posts ? posts.map(toNewsPost) : null}
         categories={categories ?? []}
         contact={{
           hotline: contact.hotline,

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -60,10 +60,47 @@ describe("NewsExplorer", () => {
     render(<NewsExplorer posts={posts} categories={categories} />)
     expect(screen.getAllByText("Lịch nghỉ lễ").length).toBeGreaterThan(0)
     expect(screen.getAllByText("Bảng học phí 2026").length).toBeGreaterThan(0)
+    // Chuyên mục thông báo không có tab/lựa chọn trong bộ lọc
+    expect(screen.queryByRole("button", { name: /Thông báo/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: /Thông báo/ })).not.toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: /Kinh nghiệm thi/ }).length).toBeGreaterThan(0)
+    // Bài thông báo nằm trong khối "Thông báo từ trung tâm", không nằm trong lưới bài viết
+    const announcementBlock = screen
+      .getByRole("heading", { name: "Thông báo từ trung tâm" })
+      .closest("section") as HTMLElement
+    expect(within(announcementBlock).getByRole("link", { name: /Lịch nghỉ lễ/ })).toHaveAttribute(
+      "href",
+      "/dien-dan/c"
+    )
+    expect(within(announcementBlock).queryByText("Bảng học phí 2026")).not.toBeInTheDocument()
+    const articleLinks = screen
+      .getAllByRole("link")
+      .filter((link) => !announcementBlock.contains(link))
+      .map((link) => link.getAttribute("href"))
+    expect(articleLinks).toContain("/dien-dan/b")
+    expect(articleLinks).not.toContain("/dien-dan/c")
     // Lọc theo chuyên mục động (tab hoặc select hiện có)
     await userEvent.click(screen.getAllByRole("button", { name: /Học phí/ })[0])
     expect(screen.queryByText("Mẹo thi")).not.toBeInTheDocument()
     expect(screen.getAllByText("Bảng học phí 2026").length).toBeGreaterThan(0)
+  })
+
+  it("API lỗi (posts null) hiện thông báo dự phòng kèm hotline, khác danh sách rỗng", () => {
+    const { unmount } = render(
+      <NewsExplorer
+        posts={null}
+        categories={categories}
+        contact={{ hotline: "0909 000 111", telHref: "tel:0909000111", zaloHref: "https://zalo.me/0909000111" }}
+      />
+    )
+    expect(screen.getByText(/Tin tức đang được cập nhật/)).toBeInTheDocument()
+    expect(screen.getAllByRole("link", { name: "0909 000 111" })[0]).toHaveAttribute("href", "tel:0909000111")
+    expect(screen.queryByText("Chưa có bài viết.")).not.toBeInTheDocument()
+    unmount()
+
+    render(<NewsExplorer posts={[]} categories={categories} />)
+    expect(screen.getByText("Chưa có bài viết.")).toBeInTheDocument()
+    expect(screen.queryByText(/Tin tức đang được cập nhật/)).not.toBeInTheDocument()
   })
 })
 

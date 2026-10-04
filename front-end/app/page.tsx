@@ -74,7 +74,8 @@ export default async function Page() {
     getUpcomingExams(),
     getLatestPosts(4),
   ])
-  const latestPosts = (latest ?? []).map(toNewsPost)
+  // latest null = API lỗi: hiện thông báo dự phòng kèm hotline, khác với chưa có bài
+  const latestPosts = latest ? latest.map(toNewsPost) : null
 
   return (
     <main className="min-h-svh overflow-x-clip bg-background">
@@ -312,7 +313,15 @@ export default async function Page() {
             </Link>
           </ScrollReveal>
 
-          {latestPosts.length > 0 ? (
+          {latestPosts === null ? (
+            <p className="mt-12 text-muted-foreground">
+              Tin tức đang được cập nhật, vui lòng gọi hotline{" "}
+              <a href={contact.telHref} className="font-bold text-primary hover:underline">
+                {contact.hotline}
+              </a>{" "}
+              để được hỗ trợ.
+            </p>
+          ) : latestPosts.length > 0 ? (
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {latestPosts.map((post, index) => (
                 <ScrollReveal key={post.slug} delay={0.05 * index}>

@@ -24,6 +24,7 @@ Ngoài phạm vi (giữ nguyên dữ liệu tĩnh): diễn đàn `thao-luan` (**
   - `publicGetOrNull<T>(path, query?)`: như trên nhưng trả `null` khi có bất kỳ lỗi nào (ghi `console.error`).
 - Khối dữ liệu trên trang dùng `publicGetOrNull`; `null` → hiện thông báo dự phòng ("Thông tin đang được cập nhật, vui lòng gọi hotline …"), trang vẫn render. Nhờ đó build trên Vercel không phụ thuộc backend.
 - Trang chi tiết bài viết dùng `publicGet`: 404 → `notFound()`; lỗi khác → ném lỗi (ISR giữ bản cũ đã cache, không cache trang 404 sai). Không `generateStaticParams` (render khi có người mở rồi cache).
+  - Giới hạn đã biết: slug **chưa có cache** mà API đang sập → người xem nhận 500 trơn ("Internal Server Error"). Next 16 ném lỗi render ISR thẳng ra ngoài route handler (`app-page-runtime.js` → `base-server.js`), không qua `error.tsx` hay trang lỗi, nên thêm `error.tsx` không giúp được (đã thử bằng `next start`). Muốn có trang thân thiện phải bỏ cơ chế ném lỗi (khi đó bản cache cũ có thể bị thay bằng trang dự phòng lúc API sập): chưa làm, cần chốt lại nếu muốn đổi.
 - Gọi từ trình duyệt (form tư vấn, đếm lượt xem) dùng `apiFetch` của đợt A (`NEXT_PUBLIC_API_URL`).
 - Ảnh từ API (`cover`, `course.image`, ảnh trong bài): `next/image` với `unoptimized` (backend đã nén webp; không cần `remotePatterns`). Bài không có ảnh bìa → khung nền `bg-mist` với logo Gia Thịnh.
 

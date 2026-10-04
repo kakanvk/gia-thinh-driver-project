@@ -88,8 +88,11 @@ export default async function NewsDetailPage({
               <p className="mt-4 text-lg leading-7 text-muted-foreground sm:leading-8">{post.excerpt}</p>
             </ScrollReveal>
 
-            {view.image ? (
-              <ScrollReveal className="relative mt-8 aspect-[16/9] overflow-hidden rounded-md border border-border" delay={0.08}>
+            <ScrollReveal
+              className="relative mt-8 aspect-[16/9] overflow-hidden rounded-md border border-border bg-mist"
+              delay={0.08}
+            >
+              {view.image ? (
                 <Image
                   src={view.image}
                   alt={view.imageAlt}
@@ -99,8 +102,17 @@ export default async function NewsDetailPage({
                   priority
                   className="object-cover"
                 />
-              </ScrollReveal>
-            ) : null}
+              ) : (
+                // Bài không có ảnh bìa: khung bg-mist với logo Gia Thịnh như NewsCard
+                <Image
+                  src="/giathinh-logo.png"
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 800px"
+                  className="object-contain p-12 opacity-60 sm:p-16"
+                />
+              )}
+            </ScrollReveal>
 
             <ScrollReveal className="mt-8" delay={0.1}>
               <PostContent value={post.content} />

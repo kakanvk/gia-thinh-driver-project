@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { ClassSchedule } from "@/components/class-schedule"
 import { ExamSchedule } from "@/components/exam-schedule"
@@ -49,6 +49,15 @@ describe("ExamSchedule", () => {
     expect(screen.getByText("Hạng A1")).toBeInTheDocument()
     expect(screen.getByText("02/11/2026")).toBeInTheDocument()
     expect(screen.getByText(/Sân thi Vũng Liêm/)).toBeInTheDocument()
+  })
+
+  it("hai ca thi giống hệt nhau vẫn hiện đủ, không cảnh báo trùng key", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
+    const exam: UpcomingExam = { type: "official", course: { code: "B", name: "Hạng B" }, branch: { name: "Tân Ngãi", slug: "tan-ngai" }, date: "2026-11-02T07:30:00+07:00", location: null }
+    render(<ExamSchedule exams={[exam, { ...exam }]} />)
+    expect(screen.getAllByText("Hạng B")).toHaveLength(2)
+    expect(errorSpy.mock.calls.some((call) => String(call[0]).includes("same key"))).toBe(false)
+    errorSpy.mockRestore()
   })
 
   it("rỗng → thông báo", () => {

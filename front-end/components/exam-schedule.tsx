@@ -22,7 +22,8 @@ export function ExamSchedule({ exams }: { exams: UpcomingExam[] | null }) {
         <span>Ngày thi</span>
       </div>
       {exams.slice(0, 8).map((exam, index) => (
-        <div key={`${exam.type}-${exam.course.code}-${exam.branch.slug}-${exam.date}`}>
+        // API công khai không trả id ca thi: thêm index để key không trùng khi hai ca giống hệt nhau
+        <div key={`${exam.type}-${exam.course.code}-${exam.branch.slug}-${exam.date}-${index}`}>
           {index > 0 ? <Separator /> : null}
           <div className="grid gap-3 px-5 py-5 sm:grid-cols-[0.9fr_1.2fr_0.8fr] sm:items-center sm:gap-4 sm:px-6">
             <div>

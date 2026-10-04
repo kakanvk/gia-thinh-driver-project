@@ -170,17 +170,20 @@ function AnnouncementList({ posts, query }: { posts: NewsPost[]; query?: string 
 const DEFAULT_CONTACT = toSiteContact(null)
 
 export function NewsExplorer({
-  posts,
+  posts: postsOrNull,
   categories,
   contact = DEFAULT_CONTACT,
 }: {
-  posts: NewsPost[]
+  /** null = không lấy được bài từ API (khác với danh sách rỗng thật) */
+  posts: NewsPost[] | null
   categories: NewsCategory[]
   contact?: Pick<SiteContact, "hotline" | "telHref" | "zaloHref">
 }) {
   const [query, setQuery] = useState("")
   const [category, setCategory] = useState<string>(ALL_CATEGORIES)
   const [sort, setSort] = useState<NewsSortKey>("newest")
+  const unavailable = postsOrNull === null
+  const posts = useMemo(() => postsOrNull ?? [], [postsOrNull])
 
   const trimmedQuery = query.trim()
   const searching = trimmedQuery.length > 0
@@ -355,7 +358,15 @@ export function NewsExplorer({
                 </div>
               ) : null}
 
-              {posts.length === 0 ? (
+              {unavailable ? (
+                <p className="mt-6 text-muted-foreground">
+                  Tin tức đang được cập nhật, vui lòng gọi hotline{" "}
+                  <a href={contact.telHref} className="font-bold text-primary hover:underline">
+                    {contact.hotline}
+                  </a>{" "}
+                  để được hỗ trợ.
+                </p>
+              ) : posts.length === 0 ? (
                 <p className="mt-6 text-muted-foreground">Chưa có bài viết.</p>
               ) : filtered.length === 0 ? (
                 <Empty className="mt-6 rounded-md border border-dashed border-border bg-card py-14">
