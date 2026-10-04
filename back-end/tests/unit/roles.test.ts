@@ -23,4 +23,12 @@ describe('hasPermission', () => {
       expect(hasPermission(role, 'branch.read')).toBe(true);
     }
   });
+
+  it('gallery.manage cho quản lý chi nhánh, biên tập viên; không cho tư vấn viên, giáo viên', () => {
+    expect(hasPermission('branch_manager', 'gallery.manage')).toBe(true);
+    expect(hasPermission('editor', 'gallery.manage')).toBe(true);
+    expect(hasPermission('super_admin', 'gallery.manage')).toBe(true);
+    expect(hasPermission('consultant', 'gallery.manage')).toBe(false);
+    expect(hasPermission('instructor', 'gallery.manage')).toBe(false);
+  });
 });

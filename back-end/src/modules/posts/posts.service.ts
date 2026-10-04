@@ -6,6 +6,8 @@ import { escapeRegex } from '../../utils/regex';
 import { slugify } from '../../utils/slugify';
 import { recordAudit } from '../audit/audit.service';
 import { Category } from '../categories/category.model';
+import { Media } from '../media/media.model';
+import { collectContentMediaIds, collectPostMediaIds, syncMediaRefs } from '../media/media.refs';
 import { User } from '../users/user.model';
 import { plateToText, readTimeMinutes } from './plate';
 import { Post, type IPost, type PostDoc, type PostStatus } from './post.model';
@@ -62,6 +64,26 @@ async function assertCategory(categoryId: string): Promise<void> {
   }
 }
 
+const MEDIA_MISSING = 'Ảnh không tồn tại trong kho media';
+
+/** Mọi `mediaId` trong ảnh bìa/nội dung phải là ảnh (không phải video) có trong kho media. */
+async function assertPostMedia(input: { content?: unknown[]; cover?: { mediaId?: string } | null }): Promise<void> {
+  const groups: { path: string; ids: unknown[] }[] = [
+    { path: 'body.cover.mediaId', ids: input.cover?.mediaId ? [input.cover.mediaId] : [] },
+    { path: 'body.content', ids: input.content ? collectContentMediaIds(input.content) : [] },
+  ];
+  const all = [...new Set(groups.flatMap((group) => group.ids).map(String))];
+  if (all.length === 0) return;
+  const valid = all.filter((id) => /^[a-f\d]{24}$/i.test(id));
+  const found = new Set(
+    (await Media.find({ _id: { $in: valid }, kind: { $ne: 'video' } }, { _id: 1 }).lean()).map((m) => String(m._id)),
+  );
+  const details = groups
+    .filter((group) => group.ids.some((id) => !found.has(String(id))))
+    .map((group) => ({ path: group.path, message: MEDIA_MISSING }));
+  if (details.length > 0) throw ApiError.badRequest(MEDIA_MISSING, details);
+}
+
 export async function listPosts(query: ListPostsQuery) {
   const filter: FilterQuery<IPost> = {};
   if (query.status) filter.status = query.status;
@@ -91,6 +113,7 @@ export async function getPost(id: string): Promise<PostDoc> {
 
 export async function createPost(actor: Actor, input: CreatePostInput): Promise<PostDoc> {
   await assertCategory(input.categoryId);
+  await assertPostMedia(input);
   if (input.slug) await assertSlugFree(input.slug);
   const slug = input.slug ?? (await uniqueSlug(slugify(input.title)));
   const derived = deriveFromContent(input.content);
@@ -107,6 +130,7 @@ export async function createPost(actor: Actor, input: CreatePostInput): Promise<
     status: 'draft',
     publishedAt: null,
   });
+  await syncMediaRefs('post', post.id, collectPostMediaIds(post));
   await recordAudit({ actorId: actor.id, action: 'post.create', entity: 'post', entityId: post.id, after: summary(post) });
   return post;
 }
@@ -114,6 +138,7 @@ export async function createPost(actor: Actor, input: CreatePostInput): Promise<
 export async function updatePost(actor: Actor, id: string, input: UpdatePostInput): Promise<PostDoc> {
   const post = await getPost(id);
   if (input.categoryId) await assertCategory(input.categoryId);
+  await assertPostMedia(input);
   if (input.slug && input.slug !== post.slug) await assertSlugFree(input.slug, id);
   const before = summary(post);
   const derived = input.content ? deriveFromContent(input.content) : null;
@@ -121,6 +146,9 @@ export async function updatePost(actor: Actor, id: string, input: UpdatePostInpu
   if (input.excerpt !== undefined) post.excerptAuto = false;
   else if (derived && post.excerptAuto) post.excerpt = excerptFrom(derived.contentText);
   await post.save();
+  if (input.content !== undefined || input.cover !== undefined) {
+    await syncMediaRefs('post', id, collectPostMediaIds(post));
+  }
   await recordAudit({
     actorId: actor.id,
     action: 'post.update',
@@ -181,6 +209,7 @@ export async function duplicatePost(actor: Actor, id: string): Promise<PostDoc> 
     publishedAt: null,
     views: 0,
   });
+  await syncMediaRefs('post', copy.id, collectPostMediaIds(copy));
   await recordAudit({
     actorId: actor.id,
     action: 'post.duplicate',
@@ -191,6 +220,7 @@ export async function duplicatePost(actor: Actor, id: string): Promise<PostDoc> 
   return copy;
 }
 
+// Xoá mềm giữ refs của media (bài khôi phục được)
 export async function removePost(actor: Actor, id: string): Promise<void> {
   const post = await getPost(id);
   const before = summary(post);

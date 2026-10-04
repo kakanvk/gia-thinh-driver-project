@@ -9,6 +9,7 @@ export const PERMISSIONS: Record<Role, readonly string[]> = {
     ...STAFF_COMMON,
     'user.manage',
     'media.upload',
+    'gallery.manage',
     'pricing.manage',
     'category.manage',
     'post.manage',
@@ -34,7 +35,7 @@ export const PERMISSIONS: Record<Role, readonly string[]> = {
     'tuition.read',
     'dashboard.read',
   ],
-  editor: [...STAFF_COMMON, 'media.upload', 'category.manage', 'post.manage'],
+  editor: [...STAFF_COMMON, 'media.upload', 'gallery.manage', 'category.manage', 'post.manage'],
   instructor: [...STAFF_COMMON, 'class.read', 'student.read', 'exam.read'],
 };
 

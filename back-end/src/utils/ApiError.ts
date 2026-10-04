@@ -5,6 +5,8 @@ export type ErrorCode =
   | 'BRANCH_FORBIDDEN'
   | 'NOT_FOUND'
   | 'CONFLICT'
+  | 'MEDIA_IN_USE'
+  | 'UPLOAD_INCOMPLETE'
   | 'PAYLOAD_TOO_LARGE'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';

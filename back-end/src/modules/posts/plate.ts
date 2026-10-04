@@ -4,6 +4,8 @@ const MAX_DEPTH = 12;
 const MAX_JSON_LENGTH = 500_000;
 const SAFE_URL = /^(https?:\/\/|\/(?![/\\])|#|mailto:|tel:)/i;
 
+const OBJECT_ID = /^[a-f\d]{24}$/i;
+
 const INLINE_TYPES = new Set(['a', 'link']);
 
 type PlateRecord = Record<string, unknown>;
@@ -30,6 +32,14 @@ function checkNode(node: unknown, depth: number, path: (string | number)[], ctx:
   }
   if (typeof record.type !== 'string' || record.type.length === 0 || record.type.length > 50) {
     ctx.addIssue({ code: 'custom', path: [...path, 'type'], message: 'type không hợp lệ' });
+  }
+  // Ảnh từ kho media: `{ type: 'img', url, mediaId }` — tồn tại/đúng loại được kiểm ở service khi lưu bài
+  if (
+    'mediaId' in record &&
+    record.mediaId != null &&
+    (typeof record.mediaId !== 'string' || !OBJECT_ID.test(record.mediaId))
+  ) {
+    ctx.addIssue({ code: 'custom', path: [...path, 'mediaId'], message: 'mediaId không hợp lệ' });
   }
   if (!Array.isArray(record.children) || record.children.length === 0) {
     ctx.addIssue({ code: 'custom', path: [...path, 'children'], message: 'children phải là mảng không rỗng' });
