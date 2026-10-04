@@ -1,13 +1,21 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
-import { CheckCircle2, MessageCircle, RotateCcw, Send } from "lucide-react"
+import { useRef, useState, type FormEvent } from "react"
+import {
+  CheckCircle2,
+  LoaderCircle,
+  MessageCircle,
+  Phone,
+  RotateCcw,
+  Send,
+} from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Field,
   FieldContent,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -21,115 +29,159 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { offices } from "@/lib/contact"
+import { apiFetch } from "@/lib/api/client"
+import { ApiError, errorMessage, fieldErrors } from "@/lib/api/errors"
+import { buildLeadBody, NO_COURSE, type CourseOption } from "@/lib/public/lead"
 import { cn } from "@/lib/utils"
 
-const licenseOptions = [
-  { label: "Hạng A1 — xe máy đến 125cc", value: "A1" },
-  { label: "Hạng A — xe máy trên 125cc", value: "A" },
-  { label: "Hạng B — ô tô", value: "B" },
-  { label: "Hạng C1 — ô tô tải", value: "C1" },
-  { label: "Chưa xác định, cần tư vấn", value: "Chưa xác định" },
-]
+type ConsultationFormProps = {
+  branches: { slug: string; label: string }[]
+  courses: CourseOption[]
+  contactTimes: { label: string; value: string }[]
+  contact: { hotline: string; telHref: string; zaloHref: string }
+  initialBranch?: string
+  initialCourse?: string
+}
 
-const contactTimeOptions = [
-  { label: "Buổi sáng, 07:00–11:30", value: "Buổi sáng (07:00–11:30)" },
-  { label: "Buổi chiều, 13:00–17:30", value: "Buổi chiều (13:00–17:30)" },
-  { label: "Buổi tối, 18:00–21:00", value: "Buổi tối (18:00–21:00)" },
-  { label: "Liên hệ lúc nào cũng được", value: "Bất kỳ thời gian nào" },
-]
-
-export function ConsultationForm() {
-  const [license, setLicense] = useState(licenseOptions[0].value)
-  const [office, setOffice] = useState(offices[0].name)
-  const [contactTime, setContactTime] = useState(contactTimeOptions[0].value)
+export function ConsultationForm({
+  branches,
+  courses,
+  contactTimes,
+  contact,
+  initialBranch,
+  initialCourse,
+}: ConsultationFormProps) {
+  const [branch, setBranch] = useState(
+    initialBranch && branches.some((item) => item.slug === initialBranch)
+      ? initialBranch
+      : (branches[0]?.slug ?? "")
+  )
+  const [courseCode, setCourseCode] = useState(
+    initialCourse && courses.some((item) => item.code === initialCourse)
+      ? initialCourse
+      : NO_COURSE
+  )
+  const [contactTime, setContactTime] = useState(contactTimes[0]?.value ?? "")
   const [consent, setConsent] = useState(false)
-  const [preparedMessage, setPreparedMessage] = useState<string | null>(null)
-  const [shared, setShared] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [formError, setFormError] = useState<string | null>(null)
+  // Chặn gửi đôi ngay trong cùng một tick, trước khi state kịp cập nhật
+  const inFlight = useRef(false)
+
+  const courseItems = [
+    ...courses.map((item) => ({ label: item.name, value: item.code })),
+    { label: "Chưa xác định, cần tư vấn", value: NO_COURSE },
+  ]
+  const branchItems = branches.map((item) => ({ label: item.label, value: item.slug }))
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (inFlight.current) return
+    inFlight.current = true
+    setSubmitting(true)
+    setErrors({})
+    setFormError(null)
 
     const formData = new FormData(event.currentTarget)
-    const name = String(formData.get("name") ?? "").trim()
-    const phone = String(formData.get("phone") ?? "").trim()
-    const note = String(formData.get("note") ?? "").trim()
-    const message = [
-      "YÊU CẦU TƯ VẤN HỌC LÁI XE",
-      `Họ tên: ${name}`,
-      `Số điện thoại: ${phone}`,
-      `Hạng bằng quan tâm: ${license}`,
-      `Cơ sở thuận tiện: ${office}`,
-      `Thời gian có thể liên hệ: ${contactTime}`,
-      note ? `Nội dung cần tư vấn: ${note}` : null,
-    ]
-      .filter(Boolean)
-      .join("\n")
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Yêu cầu tư vấn học lái xe",
-          text: message,
-        })
-        setShared(true)
-        setPreparedMessage(message)
-        return
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return
-      }
-    }
+    const body = buildLeadBody(
+      {
+        name: String(formData.get("name") ?? ""),
+        phone: String(formData.get("phone") ?? ""),
+        branch,
+        courseCode,
+        preferredContactTime: contactTime,
+        note: String(formData.get("note") ?? ""),
+        website: String(formData.get("website") ?? ""),
+      },
+      window.location.search
+    )
 
     try {
-      await navigator.clipboard.writeText(message)
-    } catch {
-      // Nội dung vẫn được hiển thị để người dùng sao chép thủ công.
+      await apiFetch("/public/leads", { method: "POST", body })
+      setSubmitted(true)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 400 && error.details.length > 0) {
+        setErrors(fieldErrors(error.details))
+      } else if (error instanceof ApiError && error.status === 400) {
+        setFormError(error.message)
+      } else if (error instanceof ApiError && error.status === 429) {
+        setFormError(
+          `${error.message}. Vui lòng gọi hotline ${contact.hotline} để được hỗ trợ ngay.`
+        )
+      } else {
+        setFormError(`${errorMessage(error)} Hoặc gọi hotline ${contact.hotline}.`)
+      }
+    } finally {
+      inFlight.current = false
+      setSubmitting(false)
     }
-    setShared(false)
-    setPreparedMessage(message)
   }
 
-  if (preparedMessage) {
+  function reset() {
+    setSubmitted(false)
+    setErrors({})
+    setFormError(null)
+    setConsent(false)
+  }
+
+  if (branches.length === 0) {
+    return (
+      <div className="flex flex-col gap-3">
+        <h2 className="text-xl font-extrabold text-navy">Thông tin cần tư vấn</h2>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Hiện chưa gửi được yêu cầu trực tuyến. Vui lòng gọi hotline{" "}
+          <a href={contact.telHref} className="font-bold text-primary hover:underline">
+            {contact.hotline}
+          </a>{" "}
+          hoặc nhắn Zalo.
+        </p>
+      </div>
+    )
+  }
+
+  if (submitted) {
     return (
       <div className="flex flex-col gap-5" role="status" aria-live="polite">
         <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <CheckCircle2 aria-hidden="true" className="size-6" />
         </div>
         <div>
-          <h2 className="text-2xl font-extrabold text-navy">
-            {shared ? "Đã mở yêu cầu chia sẻ" : "Thông tin đã được chuẩn bị"}
-          </h2>
+          <h2 className="text-2xl font-extrabold text-navy">Đã nhận thông tin</h2>
           <p className="mt-2 leading-7 text-muted-foreground">
-            {shared
-              ? "Nếu bạn đã chọn Zalo và người nhận, Gia Thịnh sẽ phản hồi theo số điện thoại đã cung cấp."
-              : "Nội dung đã được sao chép. Mở Zalo, chọn Gia Thịnh và dán tin nhắn để hoàn tất."}
+            Tư vấn viên Gia Thịnh sẽ gọi lại cho bạn trong giờ làm việc. Cần gấp, hãy gọi hotline.
           </p>
         </div>
-        <Textarea
-          aria-label="Nội dung yêu cầu tư vấn"
-          readOnly
-          value={preparedMessage}
-          className="min-h-36 resize-none rounded-md bg-mist/60"
-        />
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <a
-            href="https://zalo.me/0779666664"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={contact.telHref}
             className={cn(buttonVariants({ size: "lg" }), "h-11 rounded-full px-6")}
           >
+            <Phone data-icon="inline-start" aria-hidden="true" />
+            Gọi {contact.hotline}
+          </a>
+          <a
+            href={contact.zaloHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "h-11 rounded-full px-6"
+            )}
+          >
             <MessageCircle data-icon="inline-start" aria-hidden="true" />
-            Mở Zalo Gia Thịnh
+            Nhắn Zalo
           </a>
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="lg"
-            onClick={() => setPreparedMessage(null)}
+            onClick={reset}
             className="h-11 rounded-full px-6"
           >
             <RotateCcw data-icon="inline-start" aria-hidden="true" />
-            Tạo yêu cầu khác
+            Gửi yêu cầu khác
           </Button>
         </div>
       </div>
@@ -137,7 +189,7 @@ export function ConsultationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="relative flex flex-col gap-5">
       <div>
         <h2 className="text-xl font-extrabold text-navy">Thông tin cần tư vấn</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -145,8 +197,21 @@ export function ConsultationForm() {
         </p>
       </div>
 
+      {/* Bẫy spam: người thật không thấy ô này */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="consultation-website">Website</label>
+        <input
+          id="consultation-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
+
       <FieldGroup className="grid gap-4 sm:grid-cols-2">
-        <Field>
+        <Field data-invalid={errors.name ? true : undefined}>
           <FieldLabel htmlFor="consultation-name">Họ và tên</FieldLabel>
           <Input
             id="consultation-name"
@@ -154,10 +219,12 @@ export function ConsultationForm() {
             autoComplete="name"
             placeholder="Nguyễn Văn An"
             required
+            aria-invalid={errors.name ? true : undefined}
             className="h-11 rounded-md"
           />
+          {errors.name ? <FieldError>{errors.name}</FieldError> : null}
         </Field>
-        <Field>
+        <Field data-invalid={errors.phone ? true : undefined}>
           <FieldLabel htmlFor="consultation-phone">Số điện thoại</FieldLabel>
           <Input
             id="consultation-phone"
@@ -166,22 +233,80 @@ export function ConsultationForm() {
             inputMode="tel"
             autoComplete="tel"
             placeholder="09xx xxx xxx"
-            pattern="(?:\+84|0)(?:[ .-]?[0-9]){9}"
-            title="Nhập số điện thoại Việt Nam gồm 10 chữ số"
             required
+            aria-invalid={errors.phone ? true : undefined}
             className="h-11 rounded-md"
           />
+          {errors.phone ? <FieldError>{errors.phone}</FieldError> : null}
         </Field>
       </FieldGroup>
 
       <FieldGroup className="grid gap-4 sm:grid-cols-2">
-        <Field>
+        <Field data-invalid={errors.courseCode ? true : undefined}>
           <FieldLabel>Hạng bằng quan tâm</FieldLabel>
           <Select
-            items={licenseOptions}
-            value={license}
+            items={courseItems}
+            value={courseCode}
             onValueChange={(value) => {
-              if (typeof value === "string") setLicense(value)
+              if (typeof value === "string") setCourseCode(value)
+            }}
+          >
+            <SelectTrigger
+              aria-invalid={errors.courseCode ? true : undefined}
+              className="w-full rounded-md data-[size=default]:h-11"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {courseItems.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {errors.courseCode ? <FieldError>{errors.courseCode}</FieldError> : null}
+        </Field>
+
+        <Field data-invalid={errors.branch ? true : undefined}>
+          <FieldLabel>Cơ sở thuận tiện</FieldLabel>
+          <Select
+            items={branchItems}
+            value={branch}
+            onValueChange={(value) => {
+              if (typeof value === "string") setBranch(value)
+            }}
+          >
+            <SelectTrigger
+              aria-invalid={errors.branch ? true : undefined}
+              className="w-full rounded-md data-[size=default]:h-11"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {branchItems.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {errors.branch ? <FieldError>{errors.branch}</FieldError> : null}
+        </Field>
+      </FieldGroup>
+
+      {contactTimes.length > 0 ? (
+        <Field>
+          <FieldLabel>Thời gian thuận tiện để liên hệ</FieldLabel>
+          <Select
+            items={contactTimes}
+            value={contactTime}
+            onValueChange={(value) => {
+              if (typeof value === "string") setContactTime(value)
             }}
           >
             <SelectTrigger className="w-full rounded-md data-[size=default]:h-11">
@@ -189,7 +314,7 @@ export function ConsultationForm() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {licenseOptions.map((option) => (
+                {contactTimes.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -198,65 +323,18 @@ export function ConsultationForm() {
             </SelectContent>
           </Select>
         </Field>
+      ) : null}
 
-        <Field>
-          <FieldLabel>Cơ sở thuận tiện</FieldLabel>
-          <Select
-            items={offices.map((item) => ({ label: item.name, value: item.name }))}
-            value={office}
-            onValueChange={(value) => {
-              if (typeof value === "string") setOffice(value)
-            }}
-          >
-            <SelectTrigger className="w-full rounded-md data-[size=default]:h-11">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {offices.map((item) => (
-                  <SelectItem key={item.name} value={item.name}>
-                    {item.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Field>
-      </FieldGroup>
-
-      <Field>
-        <FieldLabel>Thời gian thuận tiện để liên hệ</FieldLabel>
-        <Select
-          items={contactTimeOptions}
-          value={contactTime}
-          onValueChange={(value) => {
-            if (typeof value === "string") setContactTime(value)
-          }}
-        >
-          <SelectTrigger className="w-full rounded-md data-[size=default]:h-11">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {contactTimeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </Field>
-
-      <Field>
+      <Field data-invalid={errors.note ? true : undefined}>
         <FieldLabel htmlFor="consultation-note">Bạn cần hỏi thêm điều gì?</FieldLabel>
         <Textarea
           id="consultation-note"
           name="note"
           placeholder="Ví dụ: học phí trọn khóa, lịch học cuối tuần, hồ sơ cần chuẩn bị…"
+          aria-invalid={errors.note ? true : undefined}
           className="min-h-20 resize-y rounded-md"
         />
-
+        {errors.note ? <FieldError>{errors.note}</FieldError> : null}
       </Field>
 
       <Field orientation="horizontal">
@@ -273,16 +351,28 @@ export function ConsultationForm() {
         </FieldContent>
       </Field>
 
+      {formError ? (
+        <p
+          role="alert"
+          className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          {formError}
+        </p>
+      ) : null}
+
       <Button
         type="submit"
         size="lg"
-        disabled={!consent}
+        disabled={!consent || submitting}
         className="h-11 w-full rounded-full text-base font-bold"
       >
         Gửi thông tin tư vấn
-        <Send data-icon="inline-end" aria-hidden="true" />
+        {submitting ? (
+          <LoaderCircle data-icon="inline-end" aria-hidden="true" className="animate-spin" />
+        ) : (
+          <Send data-icon="inline-end" aria-hidden="true" />
+        )}
       </Button>
-
     </form>
   )
 }

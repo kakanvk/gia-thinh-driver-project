@@ -13,8 +13,7 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field"
-import { supportContacts } from "@/lib/admin-data"
-import { offices } from "@/lib/contact"
+import { offices, supportContacts } from "@/lib/admin-data"
 
 export const metadata: Metadata = {
   title: "Cài đặt",

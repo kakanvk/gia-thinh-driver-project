@@ -25,8 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { branches, instructors, trainingClasses } from "@/lib/admin-data"
-import { offices } from "@/lib/contact"
+import {
+  branches,
+  instructors,
+  offices,
+  trainingClasses,
+} from "@/lib/admin-data"
 
 export const metadata: Metadata = {
   title: "Chi nhánh",

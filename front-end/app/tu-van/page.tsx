@@ -4,7 +4,8 @@ import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone } from "lucide-react"
 
 import { ConsultationForm } from "@/components/consultation-form"
 import { SiteHeader } from "@/components/site-header"
-import { getBranches, getSiteContact } from "@/lib/api/public"
+import { getBranches, getPricing, getSiteContact } from "@/lib/api/public"
+import { courseOptions } from "@/lib/public/lead"
 
 export const metadata: Metadata = {
   title: "Nhận tư vấn khóa học | Trường lái Gia Thịnh",
@@ -14,8 +15,19 @@ export const metadata: Metadata = {
 
 export const revalidate = 300
 
-export default async function ConsultationPage() {
-  const [contact, branches] = await Promise.all([getSiteContact(), getBranches()])
+export default async function ConsultationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string | string[]; course?: string | string[] }>
+}) {
+  const [params, contact, branches, pricing] = await Promise.all([
+    searchParams,
+    getSiteContact(),
+    getBranches(),
+    getPricing(),
+  ])
+  const pick = (value: string | string[] | undefined) =>
+    Array.isArray(value) ? value[0] : value
   const supportDetails = [
     {
       icon: Phone,
@@ -83,7 +95,21 @@ export default async function ConsultationPage() {
         </aside>
 
         <div className="order-1 rounded-md border border-primary/15 bg-background p-5 shadow-[0_20px_55px_-42px_rgba(9,57,102,0.45)] sm:p-6 lg:order-2">
-          <ConsultationForm />
+          <ConsultationForm
+            branches={(branches ?? []).map((branch) => ({
+              slug: branch.slug,
+              label: branch.officeName || branch.name,
+            }))}
+            courses={courseOptions(pricing)}
+            contactTimes={contact.contactTimes}
+            contact={{
+              hotline: contact.hotline,
+              telHref: contact.telHref,
+              zaloHref: contact.zaloHref,
+            }}
+            initialBranch={pick(params.branch)}
+            initialCourse={pick(params.course)?.toUpperCase()}
+          />
         </div>
       </section>
     </main>
