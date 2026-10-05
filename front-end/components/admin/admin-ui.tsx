@@ -78,6 +78,10 @@ const statusStyles: Record<string, string> = {
   "Đã duyệt": "bg-primary/10 text-primary",
   "Chờ duyệt": "bg-highlight/25 text-foreground",
   "Bản nháp": "bg-muted text-muted-foreground",
+  // Trạng thái bài viết
+  Nháp: "bg-muted text-muted-foreground",
+  "Hẹn giờ": "bg-signal/20 text-navy",
+  "Lưu trữ": "bg-muted text-muted-foreground",
   // Trạng thái khách hàng
   Mới: "bg-signal/20 text-navy",
   "Đã liên hệ": "bg-primary/10 text-primary",
