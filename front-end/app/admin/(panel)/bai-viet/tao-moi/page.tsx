@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 
-import { PostCreateForm } from "@/components/admin/post-create-form"
+import { PostEditorForm } from "@/components/admin/posts/post-editor-form"
 
 export const metadata: Metadata = {
-  title: "Tạo bài viết",
+  title: "Viết bài mới",
 }
 
 export default function CreatePostPage() {
-  return <PostCreateForm />
+  return <PostEditorForm />
 }

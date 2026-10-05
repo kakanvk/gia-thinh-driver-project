@@ -141,3 +141,41 @@ export function buildPostBody(state: PostFormState): PostBody {
     content: state.content,
   }
 }
+
+export function formStateFromPost(
+  post: AdminPost | null,
+  defaultAuthor = ""
+): PostFormState {
+  return {
+    title: post?.title ?? "",
+    slug: post?.slug ?? "",
+    // Tóm tắt tự tạo thì để trống ô: lưu lại vẫn để backend tự tạo theo nội dung
+    excerpt: post && !post.excerptAuto ? post.excerpt : "",
+    categoryId: post?.categoryId ?? "",
+    tags: post?.tags ?? [],
+    cover: post?.cover ?? null,
+    authorName: post?.authorName ?? defaultAuthor,
+    seoTitle: post?.seo?.title ?? "",
+    seoDescription: post?.seo?.description ?? "",
+    content: post?.content ?? [],
+  }
+}
+
+function nodeHasContent(node: unknown): boolean {
+  if (!node || typeof node !== "object") return false
+  const record = node as Record<string, unknown>
+  if (typeof record.text === "string") return record.text.trim().length > 0
+  if (record.type === "img" && typeof record.url === "string") return true
+  return Array.isArray(record.children) && record.children.some(nodeHasContent)
+}
+
+// Nội dung có chữ hoặc có ảnh
+export function hasPostContent(content: unknown[]): boolean {
+  return content.some(nodeHasContent)
+}
+
+// Khoá lỗi trường của form từ path backend (đã bỏ "body."): seo.title giữ nguyên,
+// content.0.children… → content, cover.mediaId → cover
+export function postFieldKey(path: string): string {
+  return path.startsWith("seo.") ? path : path.split(".")[0]!
+}

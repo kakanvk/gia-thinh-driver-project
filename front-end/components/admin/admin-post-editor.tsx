@@ -29,6 +29,7 @@ import {
 } from "platejs/react"
 import { KEYS } from "platejs"
 
+import { MediaPicker } from "@/components/admin/media/media-picker"
 import { PostImageElement } from "@/components/post-image-element"
 import { BlockquoteElement } from "@/components/ui/blockquote-node"
 import { Editor, EditorContainer } from "@/components/ui/editor"
@@ -37,14 +38,10 @@ import { H1Element, H2Element, H3Element } from "@/components/ui/heading-node"
 import { MarkToolbarButton } from "@/components/ui/mark-toolbar-button"
 import { Separator } from "@/components/ui/separator"
 import { ToolbarButton } from "@/components/ui/toolbar"
+import type { MediaItem } from "@/lib/admin/types"
 import { cn } from "@/lib/utils"
 
-const initialValue: Value = [
-  {
-    type: "p",
-    children: [{ text: "" }],
-  },
-]
+const EMPTY_VALUE: Value = [{ type: "p", children: [{ text: "" }] }]
 
 const alignItems = [
   { icon: AlignLeftIcon, value: "left", title: "Căn trái" },
@@ -52,20 +49,6 @@ const alignItems = [
   { icon: AlignRightIcon, value: "right", title: "Căn phải" },
   { icon: AlignJustifyIcon, value: "justify", title: "Căn đều" },
 ] as const
-
-function getNodeText(node: unknown): string {
-  if (!node || typeof node !== "object") return ""
-
-  if ("text" in node && typeof node.text === "string") {
-    return node.text
-  }
-
-  if ("children" in node && Array.isArray(node.children)) {
-    return node.children.map(getNodeText).join(" ")
-  }
-
-  return ""
-}
 
 function AlignButtons() {
   const { tf } = useEditorPlugin(TextAlignPlugin)
@@ -85,61 +68,61 @@ function AlignButtons() {
   )
 }
 
+// Ảnh trong nội dung chỉ lấy từ kho media (backend từ chối data: URL và
+// kiểm mediaId tồn tại khi lưu bài)
 function ImageInsertButton() {
   const editor = useEditorRef()
-  const fileRef = React.useRef<HTMLInputElement>(null)
+  const [open, setOpen] = React.useState(false)
 
-  function insertImages(files: FileList | null) {
-    if (!files) return
-
-    Array.from(files)
-      .slice(0, 4)
-      .forEach((file) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          editor.tf.insertNodes({
-            type: KEYS.img,
-            url: String(reader.result),
-            children: [{ text: "" }],
-          } as never)
-          editor.tf.insertNodes({
-            type: "p",
-            children: [{ text: "" }],
-          } as never)
-        }
-        reader.readAsDataURL(file)
-      })
+  function insertImage(media: MediaItem) {
+    editor.tf.insertNodes(
+      [
+        {
+          type: KEYS.img,
+          url: media.url,
+          mediaId: media.id,
+          caption: [{ text: "" }],
+          children: [{ text: "" }],
+        },
+        { type: "p", children: [{ text: "" }] },
+      ] as never,
+      { select: true }
+    )
   }
 
   return (
     <>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-        multiple
-        hidden
-        onChange={(event) => {
-          insertImages(event.target.files)
-          event.target.value = ""
-        }}
-      />
-      <ToolbarButton title="Chèn ảnh" onClick={() => fileRef.current?.click()}>
+      <ToolbarButton
+        title="Chèn ảnh"
+        aria-label="Chèn ảnh"
+        onClick={() => setOpen(true)}
+      >
         <ImageIcon />
       </ToolbarButton>
+      <MediaPicker
+        open={open}
+        onOpenChange={setOpen}
+        kind="image"
+        title="Chèn ảnh vào bài viết"
+        onSelect={insertImage}
+      />
     </>
   )
 }
 
 type AdminPostEditorProps = {
+  value: Value
+  onChange: (value: Value) => void
   invalid?: boolean
-  onContentChange: (hasContent: boolean) => void
 }
 
 export function AdminPostEditor({
+  value,
+  onChange,
   invalid = false,
-  onContentChange,
 }: AdminPostEditorProps) {
+  // Giá trị editor phát ra gần nhất: value khác nó nghĩa là form đặt lại từ ngoài
+  const emitted = React.useRef<Value>(value)
   const editor = usePlateEditor({
     plugins: [
       BoldPlugin,
@@ -153,8 +136,14 @@ export function AdminPostEditor({
       ImagePlugin.withComponent(PostImageElement),
       CaptionPlugin,
     ],
-    value: initialValue,
+    value: value.length > 0 ? value : EMPTY_VALUE,
   })
+
+  React.useEffect(() => {
+    if (value === emitted.current) return
+    emitted.current = value
+    editor.tf.setValue(value.length > 0 ? value : EMPTY_VALUE)
+  }, [editor, value])
 
   return (
     <div
@@ -166,8 +155,9 @@ export function AdminPostEditor({
     >
       <Plate
         editor={editor}
-        onValueChange={({ value }) => {
-          onContentChange(getNodeText({ children: value }).trim().length > 0)
+        onValueChange={({ value: next }) => {
+          emitted.current = next
+          onChange(next)
         }}
       >
         <FixedToolbar className="justify-start rounded-none">
