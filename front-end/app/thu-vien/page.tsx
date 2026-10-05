@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
-import { readdirSync } from "node:fs"
-import { join } from "node:path"
 
 import { MediaGallery, type MediaItem } from "@/components/media-gallery"
 import { ScrollReveal } from "@/components/scroll-reveal"
 import { SiteHeader } from "@/components/site-header"
 import { Badge } from "@/components/ui/badge"
+import { getGallery } from "@/lib/api/public"
+import type { PublicGalleryItem } from "@/lib/public/types"
 
 export const metadata: Metadata = {
   title: "Thư viện ảnh & video | Trường lái Gia Thịnh",
@@ -13,34 +13,23 @@ export const metadata: Metadata = {
     "Hình ảnh và video hoạt động đào tạo, sân tập và kỳ thi sát hạch tại trung tâm Gia Thịnh.",
 }
 
-const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp"])
-const VIDEO_EXTS = new Set([".mp4", ".webm"])
+export const revalidate = 300
 
-function getMediaItems(): MediaItem[] {
-  const dir = join(process.cwd(), "public", "media")
-  let files: string[] = []
-  try {
-    files = readdirSync(dir, { withFileTypes: true })
-      .filter((entry) => entry.isFile())
-      .map((entry) => entry.name)
-  } catch {
-    return []
+function toMediaItem(item: PublicGalleryItem): MediaItem {
+  return {
+    src: item.url,
+    kind: item.kind,
+    alt: item.alt,
+    caption: item.caption ?? undefined,
+    poster: item.posterUrl ?? undefined,
+    width: item.width ?? undefined,
+    height: item.height ?? undefined,
   }
-
-  return files
-    .map((name) => {
-      const dot = name.lastIndexOf(".")
-      const ext = dot >= 0 ? name.slice(dot).toLowerCase() : ""
-      if (IMAGE_EXTS.has(ext)) return { src: `/media/${name}`, kind: "image" as const }
-      if (VIDEO_EXTS.has(ext)) return { src: `/media/${name}`, kind: "video" as const }
-      return null
-    })
-    .filter((item): item is MediaItem => item !== null)
-    .sort((a, b) => a.src.localeCompare(b.src))
 }
 
-export default function MediaPage() {
-  const items = getMediaItems()
+export default async function MediaPage() {
+  const gallery = await getGallery()
+  const items = gallery?.map(toMediaItem) ?? []
 
   return (
     <main className="min-h-svh bg-background">
@@ -64,7 +53,17 @@ export default function MediaPage() {
 
       <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <MediaGallery items={items} />
+          {gallery === null ? (
+            <p role="status" className="rounded-md border border-border bg-mist px-5 py-10 text-center text-muted-foreground">
+              Thư viện đang được cập nhật, vui lòng quay lại sau.
+            </p>
+          ) : items.length === 0 ? (
+            <p className="rounded-md border border-border bg-mist px-5 py-10 text-center text-muted-foreground">
+              Chưa có ảnh hoặc video.
+            </p>
+          ) : (
+            <MediaGallery items={items} />
+          )}
         </div>
       </section>
     </main>

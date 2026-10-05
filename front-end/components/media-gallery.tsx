@@ -10,7 +10,14 @@ import { cn } from "@/lib/utils"
 export type MediaItem = {
   src: string
   kind: "image" | "video"
+  alt: string
+  caption?: string
+  poster?: string
+  width?: number
+  height?: number
 }
+
+const FALLBACK_ALT = "Tư liệu hoạt động của trung tâm Gia Thịnh"
 
 const tabs = [
   { key: "all", label: "Tất cả", icon: LayoutGrid },
@@ -99,7 +106,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
           {visible.map((item, index) =>
             item.kind === "image" ? (
               <button
-                key={item.src}
+                key={`${index}-${item.src}`}
                 type="button"
                 onClick={() => setActiveIndex(index)}
                 aria-label={`Xem ảnh ${index + 1}`}
@@ -107,8 +114,9 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               >
                 <Image
                   src={item.src}
-                  alt="Tư liệu hoạt động của trung tâm Gia Thịnh"
+                  alt={item.alt || FALLBACK_ALT}
                   fill
+                  unoptimized
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   loading="lazy"
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
@@ -116,14 +124,15 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               </button>
             ) : (
               <button
-                key={item.src}
+                key={`${index}-${item.src}`}
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                aria-label={`Xem video ${index + 1}`}
+                aria-label={`Xem video ${index + 1}${item.alt ? `: ${item.alt}` : ""}`}
                 className="group relative block aspect-square cursor-pointer overflow-hidden rounded-md border border-border bg-navy"
               >
                 <video
                   src={item.src}
+                  poster={item.poster}
                   preload="metadata"
                   playsInline
                   muted
@@ -172,8 +181,9 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               <span className="relative block h-[70vh] w-full sm:h-[80vh]">
                 <Image
                   src={active.src}
-                  alt="Tư liệu hoạt động của trung tâm Gia Thịnh"
+                  alt={active.alt || FALLBACK_ALT}
                   fill
+                  unoptimized
                   sizes="100vw"
                   className="object-contain"
                 />
@@ -182,16 +192,22 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               <video
                 key={active.src}
                 src={active.src}
+                poster={active.poster}
                 controls
                 autoPlay
                 playsInline
                 className="max-h-[80vh] w-full"
               />
             )}
-            <p className="bg-black px-4 py-2.5 text-center text-xs text-white/70 tabular-nums">
-              {(activeIndex ?? 0) + 1} / {visible.length} ·{" "}
-              {active.kind === "image" ? "Hình ảnh" : "Video"}
-            </p>
+            <div className="bg-black px-4 py-2.5 text-center">
+              {active.caption ? (
+                <p className="text-sm text-white">{active.caption}</p>
+              ) : null}
+              <p className="text-xs text-white/70 tabular-nums">
+                {(activeIndex ?? 0) + 1} / {visible.length} ·{" "}
+                {active.kind === "image" ? "Hình ảnh" : "Video"}
+              </p>
+            </div>
 
             <button
               type="button"

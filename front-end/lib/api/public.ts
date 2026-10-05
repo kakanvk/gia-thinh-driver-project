@@ -4,6 +4,7 @@ import type {
   PageMeta,
   PostDetail,
   PostSummary,
+  PublicGalleryItem,
   PublicBranch,
   PublicCategory,
   PublicSettings,
@@ -69,6 +70,7 @@ export const getPricing = () => publicGetOrNull<BranchPricing[]>("/pricing")
 export const getUpcomingClasses = () => publicGetOrNull<UpcomingClass[]>("/classes/upcoming")
 export const getUpcomingExams = () => publicGetOrNull<UpcomingExam[]>("/exams/upcoming")
 export const getCategories = () => publicGetOrNull<PublicCategory[]>("/categories")
+export const getGallery = () => publicGetOrNull<PublicGalleryItem[]>("/gallery")
 
 export async function getSiteContact(): Promise<SiteContact> {
   return toSiteContact(await getSettings())

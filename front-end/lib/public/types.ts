@@ -96,3 +96,15 @@ export type PostSummary = {
 export type PostDetail = PostSummary & { content: unknown[] }
 
 export type PageMeta = { page: number; limit: number; total: number }
+
+// GET /public/gallery: mục thư viện đang hiện, đã theo thứ tự admin sắp
+export type PublicGalleryItem = {
+  id: string
+  kind: "image" | "video"
+  url: string
+  alt: string
+  caption: string | null
+  width: number | null
+  height: number | null
+  posterUrl: string | null
+}
