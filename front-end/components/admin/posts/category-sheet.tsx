@@ -55,6 +55,7 @@ function CategoryForm({
       toast.success(category ? "Đã lưu chuyên mục" : "Đã thêm chuyên mục")
       onDone()
     },
+    meta: { silent: true },
     onError: (error) => {
       const fields = error instanceof ApiError ? fieldErrors(error.details) : {}
       if (Object.keys(fields).length > 0) setErrors(fields)
@@ -157,6 +158,7 @@ export function CategorySheet({
       }),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -168,6 +170,7 @@ export function CategorySheet({
       toast.success("Đã xoá chuyên mục")
       setDeleting(null)
     },
+    meta: { silent: true },
     onError: (error) => {
       setDeleting(null)
       toast.error(

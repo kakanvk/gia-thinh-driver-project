@@ -99,6 +99,7 @@ function ItemSheet({
       toast.success("Đã lưu mục thư viện")
       onOpenChange(false)
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -229,6 +230,7 @@ export function GalleryManager() {
       refresh()
       toast.success("Đã thêm vào thư viện")
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -239,6 +241,7 @@ export function GalleryManager() {
         body: { ids },
       }),
     onSuccess: (items) => queryClient.setQueryData(GALLERY_KEY, items),
+    meta: { silent: true },
     onError: (error) => {
       toast.error(errorMessage(error))
       void queryClient.invalidateQueries({ queryKey: GALLERY_KEY })
@@ -257,6 +260,7 @@ export function GalleryManager() {
         saved.visible ? "Đã hiện trên website" : "Đã ẩn khỏi website"
       )
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -268,6 +272,7 @@ export function GalleryManager() {
       toast.success("Đã xoá khỏi thư viện")
       setDeleting(null)
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 

@@ -199,6 +199,8 @@ describe("PostList", () => {
     await waitFor(() =>
       expect(toastError).toHaveBeenCalledWith("Không thể khôi phục bài viết")
     )
+    // Mutation tự báo lỗi → không báo thêm lần nữa qua MutationCache
+    expect(toastError).toHaveBeenCalledTimes(1)
   })
 
   it("Nhân bản → POST duplicate → toast + chuyển tới bài mới", async () => {

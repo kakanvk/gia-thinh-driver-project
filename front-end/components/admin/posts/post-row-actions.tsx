@@ -73,6 +73,7 @@ export function PostRowActions({ post }: { post: AdminPost }) {
         TRANSITIONS.find((item) => item.action === action)?.done ?? "Đã lưu"
       )
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -84,6 +85,7 @@ export function PostRowActions({ post }: { post: AdminPost }) {
       toast.success("Đã nhân bản bài viết")
       router.push(`/admin/bai-viet/${copy.id}`)
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -95,6 +97,7 @@ export function PostRowActions({ post }: { post: AdminPost }) {
       toast.success("Đã xoá bài viết")
       setConfirmDelete(false)
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 

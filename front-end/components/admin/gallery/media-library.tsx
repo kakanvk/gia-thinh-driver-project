@@ -163,6 +163,7 @@ function MediaSheet({
       toast.success("Đã lưu mô tả")
       onOpenChange(false)
     },
+    meta: { silent: true },
     onError: (error) => toast.error(errorMessage(error)),
   })
 
@@ -269,6 +270,7 @@ export function MediaLibrary() {
       setDeleting(null)
       setViewing(null)
     },
+    meta: { silent: true },
     onError: (error) => {
       setDeleting(null)
       if (error instanceof ApiError && error.code === "MEDIA_IN_USE") {
