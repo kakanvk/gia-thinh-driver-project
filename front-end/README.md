@@ -31,7 +31,7 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 
 ## Website công khai
 
-- Trang chủ, `/tu-van`, `/dien-dan`, header và footer lấy dữ liệu từ `/api/v1/public/*`; admin sửa thì website cập nhật trễ tối đa 5 phút.
+- Trang chủ, `/tu-van`, `/dien-dan`, `/thu-vien`, header và footer lấy dữ liệu từ `/api/v1/public/*`; admin sửa thì website cập nhật trễ tối đa 5 phút.
 - Form tư vấn tạo khách trong CRM.
 - Diễn đàn `/thao-luan` lưu trên trình duyệt (không có backend).
 
@@ -47,6 +47,13 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 - `/admin/khach-hang/[id]`: đổi trạng thái (chuyển sang "Không thành công" phải nhập lý do; mở lại bằng "Đã liên hệ"), phân công người phụ trách, ghi lịch sử chăm sóc, đặt lịch hẹn và chuyển thành học viên khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ.
 - `/admin/lich-dang-ky`: lịch hẹn theo tháng (lọc chi nhánh, người phụ trách); tạo/sửa/đổi trạng thái/xoá lịch hẹn. Trùng giờ với lịch khác của cùng người phụ trách thì báo lỗi ngay trên form.
 - Giờ nhập và hiển thị theo giờ Việt Nam (`+07:00`), không phụ thuộc múi giờ máy.
+
+## Kho media, thư viện & bài viết
+
+- `MediaPicker` (`components/admin/media/media-picker.tsx`) dùng chung để chọn ảnh/video từ kho media; tab Tải lên chỉ hiện với quyền `media.upload`. Ảnh (jpeg/png/webp ≤ 5 MB) gửi qua backend; video (mp4/webm ≤ 500 MB) tải thẳng lên bucket GCS bằng signed URL, có thanh tiến trình và huỷ được.
+- Upload video cần bucket bật CORS cho origin admin (xem mục "Lưu ảnh trên Google Cloud Storage" trong `back-end/README.md`); thiếu thì báo "Không tải được lên kho lưu trữ (kiểm tra cấu hình CORS của bucket)".
+- `/admin/thu-vien` (quyền `gallery.manage`): tab Thư viện website (thêm mục, chú thích, ảnh bìa cho video, ẩn/hiện, sắp thứ tự) và tab Kho media (sửa mô tả, xoá; media đang dùng thì báo nơi đang dùng).
+- `/admin/bai-viet`: danh sách lọc theo trạng thái/chuyên mục, menu hàng (xuất bản, gỡ, lưu trữ, khôi phục, nhân bản, xoá) và quản lý chuyên mục. `/admin/bai-viet/tao-moi`, `/admin/bai-viet/[id]`: ảnh bìa và ảnh trong nội dung chọn từ kho media (không chèn base64), xuất bản ngay hoặc hẹn giờ; rời trang khi chưa lưu sẽ được hỏi lại.
 
 ## Lệnh
 
