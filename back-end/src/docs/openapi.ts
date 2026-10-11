@@ -89,9 +89,20 @@ export const openApiDocument = {
       }),
     },
     '/users/options': {
-      get: op('Người dùng', 'Nhân viên có thể phụ trách khách/lịch hẹn (lead.read hoặc appointment.read)', {
-        parameters: [{ name: 'branchId', in: 'query', schema: { type: 'string' } }],
-      }),
+      get: op(
+        'Người dùng',
+        'Nhân viên có thể phụ trách khách/lịch hẹn (lead.read hoặc appointment.read); role=instructor → tài khoản giáo viên (instructor.create hoặc instructor.update)',
+        {
+          parameters: [
+            { name: 'branchId', in: 'query', schema: { type: 'string' } },
+            {
+              name: 'role',
+              in: 'query',
+              schema: { type: 'string', enum: ['consultant', 'branch_manager', 'instructor'] },
+            },
+          ],
+        },
+      ),
     },
     '/users/{id}': {
       get: op('Người dùng', 'Chi tiết nhân viên', { parameters: [idParam] }),
@@ -486,6 +497,9 @@ export const openApiDocument = {
       get: op('Đào tạo', 'Chi tiết học viên', { parameters: [idParam] }),
       patch: op('Đào tạo', 'Sửa học viên', { parameters: [idParam], requestBody: json({ status: 'paused' }) }),
       delete: op('Đào tạo', 'Xóa (mềm) học viên', { parameters: [idParam] }),
+    },
+    '/students/{id}/exams': {
+      get: op('Đào tạo', 'Các lần thi của học viên (exam.read), ca mới nhất trước', { parameters: [idParam] }),
     },
     '/students/{id}/class': {
       patch: op('Đào tạo', 'Xếp / bỏ lớp', { parameters: [idParam], requestBody: json({ classId: '<classId>' }) }),

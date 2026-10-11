@@ -13,6 +13,7 @@ import { TrainingClass } from '../classes/class.model';
 import { classScopeFilter, getClassDoc, seatCounts } from '../classes/classes.service';
 import { Course } from '../courses/course.model';
 import { ExamCandidate } from '../exams/exam-candidate.model';
+import { ExamSession } from '../exams/exam-session.model';
 import { instructorIdsOfUser } from '../instructors/instructors.scope';
 import { addActivity } from '../leads/leads.activity';
 import { Lead } from '../leads/lead.model';
@@ -218,4 +219,33 @@ export async function listClassStudents(actor: Actor, scope: Scope, classId: str
   if (!cls) throw ApiError.notFound('Không tìm thấy lớp học');
   const students = await Student.find({ classId: cls._id }).sort({ name: 1, _id: 1 });
   return students.map((student) => presentStudent(actor, student));
+}
+
+// Các lần thi của học viên (cùng phạm vi như GET /students/:id), ca thi mới nhất trước.
+export async function listStudentExams(actor: Actor, scope: Scope, id: string) {
+  const student = await getStudentDoc(actor, scope, id);
+  const candidates = await ExamCandidate.find({ studentId: student._id });
+  const sessions = await ExamSession.find({ _id: { $in: candidates.map((candidate) => candidate.sessionId) } });
+  const byId = new Map(sessions.map((session) => [session.id, session]));
+  return candidates
+    .flatMap((candidate) => {
+      const session = byId.get(candidate.sessionId.toString());
+      if (!session) return [];
+      return [
+        {
+          candidateId: candidate.id,
+          sessionId: session.id,
+          sessionCode: session.code,
+          type: session.type,
+          date: session.date,
+          location: session.location ?? null,
+          courseCode: session.courseCode,
+          result: candidate.result,
+          score: candidate.score ?? null,
+          attempt: candidate.attempt,
+          note: candidate.note ?? null,
+        },
+      ];
+    })
+    .sort((a, b) => b.date.getTime() - a.date.getTime() || b.candidateId.localeCompare(a.candidateId));
 }

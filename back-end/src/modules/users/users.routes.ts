@@ -4,16 +4,17 @@ import { authorize, authorizeAny } from '../../middlewares/authorize.middleware'
 import { validate } from '../../middlewares/validate.middleware';
 import { idParamsSchema } from '../../shared/zod';
 import * as controller from './users.controller';
-import { options, userOptionsQuerySchema } from './users.options';
+import { options, USER_OPTIONS_PERMISSIONS, userOptionsQuerySchema } from './users.options';
 import { createUserSchema, listUsersQuerySchema, updateUserSchema, userStatusSchema } from './users.validation';
 
 export function createUsersRouter(): Router {
   const router = Router();
-  // Khai báo trước router.use(authorize('user.manage')) để tư vấn viên/quản lý gọi được
+  // Khai báo trước router.use(authorize('user.manage')) để tư vấn viên/quản lý gọi được.
+  // Handler kiểm tiếp quyền theo `role` (role=instructor cần instructor.create/update).
   router.get(
     '/options',
     authenticate,
-    authorizeAny(['lead.read', 'appointment.read'], { branchScoped: true }),
+    authorizeAny([...USER_OPTIONS_PERMISSIONS.staff, ...USER_OPTIONS_PERMISSIONS.instructor], { branchScoped: true }),
     validate({ query: userOptionsQuerySchema }),
     options,
   );

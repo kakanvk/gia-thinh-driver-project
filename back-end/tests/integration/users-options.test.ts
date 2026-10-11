@@ -35,20 +35,14 @@ describe('GET /users/options', () => {
     const { app, admin } = await setup();
     const res = await request(app).get('/api/v1/users/options').set(authHeader(admin));
     expect(res.status).toBe(200);
-    expect(res.body.data.map((u: { name: string }) => u.name)).toEqual([
-      'An quản lý A',
-      'Bình tư vấn A',
-      'Cường tư vấn B',
-    ]);
+    expect(res.body.data.map((u: { name: string }) => u.name)).toEqual(['An quản lý A', 'Bình tư vấn A', 'Cường tư vấn B']);
   });
 
   it('super_admin lọc ?branchId=B → chỉ nhân viên chi nhánh B', async () => {
     const { app, b, admin, consultantB } = await setup();
     const res = await request(app).get(`/api/v1/users/options?branchId=${b.id}`).set(authHeader(admin));
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual([
-      { id: consultantB.id, name: 'Cường tư vấn B', role: 'consultant', branchIds: [b.id] },
-    ]);
+    expect(res.body.data).toEqual([{ id: consultantB.id, name: 'Cường tư vấn B', role: 'consultant', branchIds: [b.id] }]);
   });
 
   it('tư vấn viên A lọc chi nhánh B → 403 BRANCH_FORBIDDEN', async () => {
@@ -78,5 +72,56 @@ describe('GET /users/options', () => {
     await removed.save();
     const res = await request(app).get('/api/v1/users/options').set(authHeader(consultantA));
     expect(res.body.data.map((u: { id: string }) => u.id)).not.toContain(removed.id);
+  });
+
+  describe('?role=instructor', () => {
+    it('quản lý chi nhánh chỉ thấy tài khoản giáo viên đang hoạt động trong chi nhánh mình', async () => {
+      const { app, a, b, managerA, instructorA } = await setup();
+      await createUser({ role: 'instructor', branchIds: [b.id], name: 'Khoa giáo viên B' });
+      await createUser({ role: 'instructor', branchIds: [a.id], name: 'Lan bị khoá', status: 'suspended' });
+      const res = await request(app).get('/api/v1/users/options?role=instructor').set(authHeader(managerA));
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual([
+        { id: instructorA.id, name: 'Giang giáo viên', role: 'instructor', branchIds: [a.id] },
+      ]);
+    });
+
+    it('super_admin lọc ?role=instructor&branchId=B → chỉ giáo viên chi nhánh B', async () => {
+      const { app, b, admin } = await setup();
+      const { user: instructorB } = await createUser({ role: 'instructor', branchIds: [b.id], name: 'Khoa giáo viên B' });
+      const res = await request(app).get(`/api/v1/users/options?role=instructor&branchId=${b.id}`).set(authHeader(admin));
+      expect(res.status).toBe(200);
+      expect(res.body.data.map((u: { id: string }) => u.id)).toEqual([instructorB.id]);
+    });
+
+    it('?role=consultant → chỉ tư vấn viên', async () => {
+      const { app, consultantA } = await setup();
+      const res = await request(app).get('/api/v1/users/options?role=consultant').set(authHeader(consultantA));
+      expect(res.status).toBe(200);
+      expect(res.body.data.map((u: { id: string }) => u.id)).toEqual([consultantA.id]);
+    });
+
+    it('tư vấn viên (không có instructor.create/update) → 403; không có role vẫn như cũ', async () => {
+      const { app, consultantA } = await setup();
+      const denied = await request(app).get('/api/v1/users/options?role=instructor').set(authHeader(consultantA));
+      expect(denied.status).toBe(403);
+      const res = await request(app).get('/api/v1/users/options').set(authHeader(consultantA));
+      expect(res.status).toBe(200);
+      expect(res.body.data.map((u: { role: string }) => u.role).sort()).toEqual(['branch_manager', 'consultant']);
+    });
+
+    it('tài khoản giáo viên và editor gọi ?role=instructor → 403', async () => {
+      const { app, editorA, instructorA } = await setup();
+      expect((await request(app).get('/api/v1/users/options?role=instructor').set(authHeader(instructorA))).status).toBe(
+        403,
+      );
+      expect((await request(app).get('/api/v1/users/options?role=instructor').set(authHeader(editorA))).status).toBe(403);
+    });
+
+    it('role không hợp lệ → 400', async () => {
+      const { app, admin } = await setup();
+      expect((await request(app).get('/api/v1/users/options?role=editor').set(authHeader(admin))).status).toBe(400);
+      expect((await request(app).get('/api/v1/users/options?role=abc').set(authHeader(admin))).status).toBe(400);
+    });
   });
 });

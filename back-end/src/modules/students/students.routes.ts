@@ -13,6 +13,7 @@ export function createStudentsRouter(): Router {
   router.get('/', can('student.read'), validate({ query: listStudentsQuerySchema }), controller.list);
   router.post('/', can('student.create'), validate({ body: createStudentSchema }), controller.create);
   router.get('/:id', can('student.read'), validate({ params: idParamsSchema }), controller.get);
+  router.get('/:id/exams', can('exam.read'), validate({ params: idParamsSchema }), controller.exams);
   router.patch(
     '/:id',
     can('student.update'),

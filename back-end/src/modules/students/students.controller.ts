@@ -14,6 +14,10 @@ export async function get(req: Request, res: Response): Promise<void> {
   sendData(res, await service.getStudent(req.user!, req.scope, idOf(req)));
 }
 
+export async function exams(req: Request, res: Response): Promise<void> {
+  sendData(res, await service.listStudentExams(req.user!, req.scope, idOf(req)));
+}
+
 export async function create(req: Request, res: Response): Promise<void> {
   const student = await service.createStudent(req.user!, req.scope, validated<CreateStudentInput>(req, 'body'));
   sendData(res, service.presentStudent(req.user!, student), 201);

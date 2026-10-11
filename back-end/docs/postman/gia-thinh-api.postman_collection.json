@@ -442,7 +442,7 @@
           "response": []
         },
         {
-          "name": "Nhân viên có thể phụ trách khách/lịch hẹn (lead.read hoặc appointment.read)",
+          "name": "Nhân viên có thể phụ trách khách/lịch hẹn (lead.read hoặc appointment.read); role=instructor → tài khoản giáo viên (instructor.create hoặc instructor.update)",
           "request": {
             "method": "GET",
             "header": [],
@@ -458,6 +458,11 @@
               "query": [
                 {
                   "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
                   "value": "",
                   "disabled": true
                 }
@@ -4194,6 +4199,32 @@
                   ]
                 },
                 "description": "DELETE /api/v1/students/{id}"
+              },
+              "response": []
+            },
+            {
+              "name": "Các lần thi của học viên (exam.read), ca mới nhất trước",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/students/:id/exams",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ":id",
+                    "exams"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{studentId}}"
+                    }
+                  ]
+                },
+                "description": "GET /api/v1/students/{id}/exams"
               },
               "response": []
             },
