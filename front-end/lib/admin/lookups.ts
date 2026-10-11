@@ -39,8 +39,13 @@ export function useCourses() {
 }
 
 // Không có role: nhân viên phụ trách khách/lịch hẹn; role=instructor: tài
-// khoản giáo viên để liên kết (cần quyền instructor.create/update)
-export function useStaffOptions(branchId?: string, role?: "instructor") {
+// khoản giáo viên để liên kết (cần quyền instructor.create/update);
+// enabled: false khi người xem thiếu quyền đó (tránh 403)
+export function useStaffOptions(
+  branchId?: string,
+  role?: "instructor",
+  { enabled = true }: { enabled?: boolean } = {}
+) {
   return useQuery({
     queryKey: ["lookup", "staff", branchId || "all", role ?? "staff"],
     queryFn: () =>
@@ -48,6 +53,7 @@ export function useStaffOptions(branchId?: string, role?: "instructor") {
         query: { branchId: branchId || undefined, role },
       }),
     staleTime: LOOKUP_STALE_MS,
+    enabled,
   })
 }
 
