@@ -113,7 +113,7 @@ const exams: StudentExam[] = [
     sessionId: "e2",
     sessionCode: "SH-2026-11",
     type: "official",
-    date: "2026-11-20T07:30:00+07:00",
+    date: "2026-11-20T00:00:00+07:00",
     location: "Trung tâm sát hạch Vĩnh Long",
     courseCode: "B-SO-SAN",
     result: "passed",
@@ -126,7 +126,7 @@ const exams: StudentExam[] = [
     sessionId: "e1",
     sessionCode: "TN-2026-10",
     type: "graduation",
-    date: "2026-10-30T08:00:00+07:00",
+    date: "2026-10-30T00:00:00+07:00",
     location: null,
     courseCode: "B-SO-SAN",
     result: "absent",
@@ -256,13 +256,14 @@ describe("StudentDetail", () => {
     expect(exam).toHaveAttribute("href", "/admin/lich-thi/e2")
     const row = exam.closest("tr")!
     expect(within(row).getByText("Sát hạch")).toBeInTheDocument()
-    expect(within(row).getByText("20/11/2026 07:30")).toBeInTheDocument()
+    expect(within(row).getByText("20/11/2026")).toBeInTheDocument()
     expect(within(row).getByText("Đậu")).toBeInTheDocument()
     expect(within(row).getByText("92")).toBeInTheDocument()
     const absent = screen
       .getByRole("link", { name: "TN-2026-10" })
       .closest("tr")!
     expect(within(absent).getByText("Tốt nghiệp")).toBeInTheDocument()
+    expect(within(absent).getByText("30/10/2026")).toBeInTheDocument()
     expect(within(absent).getByText("Vắng")).toBeInTheDocument()
     expect(urlsOf(fn, "/students/s1/exams")).toHaveLength(1)
   })

@@ -46,7 +46,7 @@ Ngoài phạm vi: học phí/thu tiền (đợt D), giờ dạy theo tháng củ
 ## 6. Lịch thi `/admin/lich-thi`
 
 - Danh sách `GET /exams` lọc `q (mã), type, status, branchId, courseId, from, to`, sắp `-date`. Cột: Mã ca · Loại · Gói · Chi nhánh · Ngày thi · Địa điểm · Thí sinh (`stats.candidates`) · Đậu/Trượt/Vắng · Tỷ lệ đậu (`passed / (candidates − absent − pending)`, "—" khi mẫu = 0) · Trạng thái. Bỏ số liệu cứng cũ. Bấm hàng → chi tiết.
-- "+ Xếp ca thi" (`exam.create`): Mã*, Loại*, Gói*, Chi nhánh*, Ngày giờ* (`datetime-local` → +07:00), Địa điểm, Trạng thái, Ghi chú → `POST /exams`.
+- "+ Xếp ca thi" (`exam.create`): Mã*, Loại*, Gói*, Chi nhánh*, Ngày thi* (`type="date"` → `yyyy-MM-dd`; backend `createExamSchema`/`updateExamSchema` dùng `zDateOnly`, ca thi chỉ lưu ngày, giờ ghi ở Ghi chú nếu cần), Địa điểm, Trạng thái, Ghi chú → `POST /exams`.
 - Chi tiết `/admin/lich-thi/[id]`: thông tin ca + Sửa (mã, ngày giờ, địa điểm, trạng thái, ghi chú) + Xoá (409 đã có kết quả → thông báo). Bảng thí sinh (`GET /exams/:id/candidates`): mã + tên học viên (link chi tiết học viên), SĐT (nếu có), lần thi, kết quả (Select: Chờ kết quả/Đậu/Trượt/Vắng), điểm (ô số 0–1000), ghi chú, nút Lưu từng dòng → `PATCH /exams/:id/candidates/:cid { result, score, note }`; xoá thí sinh chờ (`DELETE`). "Thêm thí sinh" (`exam.update`, chỉ khi ca `scheduled`): sheet tìm học viên cùng chi nhánh + gói, Đang học (`GET /students?...status=studying`), bỏ người đã có trong ca → chọn nhiều → `POST /exams/:id/candidates { studentIds }` → toast "Đã thêm N thí sinh" + liệt kê `skipped` (lý do). Tài khoản giáo viên chỉ xem (không có `exam.update`).
 
 ## 7. Giáo viên `/admin/giao-vien`

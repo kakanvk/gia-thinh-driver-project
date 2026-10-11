@@ -37,6 +37,10 @@ const consultant = [
   "lead.create",
   "lead.update",
   "appointment.*",
+  "student.read",
+  "student.create",
+  "student.update",
+  "tuition.read",
   "dashboard.read",
 ]
 const manager = [
@@ -100,7 +104,8 @@ describe("canAccess / firstAllowedPath", () => {
     expect(canAccess("/admin/hoc-vien", instructor)).toBe(true)
     expect(canAccess("/admin/hoc-vien/abc", instructor)).toBe(true)
     expect(canAccess("/admin/hoc-vien", editor)).toBe(false)
-    expect(canAccess("/admin/hoc-vien", consultant)).toBe(false)
+    expect(canAccess("/admin/hoc-vien", consultant)).toBe(true)
+    expect(canAccess("/admin/lop-hoc", consultant)).toBe(false)
     expect(canAccess("/admin/giao-vien", consultant)).toBe(false)
   })
 

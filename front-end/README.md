@@ -55,7 +55,7 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 - `/admin/lich-thi`: xếp ca thi tốt nghiệp/sát hạch, tỷ lệ đậu ("—" khi chưa có kết quả). `/admin/lich-thi/[id]`: thêm thí sinh (chỉ khi ca Đã lên lịch; người bị bỏ qua hiện kèm lý do), nhập kết quả/điểm từng dòng; đậu sát hạch → học viên Hoàn thành.
 - `/admin/giao-vien`: thêm/sửa giáo viên, chuyên môn, liên kết tài khoản vai trò giáo viên, thống kê lớp/học viên/tỷ lệ đậu. Không chuyển Nghỉ việc được khi còn lớp đang dạy.
 - `/admin/xe-tap-lai`: thêm/sửa xe; băng cảnh báo xe quá hạn hoặc sắp đến hạn (30 ngày) bảo dưỡng/đăng kiểm.
-- Tài khoản giáo viên chỉ xem lớp mình phụ trách, học viên và ca thi liên quan; không có nút thêm/sửa/xoá/xếp lớp/nhập kết quả.
+- Tài khoản giáo viên chỉ xem lớp mình phụ trách và học viên của các lớp đó, cùng toàn bộ ca thi của chi nhánh (chỉ xem); không có nút thêm/sửa/xoá/xếp lớp/nhập kết quả.
 
 ## Kho media, thư viện & bài viết
 
