@@ -125,6 +125,8 @@ npm run seed:reset -- --yes   # bỏ qua bước xác nhận (script tự độn
 - **Học viên** (`/students`): mã `HV-yyMMdd-NN`; xếp lớp qua `PATCH /students/:id/class` (cùng chi nhánh, cùng gói, lớp chưa kết thúc).
 - **Chuyển khách thành học viên:** `POST /leads/:id/convert` khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ. Chuyển khách cũng tạo luôn sổ học phí (xem "Học phí và báo cáo").
 - **Lịch thi** (`/exams`): ca thi tốt nghiệp/sát hạch, thêm thí sinh (học viên đang học, cùng chi nhánh và gói), nhập kết quả; đậu sát hạch → học viên "hoàn thành". Website lấy lịch thi ở `GET /public/exams/upcoming`.
+- **Các lần thi của học viên:** `GET /students/:id/exams` (quyền `exam.read`, cùng phạm vi như `GET /students/:id`) trả các lần dự thi, ngày thi mới nhất trước.
+- **Chọn tài khoản giáo viên:** `GET /users/options?role=instructor&branchId=` (cần `instructor.create` hoặc `instructor.update`); không có `role` thì như cũ (tư vấn viên + quản lý chi nhánh).
 - **Xe tập lái** (`/vehicles`): `GET /vehicles/alerts?days=30` liệt kê xe sắp đến hạn hoặc quá hạn bảo dưỡng/đăng kiểm.
 
 ## Học phí và báo cáo

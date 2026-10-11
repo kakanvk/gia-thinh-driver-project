@@ -48,6 +48,15 @@ Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ư�
 - `/admin/lich-dang-ky`: lịch hẹn theo tháng (lọc chi nhánh, người phụ trách); tạo/sửa/đổi trạng thái/xoá lịch hẹn. Trùng giờ với lịch khác của cùng người phụ trách thì báo lỗi ngay trên form.
 - Giờ nhập và hiển thị theo giờ Việt Nam (`+07:00`), không phụ thuộc múi giờ máy.
 
+## Đào tạo
+
+- `/admin/hoc-vien`: danh sách học viên (lọc trạng thái, chi nhánh, gói, lớp), thêm học viên (sổ học phí tạo tự động). `/admin/hoc-vien/[id]`: sửa hồ sơ, đổi trạng thái, xếp/đổi/bỏ lớp, xem các lần thi (cần `exam.read`), xoá. Từ chi tiết khách hàng có link "Xem học viên".
+- `/admin/lop-hoc`: mở/sửa lớp, sĩ số theo sức chứa. `/admin/lop-hoc/[id]`: học viên của lớp, xếp nhiều học viên một lần (ai lỗi, vd. lớp đầy, được báo riêng), bỏ khỏi lớp.
+- `/admin/lich-thi`: xếp ca thi tốt nghiệp/sát hạch, tỷ lệ đậu ("—" khi chưa có kết quả). `/admin/lich-thi/[id]`: thêm thí sinh (chỉ khi ca Đã lên lịch; người bị bỏ qua hiện kèm lý do), nhập kết quả/điểm từng dòng; đậu sát hạch → học viên Hoàn thành.
+- `/admin/giao-vien`: thêm/sửa giáo viên, chuyên môn, liên kết tài khoản vai trò giáo viên, thống kê lớp/học viên/tỷ lệ đậu. Không chuyển Nghỉ việc được khi còn lớp đang dạy.
+- `/admin/xe-tap-lai`: thêm/sửa xe; băng cảnh báo xe quá hạn hoặc sắp đến hạn (30 ngày) bảo dưỡng/đăng kiểm.
+- Tài khoản giáo viên chỉ xem lớp mình phụ trách, học viên và ca thi liên quan; không có nút thêm/sửa/xoá/xếp lớp/nhập kết quả.
+
 ## Kho media, thư viện & bài viết
 
 - `MediaPicker` (`components/admin/media/media-picker.tsx`) dùng chung để chọn ảnh/video từ kho media; tab Tải lên chỉ hiện với quyền `media.upload`. Ảnh (jpeg/png/webp ≤ 5 MB) gửi qua backend; video (mp4/webm ≤ 500 MB) tải thẳng lên bucket GCS bằng signed URL, có thanh tiến trình và huỷ được.
