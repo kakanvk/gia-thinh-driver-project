@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Be_Vietnam_Pro, Geist_Mono, Oooh_Baby, Inter } from "next/font/google"
+import { Geist_Mono, Oooh_Baby, Inter } from "next/font/google"
 
 import "./globals.css"
 import { SiteFooter } from "@/components/site-footer"

@@ -3,7 +3,9 @@ import Link from "next/link"
 import { ArrowLeft, Clock3, MapPin, MessageCircle, Phone } from "lucide-react"
 
 import { ConsultationForm } from "@/components/consultation-form"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
+import { getBranches, getPricing, getSiteContact } from "@/lib/api/public"
+import { courseOptions } from "@/lib/public/lead"
 
 export const metadata: Metadata = {
   title: "Nhận tư vấn khóa học | Trường lái Gia Thịnh",
@@ -11,28 +13,44 @@ export const metadata: Metadata = {
     "Gửi thông tin để được Gia Thịnh tư vấn hạng bằng, học phí, lịch học và cơ sở thuận tiện.",
 }
 
-const supportDetails = [
-  {
-    icon: Phone,
-    title: "Hotline & Zalo",
-    description: "0779 666 664",
-  },
-  {
-    icon: Clock3,
-    title: "Thời gian phản hồi",
-    description: "07:00–21:00 mỗi ngày",
-  },
-  {
-    icon: MapPin,
-    title: "Cơ sở",
-    description: "5 điểm tư vấn tại Vĩnh Long",
-  },
-]
+export const revalidate = 300
 
-export default function ConsultationPage() {
+export default async function ConsultationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ branch?: string | string[]; course?: string | string[] }>
+}) {
+  const [params, contact, branches, pricing] = await Promise.all([
+    searchParams,
+    getSiteContact(),
+    getBranches(),
+    getPricing(),
+  ])
+  const pick = (value: string | string[] | undefined) =>
+    Array.isArray(value) ? value[0] : value
+  const supportDetails = [
+    {
+      icon: Phone,
+      title: "Hotline & Zalo",
+      description: contact.hotline,
+    },
+    {
+      icon: Clock3,
+      title: "Thời gian phản hồi",
+      description: "07:00–21:00 mỗi ngày",
+    },
+    {
+      icon: MapPin,
+      title: "Cơ sở",
+      description: branches?.length
+        ? `${branches.length} điểm tư vấn tại Vĩnh Long`
+        : "Các điểm tư vấn tại Vĩnh Long",
+    },
+  ]
+
   return (
     <main className="min-h-svh bg-mist">
-      <StickyHeader />
+      <SiteHeader />
 
       <section className="mx-auto grid max-w-7xl gap-6 px-5 pt-3 pb-6 sm:px-8 sm:py-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-10">
         <div className="order-0 lg:col-span-2">
@@ -66,7 +84,7 @@ export default function ConsultationPage() {
           </div>
 
           <a
-            href="https://zalo.me/0779666664"
+            href={contact.zaloHref}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-primary hover:underline"
@@ -77,7 +95,21 @@ export default function ConsultationPage() {
         </aside>
 
         <div className="order-1 rounded-md border border-primary/15 bg-background p-5 shadow-[0_20px_55px_-42px_rgba(9,57,102,0.45)] sm:p-6 lg:order-2">
-          <ConsultationForm />
+          <ConsultationForm
+            branches={(branches ?? []).map((branch) => ({
+              slug: branch.slug,
+              label: branch.officeName || branch.name,
+            }))}
+            courses={courseOptions(pricing)}
+            contactTimes={contact.contactTimes}
+            contact={{
+              hotline: contact.hotline,
+              telHref: contact.telHref,
+              zaloHref: contact.zaloHref,
+            }}
+            initialBranch={pick(params.branch)}
+            initialCourse={pick(params.course)?.toUpperCase()}
+          />
         </div>
       </section>
     </main>

@@ -190,8 +190,36 @@ export const trainingClasses = [
   },
 ]
 
+// Văn phòng tĩnh cho các trang admin còn dùng dữ liệu mẫu
+export const offices = [
+  {
+    name: "VP1 — Tân Ngãi",
+    address: "Số 331A, P. Tân Ngãi, T. Vĩnh Long",
+    map: "https://www.google.com/maps/search/?api=1&query=331A+T%C3%A2n+Ng%C3%A3i+V%C4%A9nh+Long",
+  },
+  {
+    name: "VP2 — Thanh Đức",
+    address: "Số 183, P. Thanh Đức, T. Vĩnh Long",
+    map: "https://www.google.com/maps/search/?api=1&query=183+Thanh+%C4%90%E1%BB%A9c+V%C4%A9nh+Long",
+  },
+  {
+    name: "VP3 — Long Châu",
+    address: "Số 15C, đường Phạm Hùng, P. Long Châu, T. Vĩnh Long",
+    map: "https://www.google.com/maps/search/?api=1&query=15C+Ph%E1%BA%A1m+H%C3%B9ng+Long+Ch%C3%A2u+V%C4%A9nh+Long",
+  },
+  {
+    name: "VP4 — Phú Quới",
+    address: "Ấp Long Hòa, xã Phú Quới, T. Vĩnh Long",
+    map: "https://www.google.com/maps/search/?api=1&query=Long+Ho%C3%A0+Ph%C3%BA+Qu%E1%BB%9Bi+V%C4%A9nh+Long",
+  },
+  {
+    name: "VP Vũng Liêm",
+    address: "TT GDTX Vũng Liêm, QL 53, xã Trung Thành, T. Vĩnh Long",
+  },
+]
+
 /**
- * Chi nhánh: `office` trỏ tới tên văn phòng trong `@/lib/contact` để lấy địa chỉ
+ * Chi nhánh: `office` trỏ tới tên văn phòng trong `offices` ở trên để lấy địa chỉ
  * và bản đồ, `monthlyRevenue` tính bằng triệu đồng cho tháng hiện tại.
  */
 export const branches = [
@@ -244,89 +272,6 @@ export const branches = [
     monthlyRevenue: 158,
     openingHours: "7:30–17:30 · T2–T7",
     status: "Đang hoạt động",
-  },
-]
-
-/**
- * Ca thi tốt nghiệp (tại trung tâm) và sát hạch (tại Sở GTVT).
- * `passed` là null khi kỳ thi chưa diễn ra nên chưa có kết quả.
- */
-export const examSessions: Array<{
-  code: string
-  examType: "Tốt nghiệp" | "Sát hạch"
-  licenseClass: string
-  branch: string
-  date: string
-  candidates: number
-  passed: number | null
-  absent: number
-  status: "Đã có kết quả" | "Sắp diễn ra" | "Đã lên lịch"
-}> = [
-  {
-    code: "SH-2609-01",
-    examType: "Sát hạch",
-    licenseClass: "A1",
-    branch: "Tân Ngãi",
-    date: "28/09/2026",
-    candidates: 48,
-    passed: null,
-    absent: 0,
-    status: "Sắp diễn ra",
-  },
-  {
-    code: "SH-2609-02",
-    examType: "Sát hạch",
-    licenseClass: "B tự động",
-    branch: "Tân Ngãi",
-    date: "28/09/2026",
-    candidates: 32,
-    passed: null,
-    absent: 0,
-    status: "Sắp diễn ra",
-  },
-  {
-    code: "TN-2610-03",
-    examType: "Tốt nghiệp",
-    licenseClass: "B số sàn",
-    branch: "Tân Ngãi",
-    date: "02/10/2026",
-    candidates: 40,
-    passed: null,
-    absent: 0,
-    status: "Đã lên lịch",
-  },
-  {
-    code: "SH-2609-00",
-    examType: "Sát hạch",
-    licenseClass: "A",
-    branch: "Phú Quới",
-    date: "21/09/2026",
-    candidates: 26,
-    passed: 24,
-    absent: 0,
-    status: "Đã có kết quả",
-  },
-  {
-    code: "SH-2609-11",
-    examType: "Sát hạch",
-    licenseClass: "C1",
-    branch: "Long Châu",
-    date: "14/09/2026",
-    candidates: 22,
-    passed: 20,
-    absent: 1,
-    status: "Đã có kết quả",
-  },
-  {
-    code: "TN-2609-08",
-    examType: "Tốt nghiệp",
-    licenseClass: "A1",
-    branch: "Thanh Đức",
-    date: "07/09/2026",
-    candidates: 50,
-    passed: 49,
-    absent: 0,
-    status: "Đã có kết quả",
   },
 ]
 
@@ -659,9 +604,9 @@ export const supportPlaybook = [
   {
     title: "Tiếp nhận hồ sơ mới",
     steps:
-      "Đối chiếu CCCD, ảnh thẻ và giấy khám sức khỏe, sau đó xếp lịch tư vấn trong Lịch đăng ký.",
+      "Đối chiếu CCCD, ảnh thẻ và giấy khám sức khỏe, sau đó xếp lịch tư vấn trong Lịch hẹn.",
     href: "/admin/lich-dang-ky",
-    linkLabel: "Mở lịch đăng ký",
+    linkLabel: "Mở lịch hẹn",
   },
   {
     title: "Mở lớp khi sắp hết chỗ",
@@ -777,76 +722,6 @@ export const registrations: Registration[] = [
   },
 ]
 
-export type CalendarEvent = {
-  day: number
-  title: string
-  meta: string
-  tone: "primary" | "signal" | "warning"
-}
-
-export const calendarEvents: CalendarEvent[] = [
-  {
-    day: 2,
-    title: "A1 · 6 học viên",
-    meta: "08:00 · Vũng Liêm",
-    tone: "signal",
-  },
-  {
-    day: 5,
-    title: "B tự động · 4 HV",
-    meta: "13:30 · Tân Ngãi",
-    tone: "primary",
-  },
-  {
-    day: 8,
-    title: "C1 · 5 học viên",
-    meta: "08:30 · Long Châu",
-    tone: "warning",
-  },
-  {
-    day: 11,
-    title: "A · 8 học viên",
-    meta: "09:00 · Phú Quới",
-    tone: "signal",
-  },
-  {
-    day: 14,
-    title: "A1 · 12 học viên",
-    meta: "07:30 · Vũng Liêm",
-    tone: "primary",
-  },
-  {
-    day: 17,
-    title: "B số sàn · 6 HV",
-    meta: "14:00 · Thanh Đức",
-    tone: "warning",
-  },
-  {
-    day: 21,
-    title: "B tự động · 8 HV",
-    meta: "08:00 · Tân Ngãi",
-    tone: "primary",
-  },
-  {
-    day: 24,
-    title: "Tư vấn hồ sơ · 12",
-    meta: "08:00–16:30 · VP1",
-    tone: "signal",
-  },
-  {
-    day: 25,
-    title: "C1 · 5 học viên",
-    meta: "08:30 · Long Châu",
-    tone: "warning",
-  },
-  {
-    day: 28,
-    title: "A1 · 10 học viên",
-    meta: "08:00 · Vũng Liêm",
-    tone: "primary",
-  },
-]
-
 export const adminUsers = [
   {
     name: "Nguyễn Minh Anh",
@@ -927,78 +802,5 @@ export const adminUsers = [
     course: "A1",
     joined: "21/09/2026",
     status: "Đang học",
-  },
-]
-
-export const adminPosts = [
-  {
-    title: "5 lưu ý trước ngày thi sát hạch A1",
-    thumbnail:
-      "/media/1789307300348_4599662549725482019_4599662549725482019_fdc3b40a8c3079067cf0cad66a40d03b.jpg",
-    author: "Ban biên tập",
-    category: "Kinh nghiệm thi",
-    updated: "24/09/2026",
-    status: "Đã xuất bản",
-    views: "1.248",
-  },
-  {
-    title: "Lịch khai giảng tháng 10: A1, B và C1",
-    thumbnail:
-      "/media/1789307373617_4599662549725482019_4599662549725482019_6fde98cbf02dab051b15c6b50e57eedf.jpg",
-    author: "Mỹ Duyên",
-    category: "Thông báo",
-    updated: "23/09/2026",
-    status: "Bản nháp",
-    views: "—",
-  },
-  {
-    title: "Chia sẻ kinh nghiệm qua vòng số 8 không chống chân",
-    thumbnail:
-      "/media/1789307300348_4599662549725482019_4599662549725482019_fdc3b40a8c3079067cf0cad66a40d03b.jpg",
-    author: "Minh T.",
-    category: "Xe máy — A & A1",
-    updated: "23/09/2026",
-    status: "Đã duyệt",
-    views: "986",
-  },
-  {
-    title: "Chạy DAT 810km mất bao lâu? Lịch chạy của mình đây",
-    thumbnail:
-      "/media/map/1789307362409_4599662549725482019_4599662549725482019_3e15cc0c135b22be293df84b61f611d1.jpg",
-    author: "Hoài An",
-    category: "Ô tô — B & C1",
-    updated: "22/09/2026",
-    status: "Chờ duyệt",
-    views: "654",
-  },
-  {
-    title: "Phân biệt hạng A và A1 theo quy định mới",
-    thumbnail:
-      "/media/1789307300543_4599662549725482019_4599662549725482019_b9d6dab7a63f5884f387f59bc22747e7.jpg",
-    author: "Ban biên tập",
-    category: "Tư vấn chọn bằng",
-    updated: "20/09/2026",
-    status: "Đã xuất bản",
-    views: "2.106",
-  },
-  {
-    title: "Mẹo canh gương khi ghép ngang trong sa hình",
-    thumbnail:
-      "/media/map/1789307362409_4599662549725482019_4599662549725482019_3e15cc0c135b22be293df84b61f611d1.jpg",
-    author: "Thầy Đức",
-    category: "Ô tô — B & C1",
-    updated: "19/09/2026",
-    status: "Đã duyệt",
-    views: "1.572",
-  },
-  {
-    title: "Học phí B và C1 gồm những gì, phát sinh bao nhiêu?",
-    thumbnail:
-      "/media/1789307366944_4599662549725482019_4599662549725482019_967a3bf4d808bb7d612acfb0f3d9fc6a.jpg",
-    author: "Ban biên tập",
-    category: "Học phí minh bạch",
-    updated: "18/09/2026",
-    status: "Đã xuất bản",
-    views: "3.420",
   },
 ]

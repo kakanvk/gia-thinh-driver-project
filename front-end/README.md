@@ -1,21 +1,67 @@
-# Next.js template
+# Gia Thịnh — Front-end
 
-This is a Next.js template with shadcn/ui.
+Website và trang quản trị Trường lái Gia Thịnh (Next.js 16). Quy ước dự án: `AGENT.md`.
 
-## Adding components
+## Chạy ở máy dev
 
-To add components to your app, run the following command:
+1. Chạy backend (`../back-end`, xem README ở đó) tại `http://localhost:4000`.
+2. Cấu hình và chạy front-end:
 
-```bash
-npx shadcn@latest add button
-```
+   ```bash
+   cp .env.example .env.local   # NEXT_PUBLIC_API_URL=/api/v1, API_ORIGIN=http://localhost:4000
+   npm install
+   npm run dev                  # http://localhost:3000
+   ```
 
-This will place the ui components in the `components` directory.
+3. Đăng nhập quản trị: http://localhost:3000/admin/dang-nhap bằng tài khoản `SEED_ADMIN_*` của backend.
 
-## Using components
+## Địa chỉ API
 
-To use the components in your app, import them as follows:
+| Môi trường | `NEXT_PUBLIC_API_URL` | `API_ORIGIN` |
+|---|---|---|
+| Dev | `/api/v1` | `http://localhost:4000` |
+| Preview Vercel (`*.vercel.app`) | `/api/v1` | `https://api.giathinh.vn` |
+| Production (`giathinh.vn`) | `https://api.giathinh.vn/api/v1` | `https://api.giathinh.vn` |
 
-```tsx
-import { Button } from "@/components/ui/button";
-```
+`API_ORIGIN` bắt buộc ở mọi môi trường: server Next.js dùng nó để lấy dữ liệu trang công khai (cache 5 phút). Thiếu hoặc backend không phản hồi thì trang vẫn hiện, các khối dữ liệu hiện thông báo dự phòng.
+
+- Đường dẫn tương đối: Next.js chuyển tiếp `/api/v1/*` và `/uploads/*` tới `API_ORIGIN` (bắt buộc cho preview vì `vercel.app` khác site với `api.giathinh.vn`, cookie đăng nhập sẽ không được gửi).
+- Đường dẫn tuyệt đối: trình duyệt gọi thẳng; backend phải có `CORS_ORIGINS` chứa domain front-end.
+- Cả hai biến được đọc lúc build: đổi giá trị thì build/deploy lại.
+
+## Website công khai
+
+- Trang chủ, `/tu-van`, `/dien-dan`, `/thu-vien`, header và footer lấy dữ liệu từ `/api/v1/public/*`; admin sửa thì website cập nhật trễ tối đa 5 phút.
+- Form tư vấn tạo khách trong CRM.
+- Diễn đàn `/thao-luan` lưu trên trình duyệt (không có backend).
+
+## Đăng nhập quản trị
+
+- Access token chỉ giữ trong bộ nhớ; cookie `gt_refresh` (httpOnly) giữ phiên. Mở `/admin` sẽ tự cấp lại token; hết phiên thì về `/admin/dang-nhap`.
+- Menu và trang hiện theo quyền của vai trò (`lib/auth/routes.ts`). Backend vẫn kiểm quyền cho mọi API.
+- Quên mật khẩu: quản trị viên cấp mật khẩu tạm ở màn Người dùng; nhân viên đổi lại ở `/admin/tai-khoan`.
+
+## Khách hàng & lịch hẹn
+
+- `/admin/khach-hang`: danh sách khách từ CRM; bộ lọc, ô tìm và số trang lưu trên URL (tải lại hoặc gửi link vẫn giữ). Xuất CSV và xoá khách chỉ hiện với quản lý chi nhánh / quản trị viên.
+- `/admin/khach-hang/[id]`: đổi trạng thái (chuyển sang "Không thành công" phải nhập lý do; mở lại bằng "Đã liên hệ"), phân công người phụ trách, ghi lịch sử chăm sóc, đặt lịch hẹn và chuyển thành học viên khi khách ở trạng thái Đặt cọc hoặc Hoàn tất hồ sơ.
+- `/admin/lich-dang-ky`: lịch hẹn theo tháng (lọc chi nhánh, người phụ trách); tạo/sửa/đổi trạng thái/xoá lịch hẹn. Trùng giờ với lịch khác của cùng người phụ trách thì báo lỗi ngay trên form.
+- Giờ nhập và hiển thị theo giờ Việt Nam (`+07:00`), không phụ thuộc múi giờ máy.
+
+## Kho media, thư viện & bài viết
+
+- `MediaPicker` (`components/admin/media/media-picker.tsx`) dùng chung để chọn ảnh/video từ kho media; tab Tải lên chỉ hiện với quyền `media.upload`. Ảnh (jpeg/png/webp ≤ 5 MB) gửi qua backend; video (mp4/webm ≤ 500 MB) tải thẳng lên bucket GCS bằng signed URL, có thanh tiến trình và huỷ được.
+- Upload video cần bucket bật CORS cho origin admin (xem mục "Lưu ảnh trên Google Cloud Storage" trong `back-end/README.md`); thiếu thì báo "Không tải được lên kho lưu trữ (kiểm tra cấu hình CORS của bucket)".
+- `/admin/thu-vien` (quyền `gallery.manage`): tab Thư viện website (thêm mục, chú thích, ảnh bìa cho video, ẩn/hiện, sắp thứ tự) và tab Kho media (sửa mô tả, xoá; media đang dùng thì báo nơi đang dùng).
+- `/admin/bai-viet`: danh sách lọc theo trạng thái/chuyên mục, menu hàng (xuất bản, gỡ, lưu trữ, khôi phục, nhân bản, xoá) và quản lý chuyên mục. `/admin/bai-viet/tao-moi`, `/admin/bai-viet/[id]`: ảnh bìa và ảnh trong nội dung chọn từ kho media (không chèn base64), xuất bản ngay hoặc hẹn giờ; rời trang khi chưa lưu sẽ được hỏi lại.
+
+## Lệnh
+
+| Lệnh | Mô tả |
+|---|---|
+| `npm run dev` | Chạy dev |
+| `npm test` | Test (Vitest + Testing Library) |
+| `npm run typecheck` / `npm run lint` | Kiểm tra kiểu / lint |
+| `npm run build` && `npm start` | Build và chạy bản production |
+
+> Lưu ý: `next.config.ts` đặt `output: "standalone"`, nên `npm start` (`next start`) sẽ in cảnh báo. Khi chạy production thật, sau `npm run build` hãy chép `public/` vào `.next/standalone/public` và `.next/static` vào `.next/standalone/.next/static`, rồi chạy `node .next/standalone/server.js`.

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { SanTapExperience } from "@/components/san-tap/experience"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
 
 export const metadata: Metadata = {
   title: "Sân tập 3D | Trường lái Gia Thịnh",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main data-page="san-tap" className="h-svh overflow-hidden bg-background">
-      <StickyHeader />
+      <SiteHeader />
       <section className="relative h-[calc(100svh-64px)] overflow-hidden">
         <SanTapExperience />
       </section>

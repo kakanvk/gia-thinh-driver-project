@@ -12,19 +12,24 @@ import {
   Car,
   ChevronDown,
   ClipboardCheck,
+  Contact,
   ExternalLink,
   FileText,
   GraduationCap,
   HelpCircle,
+  Images,
   LayoutDashboard,
   LogOut,
   Search,
   Settings,
+  UserCircle,
   UserCog,
+  UserRoundCheck,
   Users,
   Wallet,
 } from "lucide-react"
 
+import { useAuth } from "@/components/admin/auth-provider"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +39,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { canAccess } from "@/lib/auth/routes"
+import { initials, ROLE_LABELS } from "@/lib/auth/user"
 import { cn } from "@/lib/utils"
 
 type NavItem = {
@@ -52,11 +59,9 @@ const navGroups: NavGroup[] = [
     label: "Vận hành",
     items: [
       { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
-      {
-        label: "Lịch đăng ký",
-        href: "/admin/lich-dang-ky",
-        icon: CalendarDays,
-      },
+      { label: "Khách hàng", href: "/admin/khach-hang", icon: Contact },
+      { label: "Học viên", href: "/admin/hoc-vien", icon: UserRoundCheck },
+      { label: "Lịch hẹn", href: "/admin/lich-dang-ky", icon: CalendarDays },
       { label: "Lớp học", href: "/admin/lop-hoc", icon: GraduationCap },
       { label: "Lịch thi", href: "/admin/lich-thi", icon: ClipboardCheck },
       { label: "Người dùng", href: "/admin/nguoi-dung", icon: Users },
@@ -76,7 +81,10 @@ const navGroups: NavGroup[] = [
   },
   {
     label: "Nội dung",
-    items: [{ label: "Bài viết", href: "/admin/bai-viet", icon: FileText }],
+    items: [
+      { label: "Thư viện", href: "/admin/thu-vien", icon: Images },
+      { label: "Bài viết", href: "/admin/bai-viet", icon: FileText },
+    ],
   },
   {
     label: "Hệ thống",
@@ -86,8 +94,6 @@ const navGroups: NavGroup[] = [
     ],
   },
 ]
-
-const navItems: NavItem[] = navGroups.flatMap((group) => group.items)
 
 function isActiveRoute(pathname: string, href: string) {
   if (href === "/admin") return pathname === href
@@ -125,9 +131,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const { user, permissions, logout } = useAuth()
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => canAccess(item.href, permissions)),
+    }))
+    .filter((group) => group.items.length > 0)
+  const navItems = visibleGroups.flatMap((group) => group.items)
+  const displayName = user?.name ?? ""
+  const roleLabel = user ? ROLE_LABELS[user.role] : ""
+  const avatar = initials(displayName)
 
   function logOut() {
-    router.push("/")
+    void logout()
   }
 
   return (
@@ -163,7 +180,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </Link>
 
         <div className="admin-nav-scroll mt-6 -ml-4 flex flex-1 flex-col gap-5 overflow-y-auto pl-4">
-          {navGroups.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.label}>
               <p className="px-3 text-[10px] font-semibold text-muted-foreground uppercase">
                 {group.label}
@@ -231,20 +248,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   render={
                     <button
                       type="button"
-                      aria-label="Mở menu tài khoản quản trị viên"
+                      aria-label="Mở menu tài khoản"
                       className="flex min-h-9 items-center gap-2 rounded-md bg-background pr-2 pl-1 hover:bg-muted data-popup-open:bg-muted"
                     />
                   }
                 >
                   <span className="grid size-7 place-items-center rounded-md bg-navy text-xs font-semibold text-white">
-                    AD
+                    {avatar}
                   </span>
                   <span className="hidden text-left xl:block">
                     <span className="block text-xs leading-4 font-semibold">
-                      Quản trị viên
+                      {displayName}
                     </span>
                     <span className="block text-[10px] text-muted-foreground">
-                      Gia Thịnh
+                      {roleLabel}
                     </span>
                   </span>
                   <ChevronDown
@@ -263,35 +280,42 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="flex items-center gap-3 p-2">
                       <span className="grid size-9 shrink-0 place-items-center rounded-md bg-navy text-xs font-semibold text-white">
-                        AD
+                        {avatar}
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-[13px] font-semibold text-foreground">
-                          Quản trị viên
+                          {displayName}
                         </span>
                         <span className="block truncate text-[11px] font-normal text-muted-foreground">
-                          Trung tâm Gia Thịnh
+                          {roleLabel}
                         </span>
                       </span>
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onSelect={() => router.push("/admin")}
+                    onClick={() => router.push("/admin/tai-khoan")}
+                    className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
+                  >
+                    <UserCircle aria-hidden="true" className="size-4" />
+                    Tài khoản
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push("/admin")}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
                   >
                     <LayoutDashboard aria-hidden="true" className="size-4" />
                     Tổng quan quản trị
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => router.push("/")}
+                    onClick={() => router.push("/")}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
                   >
                     <ExternalLink aria-hidden="true" className="size-4" />
                     Xem trang web
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => {
+                    onClick={() => {
                       void navigator.clipboard?.writeText("support@giathinh.vn")
                     }}
                     className="min-h-9 gap-2 px-2 text-[13px] focus:bg-muted focus:text-foreground"
@@ -302,7 +326,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onSelect={logOut}
+                    onClick={logOut}
                     className="min-h-9 gap-2 px-2 text-[13px]"
                   >
                     <LogOut aria-hidden="true" className="size-4" />

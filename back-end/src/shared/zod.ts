@@ -1,0 +1,48 @@
+import { z } from 'zod';
+import { parseDateOnly, parseDateTime } from './time';
+
+export const objectIdSchema = z.string().regex(/^[a-f\d]{24}$/i, 'ID không hợp lệ');
+
+export const idParamsSchema = z.object({ id: objectIdSchema });
+
+export const zDateOnly = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Ngày phải có dạng YYYY-MM-DD')
+  .transform((value, ctx) => {
+    try {
+      return parseDateOnly(value);
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'Ngày không tồn tại' });
+      return z.NEVER;
+    }
+  });
+
+export const zDateTime = z.string().transform((value, ctx) => {
+  try {
+    return parseDateTime(value);
+  } catch {
+    ctx.addIssue({ code: 'custom', message: 'Thời gian không hợp lệ' });
+    return z.NEVER;
+  }
+});
+export const slugSchema = z
+  .string()
+  .trim()
+  .max(150)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Slug chỉ gồm chữ thường không dấu, số và dấu gạch ngang');
+
+export const imageInputSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .max(500)
+    .regex(/^(https?:\/\/|\/(?![/\\]))/, 'URL ảnh phải là http(s) hoặc đường dẫn bắt đầu bằng /'),
+  alt: z.string().trim().max(200).default(''),
+  mediaId: objectIdSchema.optional(),
+});
+
+export function atLeastOneField<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
+  return schema.refine((value) => Object.keys(value).length > 0, { message: 'Không có thay đổi nào' });
+}
+
+export const transmissionSchema = z.enum(['manual', 'automatic']).nullable();

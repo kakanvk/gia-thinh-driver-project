@@ -2,14 +2,10 @@ import Image from "next/image"
 import Link from "next/link"
 import {
   ArrowRight,
-  Bike,
   Building2,
-  CalendarDays,
-  CarFront,
   Check,
   ChevronRight,
   Clock3,
-  FileText,
   MapPin,
   MessageCircle,
   Phone,
@@ -18,107 +14,34 @@ import {
 } from "lucide-react"
 
 import { AboutTimeline } from "@/components/about-timeline"
+import { ClassSchedule } from "@/components/class-schedule"
+import { ExamSchedule } from "@/components/exam-schedule"
 import { JourneyTimeline } from "@/components/journey-timeline"
 import { NewsCard } from "@/components/news-card"
+import { OfficeList } from "@/components/office-list"
+import { PricingSection } from "@/components/pricing-section"
 import { ScrollReveal } from "@/components/scroll-reveal"
-import { StickyHeader } from "@/components/sticky-header"
+import { SiteHeader } from "@/components/site-header"
 import { TikTokSection } from "@/components/tiktok-section"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { offices } from "@/lib/contact"
-import { newsPosts } from "@/lib/news"
+import {
+  getBranches,
+  getLatestPosts,
+  getPricing,
+  getSiteContact,
+  getUpcomingClasses,
+  getUpcomingExams,
+} from "@/lib/api/public"
+import { toNewsPost } from "@/lib/news"
 import { cn } from "@/lib/utils"
 import mainBanner from "@/public/main-banner.png"
 import mainMobileBanner from "@/public/main-mobile-banner.png"
-
-const courses = [
-  {
-    branch: "Chi nhánh Vĩnh Long",
-    type: "Xe máy",
-    title: "Hạng A & A1",
-    description:
-      "Hạng A chạy được xe A1 và xe trên 125cc (thi Vespa tay ga hoặc CB250 tay côn). Hạng A1 chạy xe đến 125cc (thi xe Wave).",
-    prices: [
-      { label: "Hạng A", value: "1.750.000đ" },
-      { label: "Hạng A1", value: "620.000đ" },
-    ],
-    priceNote: "Đã gồm hồ sơ, lý thuyết 2 ngày tập trung, lệ phí thi và cấp bằng",
-    extras: ["Xe cảm biến A: 70.000đ/vòng", "Xe cảm biến A1: 20.000đ/vòng", "Thi thử máy tính: 10.000đ/lượt"],
-    discounts: ["Có bằng ô tô: miễn lý thuyết, giảm 60.000đ", "HSSV học hạng A: giảm 500.000đ (mang thẻ khi đăng ký)"],
-    images: [
-      { src: "/vehicles/scooter-a.png", alt: "Xe tay ga thi sát hạch hạng A" },
-    ],
-    icon: Bike,
-    tone: "light",
-  },
-  {
-    branch: "Chi nhánh Vũng Liêm",
-    type: "Xe máy",
-    title: "Hạng A & A1",
-    description:
-      "Hạng A chạy được xe A1 và xe trên 125cc (thi Vespa tay ga hoặc CB250 tay côn). Hạng A1 chạy xe đến 125cc (thi xe Wave).",
-    prices: [
-      { label: "Hạng A", value: "1.595.000đ" },
-      { label: "Hạng A1", value: "790.000đ" },
-    ],
-    priceNote: "Đã gồm hồ sơ, lý thuyết 2 ngày tập trung, lệ phí thi và cấp bằng",
-    extras: ["Cảm biến A tay ga Vespa: 50.000đ/vòng", "Cảm biến A tay côn: 40.000đ/vòng", "Cảm biến A1: 20.000đ/vòng"],
-    discounts: ["Có bằng ô tô: miễn lý thuyết, giảm 60.000đ"],
-    images: [
-      { src: "/vehicles/moto-a.png", alt: "Xe mô tô thi sát hạch hạng A" },
-    ],
-    icon: Bike,
-    tone: "light",
-  },
-  {
-    branch: "Tất cả chi nhánh",
-    type: "Ô tô",
-    title: "Hạng B (sàn & tự động)",
-    description:
-      "Giáo viên kèm từ đầu đến lúc lấy bằng. Hỗ trợ đóng theo đợt, HSSV giảm thêm 1.000.000đ.",
-    prices: [{ label: "Trọn khóa", value: "16.500.000đ" }],
-    priceNote: "Đã gồm xăng DAT, xe giờ đêm/xe tự động, giáo viên đến lúc thi",
-    extras: ["Khám sức khỏe: tự khám hoặc tại trung tâm", "Cabin mô phỏng: 500.000đ (2 giờ)", "Lệ phí thi: 1.500.000đ", "Thuê xe cảm biến: 300.000–600.000đ/giờ"],
-    discounts: ["HSSV giảm thêm 1.000.000đ", "Hỗ trợ đóng theo đợt"],
-    images: [{ src: "/vehicles/car-b.png", alt: "Xe tập lái hạng B" }],
-    icon: CarFront,
-    tone: "dark",
-  },
-  {
-    branch: "Tất cả chi nhánh",
-    type: "Ô tô tải",
-    title: "Hạng C1",
-    description:
-      "Giáo viên kèm đến lúc lấy bằng. Hỗ trợ đóng theo đợt, HSSV giảm thêm 1.000.000đ.",
-    prices: [{ label: "Trọn khóa", value: "18.900.000đ" }],
-    priceNote: "Đã gồm xăng dầu DAT, xe giờ đêm/xe tự động, giáo viên đến lúc thi",
-    extras: ["Khám sức khỏe: tự khám hoặc tại trung tâm", "Cabin mô phỏng: 500.000đ (2 giờ)", "Lệ phí thi: 1.500.000đ", "Thuê xe cảm biến: 350.000–600.000đ/giờ"],
-    discounts: ["HSSV giảm thêm 1.000.000đ", "Hỗ trợ đóng theo đợt"],
-    images: [{ src: "/vehicles/truck-c1.png", alt: "Xe tập lái hạng C1" }],
-    icon: CarFront,
-    tone: "dark",
-  },
-]
 
 const motoExtras = [
   "Khám sức khỏe tại sân thi Gia Thịnh: 280.000đ (hoặc khám sẵn bên ngoài)",
   "Sách luật: 50.000đ (tùy nhu cầu)",
   "Sân tập xe cảm biến mở trước kỳ thi khoảng 3 ngày",
-]
-
-
-const registerNotes = [
-  "Học phí công khai giá gốc — nên đến trực tiếp văn phòng Gia Thịnh để đăng ký.",
-  "Đã có GPLX trước đây phải trình báo cho nhân viên tư vấn khi đăng ký.",
-  "Đăng ký xong nhớ lấy biên lai và liên hệ Gia Thịnh để vào nhóm Zalo nhận lịch ôn, thi.",
-  "Có hỗ trợ ôn kèm luật 1:1 (phí riêng) nếu có nhu cầu.",
-]
-
-const schedules = [
-  { license: "A1", date: "14/09/2026", deadline: "Còn 12 chỗ", status: "Đang nhận hồ sơ" },
-  { license: "B số tự động", date: "21/09/2026", deadline: "Còn 08 chỗ", status: "Sắp đủ lớp" },
-  { license: "B số sàn", date: "05/10/2026", deadline: "Còn 15 chỗ", status: "Đang nhận hồ sơ" },
 ]
 
 const process = [
@@ -140,7 +63,20 @@ const process = [
   },
 ]
 
-export default function Page() {
+export const revalidate = 300
+
+export default async function Page() {
+  const [contact, branches, pricing, classes, exams, latest] = await Promise.all([
+    getSiteContact(),
+    getBranches(),
+    getPricing(),
+    getUpcomingClasses(),
+    getUpcomingExams(),
+    getLatestPosts(4),
+  ])
+  // latest null = API lỗi: hiện thông báo dự phòng kèm hotline, khác với chưa có bài
+  const latestPosts = latest ? latest.map(toNewsPost) : null
+
   return (
     <main className="min-h-svh overflow-x-clip bg-background">
       <div className="bg-navy text-white">
@@ -156,7 +92,7 @@ export default function Page() {
         </div>
       </div>
 
-      <StickyHeader />
+      <SiteHeader />
 
       <section className="relative overflow-hidden border-b border-border/60 bg-background lg:h-[40vw] lg:min-h-[480px]">
         <div
@@ -248,111 +184,8 @@ export default function Page() {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal
-            className="mt-12 grid gap-6 lg:grid-cols-2"
-            delay={0.08}
-            amount="some"
-          >
-            {courses.map((course) => {
-              const isDark = course.tone === "dark"
-
-              return (
-                <article
-                  key={`${course.branch}-${course.title}`}
-                  className={cn(
-                    "overflow-hidden rounded-md border p-5 sm:p-9",
-                    isDark
-                      ? "border-navy bg-navy text-white"
-                      : "border-primary/15 bg-background text-foreground"
-                  )}
-                >
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="order-2 sm:order-1">
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant={isDark ? "secondary" : "outline"}>{course.type}</Badge>
-                        <Badge
-                          variant="outline"
-                          className={
-                            isDark
-                              ? "border-white/40 bg-transparent text-white"
-                              : ""
-                          }
-                        >
-                          {course.branch}
-                        </Badge>
-                      </div>
-                      <h3 className={cn("mt-5 text-2xl font-extrabold", isDark ? "text-white" : "text-navy")}>{course.title}</h3>
-                      <p className={cn("mt-4 max-w-lg text-sm leading-6", isDark ? "text-white/65" : "text-muted-foreground")}>{course.description}</p>
-                    </div>
-                    {course.images.length === 1 ? (
-                      <Image
-                        src={course.images[0].src}
-                        alt={course.images[0].alt}
-                        width={352}
-                        height={352}
-                        loading="lazy"
-                        className="order-1 mx-auto w-32 sm:order-2 sm:mx-0 sm:w-44 sm:shrink-0"
-                      />
-                    ) : null}
-                  </div>
-
-                  <div className={cn("mt-6 rounded-md border p-4 sm:mt-8 sm:p-6", isDark ? "border-white/15 bg-white/[0.06]" : "border-primary/15 bg-gradient-to-br from-primary/[0.08] to-primary/[0.02]")}>
-                    <div className="flex flex-col gap-3">
-                      {course.prices.map((price) => (
-                        <p key={price.label} className="flex items-center justify-between gap-4">
-                          <span className={cn("inline-flex items-center rounded-full px-3 py-1 text-xs font-bold", isDark ? "bg-white/10 text-white" : "bg-primary/10 text-primary")}>{price.label}</span>
-                          <span className={cn("text-lg font-extrabold tracking-tight sm:text-xl", isDark ? "text-white" : "text-navy")}>{price.value}</span>
-                        </p>
-                      ))}
-                    </div>
-                    <p className={cn("mt-3 border-t pt-3 text-xs leading-5", isDark ? "border-white/10 text-white/55" : "border-primary/10 text-muted-foreground")}>{course.priceNote}</p>
-                  </div>
-
-                  <div className="mt-6 grid gap-6 sm:grid-cols-2">
-                    <div>
-                      <p className={cn("flex items-center gap-2 text-xs font-semibold", isDark ? "text-signal" : "text-primary")}>
-                        <CalendarDays aria-hidden="true" className="size-4" />
-                        Chi phí phát sinh
-                      </p>
-                      <ul className="mt-2 flex flex-col gap-2">
-                        {course.extras.map((extra) => (
-                          <li key={extra} className={cn("flex items-start gap-2 text-xs leading-5", isDark ? "text-white/70" : "text-muted-foreground")}>
-                            <Check aria-hidden="true" className={cn("mt-0.5 size-3.5 shrink-0", isDark ? "text-signal" : "text-primary")} />
-                            {extra}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <p className={cn("flex items-center gap-2 text-xs font-semibold", isDark ? "text-signal" : "text-primary")}>
-                        <FileText aria-hidden="true" className="size-4" />
-                        Ưu đãi
-                      </p>
-                      <ul className="mt-2 flex flex-col gap-2">
-                        {course.discounts.map((discount) => (
-                          <li key={discount} className={cn("flex items-start gap-2 text-xs leading-5", isDark ? "text-white/70" : "text-muted-foreground")}>
-                            <Check aria-hidden="true" className={cn("mt-0.5 size-3.5 shrink-0", isDark ? "text-signal" : "text-primary")} />
-                            {discount}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <a
-                    href="#lien-he"
-                    className={cn(
-                      buttonVariants({ variant: isDark ? "secondary" : "default", size: "lg" }),
-                      "mt-6 h-11 w-full rounded-full sm:mt-8 sm:w-auto"
-                    )}
-                  >
-                    <span className="sm:hidden">Đăng ký</span>
-                    <span className="hidden sm:inline">Đăng ký {course.title} — {course.branch}</span>
-                    <ArrowRight data-icon="inline-end" aria-hidden="true" />
-                  </a>
-                </article>
-              )
-            })}
+          <ScrollReveal className="mt-12" delay={0.08} amount="some">
+            <PricingSection pricing={pricing} hotline={{ display: contact.hotline, telHref: contact.telHref }} />
           </ScrollReveal>
 
           <ScrollReveal className="mt-6 grid gap-6 lg:grid-cols-2" delay={0.1}>
@@ -370,7 +203,7 @@ export default function Page() {
             <div className="rounded-md border border-primary/15 bg-background p-7 sm:p-8">
               <h3 className="text-lg font-extrabold text-navy">Trước khi đăng ký</h3>
               <ul className="mt-4 flex flex-col gap-2.5">
-                {registerNotes.map((note) => (
+                {contact.registerNotes.map((note) => (
                   <li key={note} className="flex items-start gap-2 text-sm leading-6 text-muted-foreground">
                     <Check aria-hidden="true" className="mt-1 size-4 shrink-0 text-signal" />
                     {note}
@@ -416,27 +249,7 @@ export default function Page() {
                   </a>
                 </div>
               </div>
-              <div className="flex flex-col gap-4">
-                {offices.slice(0, 4).map((office) => (
-                  <a
-                    key={office.name}
-                    href={office.map}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Xem bản đồ ${office.name}`}
-                    className="group flex flex-1 items-center gap-4 rounded-md border border-primary/15 bg-background px-5 py-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.04]"
-                  >
-                    <span className="grid size-11 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
-                      <Building2 aria-hidden="true" className="size-5" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-extrabold text-navy">{office.name}</span>
-                      <span className="mt-1.5 block text-sm leading-6 text-muted-foreground">{office.address}</span>
-                    </span>
-                    <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" />
-                  </a>
-                ))}
-              </div>
+              <OfficeList branches={branches} />
             </div>
           </ScrollReveal>
         </div>
@@ -451,33 +264,25 @@ export default function Page() {
               <p className="mt-5 leading-7 text-muted-foreground">Lịch được cập nhật theo số lượng hồ sơ thực tế. Giữ chỗ trước, hoàn thiện giấy tờ sau.</p>
             </ScrollReveal>
 
-            <ScrollReveal className="overflow-hidden rounded-md border border-border" delay={0.08}>
-              <div className="hidden grid-cols-[0.7fr_1fr_1fr_1.2fr] gap-4 bg-navy px-6 py-4 text-xs font-semibold text-white/70 sm:grid">
-                <span>Hạng bằng</span>
-                <span>Khai giảng</span>
-                <span>Tình trạng</span>
-                <span></span>
-              </div>
-              {schedules.map((schedule, index) => (
-                <div key={schedule.license}>
-                  {index > 0 ? <Separator /> : null}
-                  <div className="grid gap-4 px-5 py-5 sm:grid-cols-[0.7fr_1fr_1fr_1.2fr] sm:items-center sm:px-6">
-                    <strong className="text-navy">Hạng {schedule.license}</strong>
-                    <span className="text-sm font-semibold">{schedule.date}</span>
-                    <div>
-                      <Badge variant={schedule.status === "Sắp đủ lớp" ? "destructive" : "secondary"}>{schedule.status}</Badge>
-                      <p className="mt-1 text-xs text-muted-foreground">{schedule.deadline}</p>
-                    </div>
-                    <a
-                      href="#lien-he"
-                      className="inline-flex h-11 items-center justify-between gap-2 rounded-md bg-primary/[0.06] px-3.5 text-sm font-bold text-primary transition-colors active:bg-primary/10 sm:h-auto sm:bg-transparent sm:px-0 sm:hover:bg-transparent sm:hover:underline"
-                    >
-                      Giữ chỗ lớp này
-                      <ChevronRight aria-hidden="true" className="size-4" />
-                    </a>
-                  </div>
-                </div>
-              ))}
+            <ScrollReveal delay={0.08}>
+              <ClassSchedule classes={classes} />
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      <section id="lich-thi" className="bg-mist py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
+            <ScrollReveal>
+              <p className="mb-4 font-hand text-3xl font-bold text-primary sm:text-4xl">Lịch thi</p>
+              <h2 className="text-3xl font-extrabold tracking-tight text-navy sm:text-4xl">Các ca thi sắp tới</h2>
+              <p className="mt-5 leading-7 text-muted-foreground">
+                Học viên nhận lịch chính thức qua nhóm Zalo của lớp. Bảng dưới để theo dõi nhanh.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <ExamSchedule exams={exams} />
             </ScrollReveal>
           </div>
         </div>
@@ -508,13 +313,25 @@ export default function Page() {
             </Link>
           </ScrollReveal>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {newsPosts.slice(0, 4).map((post, index) => (
-              <ScrollReveal key={post.slug} delay={0.05 * index}>
-                <NewsCard post={post} />
-              </ScrollReveal>
-            ))}
-          </div>
+          {latestPosts === null ? (
+            <p className="mt-12 text-muted-foreground">
+              Tin tức đang được cập nhật, vui lòng gọi hotline{" "}
+              <a href={contact.telHref} className="font-bold text-primary hover:underline">
+                {contact.hotline}
+              </a>{" "}
+              để được hỗ trợ.
+            </p>
+          ) : latestPosts.length > 0 ? (
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {latestPosts.map((post, index) => (
+                <ScrollReveal key={post.slug} delay={0.05 * index}>
+                  <NewsCard post={post} />
+                </ScrollReveal>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-12 text-muted-foreground">Chưa có bài viết mới.</p>
+          )}
         </div>
       </section>
 
@@ -548,16 +365,16 @@ export default function Page() {
             </div>
             <div className="rounded-md border border-white/15 bg-white/[0.07] p-6 text-center sm:p-8">
               <p className="text-xs font-bold tracking-[0.14em] text-white/60 uppercase">Hotline hỗ trợ (Zalo)</p>
-              <a href="tel:0779666664" className="mt-2 flex min-h-11 items-center justify-center text-3xl font-extrabold tracking-tight text-white hover:text-signal sm:text-4xl">
-                0779 666 664
+              <a href={contact.telHref} className="mt-2 flex min-h-11 items-center justify-center text-3xl font-extrabold tracking-tight text-white hover:text-signal sm:text-4xl">
+                {contact.hotline}
               </a>
               <p className="mt-2 text-xs text-white/55">Tư vấn 07:00–21:00 mỗi ngày</p>
               <div className="mt-6 flex flex-col gap-3">
-                <a href="tel:0779666664" className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "h-11 rounded-full px-5")}>
+                <a href={contact.telHref} className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "h-11 rounded-full px-5")}>
                   <Phone data-icon="inline-start" aria-hidden="true" />
                   Gọi ngay
                 </a>
-                <a href="https://zalo.me/0779666664" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 rounded-full border-white/30 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white")}>
+                <a href={contact.zaloHref} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 rounded-full border-white/30 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white")}>
                   <MessageCircle data-icon="inline-start" aria-hidden="true" />
                   Nhắn Zalo
                 </a>

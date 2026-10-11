@@ -13,18 +13,23 @@ export function NewsCard({ post, query }: { post: NewsPost; query?: string }) {
       className="flex h-full flex-col overflow-hidden rounded-md border border-border bg-card"
     >
       <span className="relative block aspect-[16/10] overflow-hidden bg-mist">
-        <Image
-          src={post.image}
-          alt={post.imageAlt}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          loading="lazy"
-          className="object-cover"
-        />
+        {post.image ? (
+          <Image
+            src={post.image}
+            alt={post.imageAlt}
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            loading="lazy"
+            className="object-cover"
+          />
+        ) : (
+          <Image src="/giathinh-logo.png" alt="" fill sizes="25vw" className="object-contain p-10 opacity-60" />
+        )}
       </span>
       <span className="flex flex-1 flex-col p-4">
         <span className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">{post.category}</Badge>
+          {post.category ? <Badge variant="secondary">{post.category}</Badge> : null}
           <span className="text-xs text-muted-foreground">{post.date}</span>
         </span>
         <span

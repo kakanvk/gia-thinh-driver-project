@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -19,11 +19,21 @@ const navItems = [
   { label: "Diễn đàn", href: "/dien-dan" },
 ]
 
-export function StickyHeader() {
+// Hash trên URL là nguồn ngoài React: đọc qua useSyncExternalStore (server trả "")
+// để không lệch hydration và không phải setState đồng bộ trong effect.
+function subscribeHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange)
+  return () => window.removeEventListener("hashchange", onChange)
+}
+const getHash = () => window.location.hash.slice(1)
+const getServerHash = () => ""
+
+export function StickyHeader({ contact }: { contact: { hotline: string; telHref: string } }) {
   const [compact, setCompact] = useState(false)
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+  const hash = useSyncExternalStore(subscribeHash, getHash, getServerHash)
   const { scrollY } = useScroll()
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -33,14 +43,8 @@ export function StickyHeader() {
 
   // Theo dõi section đang hiển thị trên trang chủ để active nav tương ứng
   useEffect(() => {
-    if (pathname !== "/") {
-      setActiveSection(null)
-      return
-    }
-    // Nếu URL có hash sẵn (vd: /#khoa-hoc) thì active ngay
-    if (window.location.hash) {
-      setActiveSection(window.location.hash.slice(1))
-    }
+    // Ngoài trang chủ isActive() đã trả false; state được reset khi rời "/" (cleanup bên dưới)
+    if (pathname !== "/") return
     const ids = navItems
       .map((item) => item.sectionId)
       .filter((id): id is string => Boolean(id))
@@ -57,7 +61,10 @@ export function StickyHeader() {
       const el = document.getElementById(id)
       if (el) observer.observe(el)
     })
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      setActiveSection(null)
+    }
   }, [pathname])
 
   // Đóng sidebar khi bấm Escape, khóa cuộn nền khi mở
@@ -80,10 +87,9 @@ export function StickyHeader() {
       return pathname === item.href || pathname.startsWith(`${item.href}/`)
     }
     // Section trang chủ: active khi đang ở "/" và section đang hiển thị
-    // (hash ban đầu đã được đồng bộ vào activeSection trong useEffect,
-    // không đọc window.location.hash ở đây để tránh lệch hydration)
+    // Chưa có section nào được observer báo thì dùng hash sẵn trên URL (vd: /#khoa-hoc)
     if (pathname !== "/") return false
-    return activeSection === item.sectionId
+    return (activeSection ?? (hash || null)) === item.sectionId
   }
 
   return (
@@ -145,11 +151,11 @@ export function StickyHeader() {
           </nav>
 
           <a
-            href="tel:0779666664"
+            href={contact.telHref}
             className={cn(buttonVariants({ size: "lg" }), "hidden rounded-full sm:inline-flex")}
           >
             <Phone data-icon="inline-start" aria-hidden="true" />
-            <span className="hidden sm:inline">0779 666 664</span>
+            <span className="hidden sm:inline">{contact.hotline}</span>
             <span className="sm:hidden">Gọi ngay</span>
           </a>
 
@@ -212,11 +218,11 @@ export function StickyHeader() {
             </nav>
             <div className="border-t border-border p-4">
               <a
-                href="tel:0779666664"
+                href={contact.telHref}
                 className={cn(buttonVariants({ size: "lg" }), "h-11 w-full rounded-md")}
               >
                 <Phone data-icon="inline-start" aria-hidden="true" />
-                0779 666 664
+                {contact.hotline}
               </a>
             </div>
           </div>
@@ -224,8 +230,8 @@ export function StickyHeader() {
       ) : null}
 
       <a
-        href="tel:0779666664"
-        aria-label="Gọi ngay 0779 666 664"
+        href={contact.telHref}
+        aria-label={`Gọi ngay ${contact.hotline}`}
         className="group fixed right-5 bottom-5 z-40 grid size-14 place-items-center rounded-full bg-logo-red text-white shadow-[0_10px_30px_-8px_color-mix(in_oklch,var(--logo-red)_70%,transparent)] transition-transform hover:scale-105 active:scale-95 sm:right-6 sm:bottom-6"
       >
         <span

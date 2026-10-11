@@ -1,11 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState, useSyncExternalStore } from "react"
 import { Bookmark, ChevronLeft, ChevronRight, MessageCircle, Search, ThumbsUp } from "lucide-react"
 
 import type { ForumThread } from "@/lib/forum"
-import { loadUserThreads, type UserThread } from "@/lib/forum-store"
+import {
+  getServerUserThreadsSnapshot,
+  getUserThreadsSnapshot,
+  subscribeUserThreads,
+} from "@/lib/forum-store"
 import { VerifiedBadge } from "@/components/verified-badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
@@ -28,12 +32,13 @@ function avatarColor(name: string) {
 
 export function ForumTabs({ threads }: { threads: ForumThread[] }) {
   const rootRef = useRef<HTMLDivElement>(null)
-  const [userThreads, setUserThreads] = useState<UserThread[]>([])
-  useEffect(() => {
-    setUserThreads(loadUserThreads())
-  }, [])
+  const userThreads = useSyncExternalStore(
+    subscribeUserThreads,
+    getUserThreadsSnapshot,
+    getServerUserThreadsSnapshot
+  )
 
-  const all = [...userThreads, ...threads] as ForumThread[]
+  const all = useMemo(() => [...userThreads, ...threads] as ForumThread[], [userThreads, threads])
   const categories = ["Tất cả", ...Array.from(new Set(all.map((t) => t.board)))]
   const [active, setActive] = useState("Tất cả")
   const [page, setPage] = useState(1)

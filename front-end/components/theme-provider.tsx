@@ -47,7 +47,8 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      // Chrome autofill phát keydown không có key
+      if (typeof event.key !== "string" || event.key.toLowerCase() !== "d") {
         return
       }
 
