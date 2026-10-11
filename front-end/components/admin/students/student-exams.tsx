@@ -5,7 +5,7 @@ import Link from "next/link"
 
 import { SectionHeading, StatusPill } from "@/components/admin/admin-ui"
 import { Button } from "@/components/ui/button"
-import { formatDateTime } from "@/lib/admin/datetime"
+import { formatDate } from "@/lib/admin/datetime"
 import { CANDIDATE_RESULT_LABELS, EXAM_TYPE_LABELS } from "@/lib/admin/labels"
 import type { StudentExam } from "@/lib/admin/types"
 import { apiData } from "@/lib/api/client"
@@ -67,7 +67,7 @@ export function StudentExams({ studentId }: { studentId: string }) {
                     {EXAM_TYPE_LABELS[exam.type]}
                   </td>
                   <td className="py-2 pr-3 whitespace-nowrap text-muted-foreground">
-                    {formatDateTime(exam.date)}
+                    {formatDate(exam.date)}
                   </td>
                   <td className="py-2 pr-3">
                     <StatusPill status={CANDIDATE_RESULT_LABELS[exam.result]} />
