@@ -7,8 +7,10 @@ import { useAuth } from "@/components/admin/auth-provider"
 import type {
   BranchOption,
   CourseOption,
+  Instructor,
   Page,
   StaffOption,
+  TrainingClass,
 } from "@/lib/admin/types"
 import { apiData, apiFetch } from "@/lib/api/client"
 
@@ -36,14 +38,58 @@ export function useCourses() {
   })
 }
 
-export function useStaffOptions(branchId?: string) {
+// Không có role: nhân viên phụ trách khách/lịch hẹn; role=instructor: tài
+// khoản giáo viên để liên kết (cần quyền instructor.create/update)
+export function useStaffOptions(branchId?: string, role?: "instructor") {
   return useQuery({
-    queryKey: ["lookup", "staff", branchId || "all"],
+    queryKey: ["lookup", "staff", branchId || "all", role ?? "staff"],
     queryFn: () =>
       apiData<StaffOption[]>("/users/options", {
-        query: { branchId: branchId || undefined },
+        query: { branchId: branchId || undefined, role },
       }),
     staleTime: LOOKUP_STALE_MS,
+  })
+}
+
+// Danh sách chọn đổi theo thao tác của nhân viên (sĩ số, trạng thái) nên cache
+// ngắn; key bắt đầu bằng tên tài nguyên để mutation của màn đó làm mới luôn
+const TRAINING_OPTIONS_STALE_MS = 30 * 1000
+
+export function useInstructorOptions(branchId?: string) {
+  return useQuery({
+    queryKey: ["instructors", "options", branchId || "all"],
+    queryFn: () =>
+      apiFetch<Page<Instructor>>("/instructors", {
+        query: {
+          status: "active",
+          limit: 100,
+          branchId: branchId || undefined,
+        },
+      }).then((res) => res.data),
+    staleTime: TRAINING_OPTIONS_STALE_MS,
+  })
+}
+
+// Lớp chưa kết thúc theo chi nhánh/gói (chọn lớp cho học viên, tra mã lớp)
+export function useClassOptions({
+  branchId,
+  courseId,
+}: { branchId?: string; courseId?: string } = {}) {
+  return useQuery({
+    queryKey: [
+      "classes",
+      "options",
+      { branchId: branchId || "", courseId: courseId || "" },
+    ],
+    queryFn: () =>
+      apiFetch<Page<TrainingClass>>("/classes", {
+        query: {
+          branchId: branchId || undefined,
+          courseId: courseId || undefined,
+          limit: 100,
+        },
+      }).then((res) => res.data.filter((cls) => cls.status !== "finished")),
+    staleTime: TRAINING_OPTIONS_STALE_MS,
   })
 }
 

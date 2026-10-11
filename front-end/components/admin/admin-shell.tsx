@@ -24,6 +24,7 @@ import {
   Settings,
   UserCircle,
   UserCog,
+  UserRoundCheck,
   Users,
   Wallet,
 } from "lucide-react"
@@ -59,6 +60,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Tổng quan", href: "/admin", icon: LayoutDashboard },
       { label: "Khách hàng", href: "/admin/khach-hang", icon: Contact },
+      { label: "Học viên", href: "/admin/hoc-vien", icon: UserRoundCheck },
       { label: "Lịch hẹn", href: "/admin/lich-dang-ky", icon: CalendarDays },
       { label: "Lớp học", href: "/admin/lop-hoc", icon: GraduationCap },
       { label: "Lịch thi", href: "/admin/lich-thi", icon: ClipboardCheck },

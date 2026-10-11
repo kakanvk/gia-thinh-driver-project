@@ -92,8 +92,20 @@ describe("canAccess / firstAllowedPath", () => {
     expect(canAccess("/admin/thu-vien", consultant)).toBe(false)
   })
 
-  it("giáo viên về lớp học, quản lý về tổng quan", () => {
-    expect(firstAllowedPath(instructor)).toBe("/admin/lop-hoc")
+  it("học viên theo student.read, chi tiết đào tạo theo trang cha", () => {
+    expect(routeFor("/admin/hoc-vien")?.permission).toBe("student.read")
+    expect(routeFor("/admin/hoc-vien/abc")?.permission).toBe("student.read")
+    expect(routeFor("/admin/lop-hoc/k1")?.permission).toBe("class.read")
+    expect(routeFor("/admin/lich-thi/e1")?.permission).toBe("exam.read")
+    expect(canAccess("/admin/hoc-vien", instructor)).toBe(true)
+    expect(canAccess("/admin/hoc-vien/abc", instructor)).toBe(true)
+    expect(canAccess("/admin/hoc-vien", editor)).toBe(false)
+    expect(canAccess("/admin/hoc-vien", consultant)).toBe(false)
+    expect(canAccess("/admin/giao-vien", consultant)).toBe(false)
+  })
+
+  it("giáo viên về học viên (mục đầu tiên có quyền), quản lý về tổng quan", () => {
+    expect(firstAllowedPath(instructor)).toBe("/admin/hoc-vien")
     expect(firstAllowedPath(manager)).toBe("/admin")
     expect(firstAllowedPath(consultant)).toBe("/admin")
     expect(

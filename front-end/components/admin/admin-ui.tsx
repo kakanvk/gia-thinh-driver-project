@@ -95,6 +95,14 @@ const statusStyles: Record<string, string> = {
   "Hoàn thành": "bg-success/10 text-success",
   "Đã hủy": "bg-muted text-muted-foreground",
   "Khách không đến": "bg-destructive/10 text-destructive",
+  // Đào tạo: học viên, ca thi, thí sinh, giáo viên ("Đang học", "Hoàn thành",
+  // "Tạm dừng", "Đã lên lịch", "Đã hủy"... dùng chung màu ở trên)
+  "Thôi học": "bg-destructive/10 text-destructive",
+  "Chờ kết quả": "bg-highlight/25 text-foreground",
+  Đậu: "bg-success/10 text-success",
+  Trượt: "bg-destructive/10 text-destructive",
+  Vắng: "bg-muted text-muted-foreground",
+  "Nghỉ việc": "bg-destructive/10 text-destructive",
 }
 
 export function StatusPill({ status }: { status: string }) {

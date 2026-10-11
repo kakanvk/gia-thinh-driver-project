@@ -3,7 +3,13 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { makeQueryClient } from "@/components/providers/query-provider"
-import { nameById, useBranchChoice } from "@/lib/admin/lookups"
+import {
+  nameById,
+  useBranchChoice,
+  useClassOptions,
+  useInstructorOptions,
+  useStaffOptions,
+} from "@/lib/admin/lookups"
 import { useListParams } from "@/lib/admin/use-list-params"
 import { setAccessToken } from "@/lib/api/session"
 import { jsonResponse, mockFetch } from "@/test/fetch-mock"
@@ -85,5 +91,74 @@ describe("lookups", () => {
       defaultBranchId: "",
       showBranchSelect: true,
     })
+  })
+})
+
+describe("lookups đào tạo", () => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={makeQueryClient()}>
+      {children}
+    </QueryClientProvider>
+  )
+  const urlOf = (fn: { mock: { calls: unknown[][] } }, index = 0) =>
+    new URL(String(fn.mock.calls[index][0]), "http://localhost")
+
+  it("useInstructorOptions: giáo viên đang hoạt động theo chi nhánh", async () => {
+    const { fn } = mockFetch({
+      "GET /instructors": () =>
+        jsonResponse(200, {
+          data: [{ id: "i1", name: "Thầy Hùng" }],
+          meta: { page: 1, limit: 100, total: 1 },
+        }),
+    })
+    const { result } = renderHook(() => useInstructorOptions("b1"), {
+      wrapper,
+    })
+    await waitFor(() => expect(result.current.data).toHaveLength(1))
+    const url = urlOf(fn)
+    expect(url.searchParams.get("status")).toBe("active")
+    expect(url.searchParams.get("limit")).toBe("100")
+    expect(url.searchParams.get("branchId")).toBe("b1")
+  })
+
+  it("useClassOptions: lọc chi nhánh + gói, bỏ lớp đã kết thúc", async () => {
+    const { fn } = mockFetch({
+      "GET /classes": () =>
+        jsonResponse(200, {
+          data: [
+            { id: "k1", code: "B-01", status: "enrolling" },
+            { id: "k2", code: "B-02", status: "finished" },
+            { id: "k3", code: "B-03", status: "ongoing" },
+          ],
+          meta: { page: 1, limit: 100, total: 3 },
+        }),
+    })
+    const { result } = renderHook(
+      () => useClassOptions({ branchId: "b1", courseId: "c1" }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.data).toBeDefined())
+    expect(result.current.data?.map((cls) => cls.id)).toEqual(["k1", "k3"])
+    const url = urlOf(fn)
+    expect(url.pathname.endsWith("/classes")).toBe(true)
+    expect(url.searchParams.get("branchId")).toBe("b1")
+    expect(url.searchParams.get("courseId")).toBe("c1")
+    expect(url.searchParams.get("limit")).toBe("100")
+  })
+
+  it("useStaffOptions role=instructor: tài khoản giáo viên theo chi nhánh", async () => {
+    const { fn } = mockFetch({
+      "GET /users/options": () =>
+        jsonResponse(200, {
+          data: [{ id: "u1", name: "GV A", role: "instructor", branchIds: [] }],
+        }),
+    })
+    const { result } = renderHook(() => useStaffOptions("b1", "instructor"), {
+      wrapper,
+    })
+    await waitFor(() => expect(result.current.data).toHaveLength(1))
+    const url = urlOf(fn)
+    expect(url.searchParams.get("role")).toBe("instructor")
+    expect(url.searchParams.get("branchId")).toBe("b1")
   })
 })

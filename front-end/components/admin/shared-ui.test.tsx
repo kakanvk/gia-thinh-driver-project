@@ -11,7 +11,13 @@ import { FormField } from "@/components/admin/form-field"
 import { Pagination } from "@/components/admin/pagination"
 import {
   APPOINTMENT_STATUS_LABELS,
+  CANDIDATE_RESULT_LABELS,
+  CLASS_STATUS_LABELS,
+  EXAM_STATUS_LABELS,
+  INSTRUCTOR_STATUS_LABELS,
   LEAD_STATUS_LABELS,
+  STUDENT_STATUS_LABELS,
+  VEHICLE_STATUS_LABELS,
 } from "@/lib/admin/labels"
 
 type Row = { id: string; name: string }
@@ -402,5 +408,27 @@ describe("StatusPill", () => {
     }
     render(<StatusPill status="Không thành công" />)
     expect(screen.getByText("Không thành công")).toHaveClass("text-destructive")
+  })
+
+  it("có màu cho trạng thái đào tạo; chỉ trạng thái dừng/kết thúc dùng màu xám", () => {
+    const muted = ["Tạm dừng", "Tạm nghỉ", "Đã kết thúc", "Đã hủy", "Vắng"]
+    const labels = [
+      ...Object.values(STUDENT_STATUS_LABELS),
+      ...Object.values(CLASS_STATUS_LABELS),
+      ...Object.values(EXAM_STATUS_LABELS),
+      ...Object.values(CANDIDATE_RESULT_LABELS),
+      ...Object.values(INSTRUCTOR_STATUS_LABELS),
+      ...Object.values(VEHICLE_STATUS_LABELS),
+    ].filter((label) => !muted.includes(label))
+    for (const label of labels) {
+      const { unmount } = render(<StatusPill status={label} />)
+      expect(screen.getByText(label)).not.toHaveClass("bg-muted")
+      unmount()
+    }
+    const { unmount } = render(<StatusPill status="Trượt" />)
+    expect(screen.getByText("Trượt")).toHaveClass("text-destructive")
+    unmount()
+    render(<StatusPill status="Đậu" />)
+    expect(screen.getByText("Đậu")).toHaveClass("text-success")
   })
 })

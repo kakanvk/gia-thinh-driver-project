@@ -9,6 +9,7 @@ export const LOGIN_PATH = "/admin/dang-nhap"
 export const ADMIN_ROUTES: AdminRoute[] = [
   { href: "/admin", permission: "dashboard.read" },
   { href: "/admin/khach-hang", permission: "lead.read" },
+  { href: "/admin/hoc-vien", permission: "student.read" },
   { href: "/admin/lich-dang-ky", permission: "appointment.read" },
   { href: "/admin/lop-hoc", permission: "class.read" },
   { href: "/admin/lich-thi", permission: "exam.read" },
