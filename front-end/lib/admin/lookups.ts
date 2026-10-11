@@ -70,16 +70,25 @@ export function useInstructorOptions(branchId?: string) {
   })
 }
 
-// Lớp chưa kết thúc theo chi nhánh/gói (chọn lớp cho học viên, tra mã lớp)
+// Lớp chưa kết thúc theo chi nhánh/gói (chọn lớp cho học viên, tra mã lớp).
+// includeFinished: giữ cả lớp đã kết thúc (tra mã lớp ở danh sách học viên);
+// enabled: false khi người xem không có class.read (tránh 403)
 export function useClassOptions({
   branchId,
   courseId,
-}: { branchId?: string; courseId?: string } = {}) {
+  includeFinished = false,
+  enabled = true,
+}: {
+  branchId?: string
+  courseId?: string
+  includeFinished?: boolean
+  enabled?: boolean
+} = {}) {
   return useQuery({
     queryKey: [
       "classes",
       "options",
-      { branchId: branchId || "", courseId: courseId || "" },
+      { branchId: branchId || "", courseId: courseId || "", includeFinished },
     ],
     queryFn: () =>
       apiFetch<Page<TrainingClass>>("/classes", {
@@ -88,8 +97,13 @@ export function useClassOptions({
           courseId: courseId || undefined,
           limit: 100,
         },
-      }).then((res) => res.data.filter((cls) => cls.status !== "finished")),
+      }).then((res) =>
+        includeFinished
+          ? res.data
+          : res.data.filter((cls) => cls.status !== "finished")
+      ),
     staleTime: TRAINING_OPTIONS_STALE_MS,
+    enabled,
   })
 }
 

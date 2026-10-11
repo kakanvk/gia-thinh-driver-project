@@ -280,6 +280,26 @@ describe("LeadDetail", () => {
     expect(await openStatusMenu()).toEqual(["Đã liên hệ"])
   })
 
+  it("khách đã thành học viên: link Xem học viên khi có student.read", async () => {
+    setup(lead({ status: "enrolled", studentId: "s1" }))
+    const first = renderDetail()
+    expect(
+      await screen.findByRole("link", { name: /Xem học viên/ })
+    ).toHaveAttribute("href", "/admin/hoc-vien/s1")
+    first.unmount()
+
+    auth = {
+      user: consultant,
+      permissions: ["lead.read", "lead.update", "appointment.*"],
+    }
+    setup(lead({ status: "enrolled", studentId: "s1" }))
+    renderDetail()
+    await screen.findByRole("heading", { name: "Nguyễn Văn An" })
+    expect(
+      screen.queryByRole("link", { name: /Xem học viên/ })
+    ).not.toBeInTheDocument()
+  })
+
   it("nút Chuyển thành học viên theo trạng thái và quyền", async () => {
     setup()
     const first = renderDetail()
@@ -361,8 +381,20 @@ describe("LeadDetail", () => {
     )
 
     await waitFor(() =>
-      expect(toastSuccess).toHaveBeenCalledWith("Đã tạo học viên HV0007")
+      expect(toastSuccess).toHaveBeenCalledWith(
+        "Đã tạo học viên HV0007",
+        expect.objectContaining({
+          action: expect.objectContaining({ label: "Mở học viên" }),
+        })
+      )
     )
+    // Nút "Mở học viên" trên toast mở trang chi tiết học viên vừa tạo
+    const [, options] = toastSuccess.mock.calls[0] as [
+      string,
+      { action: { onClick: () => void } },
+    ]
+    options.action.onClick()
+    expect(push).toHaveBeenCalledWith("/admin/hoc-vien/s1")
     expect(bodyOf(calls, "POST /leads/l1/convert")).toEqual({
       courseId: "c1",
       classId: "k1",
@@ -399,7 +431,12 @@ describe("LeadDetail", () => {
       within(dialog).getByRole("button", { name: "Chuyển thành học viên" })
     )
     await waitFor(() =>
-      expect(toastSuccess).toHaveBeenCalledWith("Đã tạo học viên HV0008")
+      expect(toastSuccess).toHaveBeenCalledWith(
+        "Đã tạo học viên HV0008",
+        expect.objectContaining({
+          action: expect.objectContaining({ label: "Mở học viên" }),
+        })
+      )
     )
     expect(bodyOf(calls, "POST /leads/l1/convert")).toEqual({
       courseId: "c1",

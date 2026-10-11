@@ -1,7 +1,13 @@
 "use client"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Pencil, Trash2, UserRoundCheck } from "lucide-react"
+import {
+  ArrowLeft,
+  GraduationCap,
+  Pencil,
+  Trash2,
+  UserRoundCheck,
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -15,7 +21,7 @@ import { LeadAssign } from "@/components/admin/leads/lead-assign"
 import { LeadConvertSheet } from "@/components/admin/leads/lead-convert-sheet"
 import { LeadFormSheet } from "@/components/admin/leads/lead-form-sheet"
 import { LeadStatusMenu } from "@/components/admin/leads/lead-status-menu"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { formatDateTime, isOverdue } from "@/lib/admin/datetime"
 import { LEAD_SOURCE_LABELS, LEAD_STATUS_LABELS } from "@/lib/admin/labels"
 import { isOpenStatus } from "@/lib/admin/lead-status"
@@ -53,6 +59,7 @@ export function LeadDetail({ id }: { id: string }) {
   const canUpdate = useCan("lead.update")
   const canDelete = useCan("lead.delete")
   const canConvert = useCan("student.create")
+  const canReadStudents = useCan("student.read")
   const branches = useBranches()
   const [editOpen, setEditOpen] = useState(false)
   const [convertOpen, setConvertOpen] = useState(false)
@@ -155,6 +162,15 @@ export function LeadDetail({ id }: { id: string }) {
               <Pencil aria-hidden="true" />
               Sửa
             </Button>
+          ) : null}
+          {lead.studentId && canReadStudents ? (
+            <Link
+              href={`/admin/hoc-vien/${lead.studentId}`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <GraduationCap aria-hidden="true" />
+              Xem học viên
+            </Link>
           ) : null}
           {showConvert ? (
             <Button type="button" onClick={() => setConvertOpen(true)}>

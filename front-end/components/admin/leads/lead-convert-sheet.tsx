@@ -1,6 +1,7 @@
 "use client"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -61,6 +62,7 @@ export function LeadConvertSheet({
   onOpenChange: (open: boolean) => void
   lead: Lead
 }) {
+  const router = useRouter()
   const queryClient = useQueryClient()
   // Tư vấn viên có student.create nhưng không có class.read: bỏ ô chọn lớp
   const canReadClasses = useCan("class.read")
@@ -96,14 +98,25 @@ export function LeadConvertSheet({
         body,
       }),
     meta: { silent: true },
-    onSuccess: (result) => {
+    onSuccess: (result, body) => {
       queryClient.setQueryData(["lead", result.lead.id], result.lead)
       void queryClient.invalidateQueries({ queryKey: ["lead", lead.id] })
       void queryClient.invalidateQueries({ queryKey: ["leads"] })
       void queryClient.invalidateQueries({
         queryKey: ["lead-activities", lead.id],
       })
-      toast.success(`Đã tạo học viên ${result.student.code}`)
+      void queryClient.invalidateQueries({ queryKey: ["students"] })
+      if ("classId" in body) {
+        void queryClient.invalidateQueries({ queryKey: ["classes"] })
+        void queryClient.invalidateQueries({ queryKey: ["class"] })
+        void queryClient.invalidateQueries({ queryKey: ["class-students"] })
+      }
+      toast.success(`Đã tạo học viên ${result.student.code}`, {
+        action: {
+          label: "Mở học viên",
+          onClick: () => router.push(`/admin/hoc-vien/${result.student.id}`),
+        },
+      })
       onOpenChange(false)
     },
     onError: (error) => {
