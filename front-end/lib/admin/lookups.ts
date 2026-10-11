@@ -55,7 +55,11 @@ export function useStaffOptions(branchId?: string, role?: "instructor") {
 // ngắn; key bắt đầu bằng tên tài nguyên để mutation của màn đó làm mới luôn
 const TRAINING_OPTIONS_STALE_MS = 30 * 1000
 
-export function useInstructorOptions(branchId?: string) {
+// enabled: false khi người xem không có instructor.read (tránh 403)
+export function useInstructorOptions(
+  branchId?: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) {
   return useQuery({
     queryKey: ["instructors", "options", branchId || "all"],
     queryFn: () =>
@@ -67,6 +71,7 @@ export function useInstructorOptions(branchId?: string) {
         },
       }).then((res) => res.data),
     staleTime: TRAINING_OPTIONS_STALE_MS,
+    enabled,
   })
 }
 
