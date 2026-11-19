@@ -198,6 +198,19 @@ gcloud storage buckets update gs://<bucket> --cors-file=cors.json --lifecycle-fi
 - Media lưu danh sách nơi dùng (`refs`): ảnh bìa / ảnh trong nội dung bài viết, mục thư viện. `DELETE /media/:id` khi media đang được dùng → 409 `MEDIA_IN_USE`, `details` liệt kê `<entity>:<id>:<tiêu đề bài | chú thích>`. Xoá mềm bài viết vẫn giữ nơi dùng.
 - Thư viện website (`/gallery`, quyền `gallery.manage`): thêm mục từ kho media, chú thích, ảnh bìa (chỉ cho video), ẩn/hiện, sắp xếp (`PATCH /gallery/reorder` gửi đủ mọi id). Xoá mục không xoá media. Website đọc `GET /public/gallery?kind=` (chỉ mục đang hiện, theo thứ tự, tối đa 500).
 
+## Chạy trên VPS ít RAM
+
+- Server dùng khoảng 160MB RAM lúc rảnh. Ảnh upload được chuyển WebP lần lượt từng ảnh (sharp 1 luồng, không cache), pool MongoDB tối đa 10 kết nối, production không nạp Swagger.
+- Chạy bằng pm2 theo `ecosystem.config.cjs`: 1 process (rate limit đăng nhập lưu trong bộ nhớ), heap tối đa 256MB, tự khởi động lại khi vượt 400MB.
+
+```bash
+npm ci && npm run build && npm prune --omit=dev
+pm2 start ecosystem.config.cjs && pm2 save
+```
+
+- `tsc` khi build tốn vài trăm MB. VPS dưới 1GB RAM nên thêm swap, hoặc build ở máy khác / CI rồi chép `dist/`, `package.json`, `package-lock.json` lên và chạy `npm ci --omit=dev` trên VPS (cài `sharp` đúng bản Linux).
+- Sau Nginx đặt `TRUST_PROXY=1`; `client_max_body_size` của Nginx ≥ 6m để upload ảnh 5MB.
+
 ## Cấu trúc
 
 `src/modules/<tính năng>/` chứa model, service, controller, routes, validation của từng nghiệp vụ.

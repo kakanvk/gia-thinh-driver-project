@@ -49,9 +49,21 @@ export type VideoUploadInput = z.infer<typeof videoUploadBodySchema>;
 export type CompleteVideoInput = z.infer<typeof completeVideoBodySchema>;
 export type UpdateMediaInput = z.infer<typeof updateMediaBodySchema>;
 
-async function toWebp(buffer: Buffer) {
+// VPS yếu: tắt cache libvips, 1 luồng xử lý, và chỉ chuyển 1 ảnh mỗi lúc để RAM không vọt khi nhiều người upload cùng lúc.
+sharp.cache(false);
+sharp.concurrency(1);
+const MAX_INPUT_PIXELS = 50_000_000;
+let webpQueue: Promise<unknown> = Promise.resolve();
+
+function toWebp(buffer: Buffer) {
+  const run = webpQueue.then(() => convertToWebp(buffer));
+  webpQueue = run.catch(() => undefined);
+  return run;
+}
+
+async function convertToWebp(buffer: Buffer) {
   try {
-    return await sharp(buffer)
+    return await sharp(buffer, { limitInputPixels: MAX_INPUT_PIXELS })
       .rotate()
       .resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 80 })
