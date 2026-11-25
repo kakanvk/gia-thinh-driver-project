@@ -4,11 +4,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { type Express } from 'express';
 import helmet from 'helmet';
-import swaggerUi from 'swagger-ui-express';
 import { pinoHttp } from 'pino-http';
 import { env } from './config/env';
 import { logger } from './config/logger';
-import { openApiDocument } from './docs/openapi';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
 import { sanitizeBody } from './middlewares/sanitize.middleware';
 import { jsonDateReplacer } from './shared/time';
@@ -51,10 +49,12 @@ export function createApp(): Express {
 
   app.use('/api/v1', createApiRouter());
   if (env.NODE_ENV !== 'production') {
-    app.get('/api/docs.json', (_req, res) => {
-      res.json(openApiDocument);
+    // Nạp tài liệu API khi cần, nên production không tốn RAM cho swagger-ui và openapi.
+    const docs = import('./docs/swagger.js').then((mod) => mod.createDocsRouter());
+    docs.catch(() => undefined);
+    app.use('/api', (req, res, next) => {
+      docs.then((router) => router(req, res, next), next);
     });
-    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
   }
   app.use(notFoundHandler);
   app.use(errorHandler);

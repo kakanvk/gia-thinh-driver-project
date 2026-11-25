@@ -62,6 +62,7 @@ export function TimelineGallery({
               alt={i === 0 ? image.alt : ""}
               aria-hidden={i === 0 ? undefined : true}
               fill
+              unoptimized
               sizes="(max-width: 768px) 50vw, 280px"
               loading="lazy"
               className={cn(

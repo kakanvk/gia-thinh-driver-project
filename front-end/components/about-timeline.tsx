@@ -8,11 +8,11 @@ const milestones = [
     text: "Một phòng tư vấn, một sân sa hình mượn giờ. Chỉ nhận ít học viên mỗi khóa để kèm kỹ từng người.",
     images: [
       {
-        src: "/media/1789307300578_4599662549725482019_4599662549725482019_ad001be0b583fa604cf76a48aa7ad405.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/49008eef-a3c6-4313-94da-fa82deba5cb7.webp",
         alt: "Lớp lý thuyết đông học viên tại trung tâm Gia Thịnh",
       },
       {
-        src: "/media/1789307300551_4599662549725482019_4599662549725482019_f8bcfa00a2e8b8b22bc85f65b1947b68.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/1bb09666-fe02-4eb8-86ab-e16782476bd0.webp",
         alt: "Học viên nghe giảng luật trong lớp tại Gia Thịnh",
       },
     ],
@@ -23,11 +23,11 @@ const milestones = [
     text: "Có sân tập riêng đúng chuẩn sân thi, bài sa hình B1/B2 được chia nhỏ để học viên yếu cũng theo kịp.",
     images: [
       {
-        src: "/media/map/1789307362409_4599662549725482019_4599662549725482019_3e15cc0c135b22be293df84b61f611d1.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/53b9f8eb-1ae3-47e4-9a4a-3f99d22acf4e.webp",
         alt: "Sân sa hình chuẩn sát hạch của trung tâm Gia Thịnh",
       },
       {
-        src: "/media/1789307300569_4599662549725482019_4599662549725482019_55b15928ba68463f725b1c80624f85a7.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/2afa78d9-d378-4488-8914-e5060fa89c87.webp",
         alt: "Khu vực chờ thi tại sân sát hạch",
       },
     ],
@@ -38,11 +38,11 @@ const milestones = [
     text: "Đổi toàn bộ xe tập lái đời mới, thêm cabin mô phỏng và app ôn lý thuyết để học ở nhà vẫn hiệu quả.",
     images: [
       {
-        src: "/media/1789307366944_4599662549725482019_4599662549725482019_967a3bf4d808bb7d612acfb0f3d9fc6a.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/ea3c3599-dde8-42ba-b7e4-ceb8e1d2e087.webp",
         alt: "Dàn xe tập lái đời mới của trung tâm Gia Thịnh",
       },
       {
-        src: "/media/1789307366940_4599662549725482019_4599662549725482019_75c4908df6aa52ec8008e66608aacb54.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/10/28470149-6246-4895-b5d8-30f607607fe3.webp",
         alt: "Xe tập lái tại sân tập của Gia Thịnh",
       },
     ],
@@ -53,11 +53,11 @@ const milestones = [
     text: "8.600+ học viên tốt nghiệp, tỉ lệ đạt ngay lần đầu 96%. Lịch học linh hoạt mỗi ngày, minh bạch học phí.",
     images: [
       {
-        src: "/media/1789307373617_4599662549725482019_4599662549725482019_6fde98cbf02dab051b15c6b50e57eedf.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/b2f13863-362c-4535-b55f-a149ac6421ce.webp",
         alt: "Đội xe ô tô và xe tải tập lái của trung tâm Gia Thịnh",
       },
       {
-        src: "/media/1789307373534_4599662549725482019_4599662549725482019_21f9f17c5624e14845aca2e2ac4944d7.jpg",
+        src: "https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/9e653052-9f04-4588-8c6a-3dff18959496.webp",
         alt: "Xe tải tập lái in thương hiệu Gia Thịnh",
       },
     ],
