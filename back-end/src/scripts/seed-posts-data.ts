@@ -16,7 +16,7 @@ export const seedPosts: SeedPost[] = [
     excerpt: 'Giấy tờ cần mang, giờ có mặt, cách chạy sa hình Wave và mẹo giữ bình tĩnh trong phòng thi lý thuyết.',
     categorySlug: 'kinh-nghiem-thi',
     date: '06/09/2026',
-    image: '/media/1789307300348_4599662549725482019_4599662549725482019_fdc3b40a8c3079067cf0cad66a40d03b.jpg',
+    image: 'https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/b2f13863-362c-4535-b55f-a149ac6421ce.webp',
     imageAlt: 'Toàn cảnh sân tập và sát hạch của trung tâm Gia Thịnh nhìn từ trên cao',
     content: [
       'Mang đủ CCCD bản gốc, biên lai đăng ký và có mặt trước giờ thi ít nhất 30 phút để làm thủ tục, nhận số báo danh và nghe phổ biến quy chế.',
@@ -32,7 +32,7 @@ export const seedPosts: SeedPost[] = [
     excerpt: 'Hạng A chạy được xe trên 125cc, hạng A1 giới hạn đến 125cc — chọn sao cho đúng nhu cầu và tiết kiệm học phí.',
     categorySlug: 'tu-van-chon-bang',
     date: '28/08/2026',
-    image: '/media/1789307300543_4599662549725482019_4599662549725482019_b9d6dab7a63f5884f387f59bc22747e7.jpg',
+    image: 'https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/ea3c3599-dde8-42ba-b7e4-ceb8e1d2e087.webp',
     imageAlt: 'Lớp học lý thuyết hạng A và A1 tại trung tâm Gia Thịnh',
     content: [
       'Hạng A cho phép điều khiển xe mô tô hai bánh không giới hạn phân khối, đồng thời chạy được cả xe của hạng A1. Xe thi sát hạch là Vespa tay ga hoặc CB250 tay côn.',
@@ -48,7 +48,7 @@ export const seedPosts: SeedPost[] = [
     excerpt: 'Bóc tách trọn gói 16,5 triệu (B) và 18,9 triệu (C1): đã gồm gì, phát sinh gì và cách đóng theo đợt.',
     categorySlug: 'hoc-phi-minh-bach',
     date: '20/08/2026',
-    image: '/media/1789307366944_4599662549725482019_4599662549725482019_967a3bf4d808bb7d612acfb0f3d9fc6a.jpg',
+    image: 'https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/10/28470149-6246-4895-b5d8-30f607607fe3.webp',
     imageAlt: 'Dàn xe tập lái hạng B thực tế của trung tâm Gia Thịnh',
     content: [
       'Học phí hạng B là 16.500.000đ (số sàn và số tự động), hạng C1 là 18.900.000đ. Mức phí đã gồm xăng dầu chạy DAT, xe giờ đêm/xe tự động và giáo viên kèm từ đầu đến lúc lấy bằng.',
@@ -64,7 +64,7 @@ export const seedPosts: SeedPost[] = [
     excerpt: 'Chia nhỏ theo nhóm câu hỏi, học câu điểm liệt trước và thi thử trên máy tính trước ngày thi.',
     categorySlug: 'kinh-nghiem-thi',
     date: '12/08/2026',
-    image: '/media/1789307300578_4599662549725482019_4599662549725482019_ad001be0b583fa604cf76a48aa7ad405.jpg',
+    image: 'https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/1bb09666-fe02-4eb8-86ab-e16782476bd0.webp',
     imageAlt: 'Lớp lý thuyết đông học viên tại trung tâm Gia Thịnh',
     content: [
       'Chia 600 câu thành 4 nhóm: khái niệm — quy tắc, biển báo, sa hình và câu điểm liệt. Học dứt điểm từng nhóm thay vì làm đề ngẫu nhiên ngay từ đầu.',
@@ -80,7 +80,7 @@ export const seedPosts: SeedPost[] = [
     excerpt: 'Các lớp sắp khai giảng, số chỗ còn lại và cách giữ chỗ trước khi hoàn thiện giấy tờ.',
     categorySlug: 'thong-bao',
     date: '02/09/2026',
-    image: '/media/1789307373617_4599662549725482019_4599662549725482019_6fde98cbf02dab051b15c6b50e57eedf.jpg',
+    image: 'https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/11/49008eef-a3c6-4313-94da-fa82deba5cb7.webp',
     imageAlt: 'Đội xe ô tô và xe tải tập lái của trung tâm Gia Thịnh',
     content: [
       'Lớp A1 khai giảng ngày 14/09/2026, hiện còn 12 chỗ và đang nhận hồ sơ tại cả hai chi nhánh Vĩnh Long và Vũng Liêm.',
@@ -96,7 +96,7 @@ export const seedPosts: SeedPost[] = [
     excerpt: 'Hiểu đúng về thiết bị DAT, số km cần chạy và cách sắp xếp lịch chạy phù hợp.',
     categorySlug: 'kinh-nghiem-hoc',
     date: '25/07/2026',
-    image: '/media/map/1789307362409_4599662549725482019_4599662549725482019_3e15cc0c135b22be293df84b61f611d1.jpg',
+    image: 'https://storage.googleapis.com/gia-thinh-media-storage-dev/2026/10/28470149-6246-4895-b5d8-30f607607fe3.webp',
     imageAlt: 'Sân sa hình chuẩn sát hạch tại Gia Thịnh',
     content: [
       'DAT là thiết bị giám sát thời gian và quãng đường học lái xe trên đường trường. Học viên phải tích đủ số giờ và km theo quy định mới được dự thi sát hạch.',
